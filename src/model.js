@@ -2,7 +2,7 @@
 
 var angular = require('angular');
 
-module.exports = function (modelCacheFactory) {
+module.exports = function ($http, modelCacheFactory) {
 
   var internals = {};
 
@@ -34,6 +34,15 @@ module.exports = function (modelCacheFactory) {
   internals.cached = function (model) {
     var cached = model.cache.get(model.id);
     return cached ? angular.extend(cached, model) : model.cache.put(model.id, model);
+  };
+
+  BaseModel.prototype.isNew = function () {
+    return (typeof this.id == 'undefined' || this.id == null);
+  };
+
+  BaseModel.prototype.url = function () {
+    var base = this.baseURL + '/' + this.name;
+    return this.isNew() ? base : base + '/' + this.id;
   };
 
   return BaseModel;

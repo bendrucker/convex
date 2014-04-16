@@ -7,7 +7,7 @@ require('angular-mocks');
 
 describe('BaseModel', function () {
 
-  var BaseModel, Model, modelCacheFactory;
+  var BaseModel, Model, model, modelCacheFactory;
   beforeEach(angular.mock.module('valet-base-model'));
   beforeEach(angular.mock.module(function ($provide) {
     $provide.factory('modelCacheFactory', function ($cacheFactory) {
@@ -20,6 +20,7 @@ describe('BaseModel', function () {
   }));
   beforeEach(function () {
     Model = BaseModel.extend({name: 'items'});
+    model = new Model();
   });
   afterEach(function () {
     modelCacheFactory.get('items').destroy();
@@ -37,13 +38,13 @@ describe('BaseModel', function () {
 
     it('creates an instance with the attributes', function () {
       var attributes = {};
-      var model = new Model(attributes);
+      model = new Model(attributes);
       expect(angular.extend).to.have.been.calledWith(model, attributes);
     });
 
     it('stores new models in the cache', function () {
       sinon.stub(Model.prototype.cache, 'put');
-      var model = new Model({id: 0});
+      model = new Model({id: 0});
       expect(model).to.be.an.instanceOf(Model);
       expect(model.cache.put).to.have.been.calledWith(0, model);
     });
@@ -118,6 +119,35 @@ describe('BaseModel', function () {
       var Child = BaseModel.extend({name: 'models'});
       expect(modelCacheFactory).to.have.been.calledWith('models');
       expect(Child.prototype.cache).to.equal(modelCacheFactory.firstCall.returnValue);
+    });
+
+  });
+
+  describe('#isNew', function () {
+
+    it('is false when the model has an id', function () {
+      expect(new Model({id: 0}).isNew()).to.be.false;
+    });
+
+    it('is true when there is no id', function () {
+      expect(new Model().isNew()).to.be.true;
+    });
+
+  });
+
+  describe('#url', function () {
+
+    beforeEach(function () {
+      model.baseURL ='api';
+    });
+
+    it('generates the collection endpoint for new models', function () {
+      expect(model.url()).to.equal('api/items')
+    });
+
+    it('generates a model endpoint for persisted models', function () {
+      model.id = 0;
+      expect(model.url()).to.equal('api/items/0');
     });
 
   });

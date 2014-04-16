@@ -1,6 +1,7 @@
 {
   "node": true,
   "browser": true,
+  "expr": true,
   "globals": {
     "expect": false,
     "describe": false,
