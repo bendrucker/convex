@@ -1,0 +1,12 @@
+{
+  "node": true,
+  "browser": true,
+  "globals": {
+    "expect": false,
+    "describe": false,
+    "it": false,
+    "beforeEach": false,
+    "afterEach": false,
+    "sinon": false
+  }
+}
