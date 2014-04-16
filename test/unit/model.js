@@ -74,7 +74,9 @@ describe('BaseModel', function () {
     });
 
     it('requires a name on the prototype', function () {
-      expect(BaseModel.extend.bind(BaseModel)).to.throw(/must have a name/);
+      expect(function () {
+        BaseModel.extend();
+      }).to.throw(/must have a name/);
     });
 
     describe('Instantiating the cache', function () {
