@@ -7,7 +7,11 @@ describe('BaseModel', function () {
 
   var BaseModel, modelCacheFactory;
   beforeEach(angular.mock.module('valet-base-model'));
-  beforeEach(require('../mocks/cache'));
+  beforeEach(angular.mock.module(function ($provide) {
+    $provide.factory('modelCacheFactory', function ($cacheFactory) {
+      return sinon.spy($cacheFactory);
+    });
+  }));
   beforeEach(angular.mock.inject(function (_BaseModel_, _modelCacheFactory_) {
     BaseModel = _BaseModel_;
     modelCacheFactory = _modelCacheFactory_;
