@@ -5,7 +5,7 @@ require('angular-mocks');
 
 describe('BaseModel', function () {
 
-  var BaseModel, modelCacheFactory;
+  var BaseModel, Model, modelCacheFactory;
   beforeEach(angular.mock.module('valet-base-model'));
   beforeEach(angular.mock.module(function ($provide) {
     $provide.factory('modelCacheFactory', function ($cacheFactory) {
@@ -16,15 +16,40 @@ describe('BaseModel', function () {
     BaseModel = _BaseModel_;
     modelCacheFactory = _modelCacheFactory_;
   }));
+  beforeEach(function () {
+    Model = BaseModel.extend({name: 'items'});
+  });
+  afterEach(function () {
+    modelCacheFactory.get('items').destroy();
+  });
 
   describe('Constructor', function () {
 
-    it('creates an instance with the attributes', function () {
+    beforeEach(function () {
       sinon.spy(angular, 'extend');
-      var attributes = {};
-      var model = new BaseModel(attributes);
-      expect(angular.extend).to.have.been.calledWith(model, attributes);
+    });
+
+    afterEach(function () {
       angular.extend.restore();
+    });
+
+    it('creates an instance with the attributes', function () {
+      var attributes = {};
+      var model = new Model(attributes);
+      expect(angular.extend).to.have.been.calledWith(model, attributes);
+    });
+
+    it('stores new models in the cache', function () {
+      sinon.stub(Model.prototype.cache, 'put');
+      var model = new Model({id: 0});
+      expect(model).to.be.an.instanceOf(Model);
+      expect(model.cache.put).to.have.been.calledWith(0, model);
+    });
+
+    it('references the cached model if available', function () {
+      var cached = {};
+      sinon.stub(Model.prototype.cache, 'get').withArgs(0).returns(cached);
+      expect(new Model({id: 0})).to.equal(cached);
     });
 
   });
@@ -36,7 +61,7 @@ describe('BaseModel', function () {
       sinon.spy(angular, 'extend');
       MockBase = sinon.spy();
       MockBase.prototype = {
-        name: 'base'
+        name: 'models'
       };
       MockBase.extend = BaseModel.extend;
     });
@@ -53,7 +78,7 @@ describe('BaseModel', function () {
     });
 
     it('copies the parent prototype', function () {
-      expect(MockBase.extend().prototype).to.deep.equal(MockBase.prototype);
+      expect(MockBase.extend().prototype).to.contain(MockBase.prototype);
     });
 
     it('extends the prototype with new methods', function () {
@@ -79,14 +104,11 @@ describe('BaseModel', function () {
       }).to.throw(/must have a name/);
     });
 
-    describe('Instantiating the cache', function () {
-
-      it('creates a new cache for the child model', function () {
-        var Child = BaseModel.extend({name: 'base'});
-        expect(modelCacheFactory).to.have.been.calledWith('base');
-        expect(Child.cache).to.equal(modelCacheFactory.firstCall.returnValue);
-      });
-
+    it('creates a new cache for the child model', function () {
+      modelCacheFactory.reset();
+      var Child = BaseModel.extend({name: 'models'});
+      expect(modelCacheFactory).to.have.been.calledWith('models');
+      expect(Child.prototype.cache).to.equal(modelCacheFactory.firstCall.returnValue);
     });
 
   });
