@@ -32,7 +32,8 @@ module.exports = function (modelCacheFactory) {
   };
 
   internals.cached = function (model) {
-    return model.cache.get(model.id) || model.cache.put(model.id, model);
+    var cached = model.cache.get(model.id);
+    return cached ? angular.extend(cached, model) : model.cache.put(model.id, model);
   };
 
   return BaseModel;

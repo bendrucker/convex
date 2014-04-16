@@ -52,6 +52,13 @@ describe('BaseModel', function () {
       expect(new Model({id: 0})).to.equal(cached);
     });
 
+    it('extends the cached model with new attributes', function () {
+      var cached = {};
+      sinon.stub(Model.prototype.cache, 'get').returns(cached);
+      new Model({id: 0});
+      expect(cached).to.have.property('id');
+    });
+
   });
 
   describe('BaseModel#extend', function () {
