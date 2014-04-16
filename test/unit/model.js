@@ -7,16 +7,17 @@ require('angular-mocks');
 
 describe('BaseModel', function () {
 
-  var BaseModel, Model, model, modelCacheFactory;
+  var BaseModel, Model, model, modelCacheFactory, $httpBackend;
   beforeEach(angular.mock.module('valet-base-model'));
   beforeEach(angular.mock.module(function ($provide) {
     $provide.factory('modelCacheFactory', function ($cacheFactory) {
       return sinon.spy($cacheFactory);
     });
   }));
-  beforeEach(angular.mock.inject(function (_BaseModel_, _modelCacheFactory_) {
-    BaseModel = _BaseModel_;
-    modelCacheFactory = _modelCacheFactory_;
+  beforeEach(angular.mock.inject(function ($injector) {
+    BaseModel = $injector.get('BaseModel');
+    modelCacheFactory = $injector.get('modelCacheFactory');
+    $httpBackend = $injector.get('$httpBackend');
   }));
   beforeEach(function () {
     Model = BaseModel.extend({name: 'items'});
@@ -26,15 +27,15 @@ describe('BaseModel', function () {
     modelCacheFactory.get('items').destroy();
   });
 
+  beforeEach(function () {
+    sinon.spy(angular, 'extend');
+  });
+
+  afterEach(function () {
+    angular.extend.restore();
+  });
+
   describe('Constructor', function () {
-
-    beforeEach(function () {
-      sinon.spy(angular, 'extend');
-    });
-
-    afterEach(function () {
-      angular.extend.restore();
-    });
 
     it('creates an instance with the attributes', function () {
       var attributes = {};
@@ -68,16 +69,11 @@ describe('BaseModel', function () {
 
     var MockBase;
     beforeEach(function () {
-      sinon.spy(angular, 'extend');
       MockBase = sinon.spy();
       MockBase.prototype = {
         name: 'models'
       };
       MockBase.extend = BaseModel.extend;
-    });
-
-    afterEach(function () {
-      angular.extend.restore();
     });
 
     it('calls the parent in the child constructor', function () {
@@ -142,12 +138,64 @@ describe('BaseModel', function () {
     });
 
     it('generates the collection endpoint for new models', function () {
-      expect(model.url()).to.equal('api/items')
+      expect(model.url()).to.equal('api/items');
     });
 
     it('generates a model endpoint for persisted models', function () {
       model.id = 0;
       expect(model.url()).to.equal('api/items/0');
+    });
+
+  });
+
+  describe('REST Methods', function () {
+
+    beforeEach(function () {
+      model.baseURL = 'https://api';
+    });
+
+    afterEach(function () {
+      $httpBackend.verifyNoOutstandingExpectation();
+      $httpBackend.verifyNoOutstandingRequest();
+    });
+
+    describe('Instance', function () {
+
+      var url = 'https://api/items/0';
+
+      beforeEach(function () {
+        model.id = 0;
+      });
+
+      describe('#fetch', function () {
+
+        it('rejects on a new model', function () {
+          model.id = null;
+          expect(model.fetch()).to.be.rejectedWith(/new model/);
+        });
+
+        it('sends a GET to the url', function () {
+          $httpBackend
+            .expectGET(url)
+            .respond(200);
+          model.fetch();
+          $httpBackend.flush();
+        });
+
+        it('populates the model with the response', function () {
+          var res = {
+            name: 'Ben'
+          };
+          $httpBackend
+            .expectGET(url)
+            .respond(200, res);
+          model.fetch();
+          $httpBackend.flush();
+          expect(angular.extend).to.have.been.calledWith(model, res);
+        });
+
+      });
+
     });
 
   });

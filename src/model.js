@@ -2,7 +2,7 @@
 
 var angular = require('angular');
 
-module.exports = function ($http, modelCacheFactory) {
+module.exports = function ($http, $q, modelCacheFactory) {
 
   var internals = {};
 
@@ -37,12 +37,31 @@ module.exports = function ($http, modelCacheFactory) {
   };
 
   BaseModel.prototype.isNew = function () {
-    return (typeof this.id == 'undefined' || this.id == null);
+    return (typeof this.id == 'undefined' || this.id === null);
   };
 
   BaseModel.prototype.url = function () {
     var base = this.baseURL + '/' + this.name;
     return this.isNew() ? base : base + '/' + this.id;
+  };
+
+  internals.disallowNew = function (model) {
+    return $q
+      .when()
+      .then(function () {
+        if (model.isNew()) return $q.reject('Instance method called on a new model');
+      });
+  };
+
+  BaseModel.prototype.fetch = function (options) {
+    var model = this;
+    return internals.disallowNew(this)
+      .then(function () {
+        return $http.get(model.url(), options);
+      })
+      .then(function (response) {
+        return angular.extend(model, response.data);
+      });
   };
 
   return BaseModel;

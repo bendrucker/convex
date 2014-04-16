@@ -15,6 +15,9 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'node_modules/es5-shim/es5-shim.js',
+      'node_modules/es5-shim/es5-sham.js',
+      'node_modules/chai-as-promised/lib/chai-as-promised.js',  
       'test/unit/*.js'
     ],
 
