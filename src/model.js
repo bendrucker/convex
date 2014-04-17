@@ -104,6 +104,18 @@ module.exports = function ($http, $q, modelCacheFactory) {
       });
   };
 
+  BaseModel.query = function (attributes) {
+    var Model = this;
+    return $http.get(Model.prototype.url(), {
+      params: attributes
+    })
+    .then(function (response) {
+      return response.data.map(function (object) {
+        return new Model(object);
+      });
+    });
+  };
+
   return BaseModel;
 
 };

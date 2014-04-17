@@ -272,6 +272,34 @@ describe('BaseModel', function () {
 
     });
 
+    describe('Collection', function () {
+
+      describe('#query', function () {
+
+        beforeEach(function () {
+          $httpBackend
+            .expectGET('https://api/items?condition=true')
+            .respond(200, [{id: 0}, {id: 1}]);
+        });
+
+        it('sends a GET request with the query', function () {
+          Model.query({condition: true});
+          $httpBackend.flush();
+        });
+
+        it('casts the returned array of models', function () {
+          Model.query({condition: true})
+            .then(function (models) {
+              expect(models).to.have.length(2);
+              expect(models[0]).to.be.an.instanceOf(Model);
+            });
+          $httpBackend.flush();
+        });
+
+      });
+
+    });
+
   });
 
 });
