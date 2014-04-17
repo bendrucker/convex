@@ -33,7 +33,13 @@ module.exports = function ($http, $q, modelCacheFactory) {
 
   internals.cached = function (model) {
     var cached = model.cache.get(model.id);
-    return cached ? angular.extend(cached, model) : model.cache.put(model.id, model);
+    if (cached) {
+      return angular.extend(cached, model);
+    } else if (!model.isNew()) {
+      return model.cache.put(model.id, model);
+    } else {
+      return model;
+    }
   };
 
   BaseModel.prototype.isNew = function () {
@@ -43,6 +49,13 @@ module.exports = function ($http, $q, modelCacheFactory) {
   BaseModel.prototype.url = function () {
     var base = this.baseURL + '/' + this.objectName;
     return this.isNew() ? base : base + '/' + this.id;
+  };
+
+  BaseModel.prototype.reset = function () {
+    for (var property in this) {
+      if (this.hasOwnProperty(property)) delete this[property];
+    }
+    return this;
   };
 
   internals.disallowNew = function (model) {
@@ -64,15 +77,30 @@ module.exports = function ($http, $q, modelCacheFactory) {
       });
   };
 
-  internals.saveMethod = function (model) {
-    return model.isNew() ? 'post' : 'put';
-  };
-
   BaseModel.prototype.save = function (options) {
     var model = this;
-    return $http[internals.saveMethod(this)](this.url(), model, options)
+    var isNew = this.isNew();
+    return $http[isNew ? 'post' : 'put'](this.url(), model, options)
       .then(function (response) {
         return angular.extend(model, response.data);
+      })
+      .then(function (model) {
+        if (isNew) model.cache.put(model.id, model);
+        return model;
+      });
+  };
+
+  BaseModel.prototype.delete = function (options) {
+    var model = this;
+    var isNew = this.isNew();
+    return $q.when()
+      .then(function () {
+        if (!isNew) return $http.delete(model.url(), options);
+      })
+      .then(function () {
+        if (!isNew) model.cache.remove(model.id);
+        model.reset();
+        model.deleted = true;
       });
   };
 

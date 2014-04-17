@@ -7,7 +7,7 @@ require('angular-mocks');
 
 describe('BaseModel', function () {
 
-  var BaseModel, Model, model, modelCacheFactory, $httpBackend;
+  var BaseModel, Model, model, modelCacheFactory, $httpBackend, $timeout;
   beforeEach(angular.mock.module('valet-base-model'));
   beforeEach(angular.mock.module(function ($provide) {
     $provide.factory('modelCacheFactory', function ($cacheFactory) {
@@ -18,6 +18,7 @@ describe('BaseModel', function () {
     BaseModel = $injector.get('BaseModel');
     modelCacheFactory = $injector.get('modelCacheFactory');
     $httpBackend = $injector.get('$httpBackend');
+    $timeout = $injector.get('$timeout');
   }));
   beforeEach(function () {
     Model = BaseModel.extend({objectName: 'items'});
@@ -148,6 +149,17 @@ describe('BaseModel', function () {
 
   });
 
+  describe('#reset', function () {
+
+    it('deletes the own properties of the model', function () {
+      model.id = 1;
+      model.reset();
+      expect(model).to.not.have.property('id');
+      expect(model).to.have.property('cache');
+    });
+
+  });
+
   describe('REST Methods', function () {
 
     beforeEach(function () {
@@ -213,6 +225,47 @@ describe('BaseModel', function () {
           model.save();
           $httpBackend.flush();
           expect(angular.extend).to.have.been.calledWith(model, res);
+        });
+
+      });
+
+      describe('#delete', function () {
+
+        beforeEach(function () {
+          model.id = null;
+        });
+
+        it('does not send requests if the model is new', function () {
+          model.delete();
+        });
+
+        it('sends a DELETE request if the model is not new', function () {
+          $httpBackend.expectDELETE(url).respond(200);
+          model.id = 0;
+          model.delete();
+          $httpBackend.flush();
+        });
+
+        it('removes the model from the cache if it was not new', function () {
+          sinon.spy(model.cache, 'remove');
+          $httpBackend.expectDELETE(url).respond(200);
+          model.id = 0;
+          model.delete();
+          $httpBackend.flush();
+          expect(model.cache.remove).to.have.been.calledWith(0);
+        });
+
+        it('resets the model', function () {
+          sinon.spy(Model.prototype, 'reset');
+          model.delete();
+          $timeout.flush();
+          expect(model.reset).to.have.been.called;
+        });
+
+        it('sets a deleted flag in case of direct references', function () {
+          model.delete();
+          $timeout.flush();
+          expect(model.deleted).to.be.true;
         });
 
       });
