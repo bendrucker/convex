@@ -116,6 +116,10 @@ module.exports = function ($http, $q, modelCacheFactory) {
     });
   };
 
+  BaseModel.all = function () {
+    return this.query();
+  };
+
   return BaseModel;
 
 };

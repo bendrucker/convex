@@ -298,6 +298,22 @@ describe('BaseModel', function () {
 
       });
 
+      describe('#all', function () {
+
+        it('sends a GET request to the collection url', function () {
+          $httpBackend
+            .expectGET('https://api/items')
+            .respond(200, [{id: 0}, {id: 1}]);
+          Model.all()
+            .then(function (models) {
+              expect(models).to.have.length(2);
+              expect(models[0]).to.be.an.instanceOf(Model);
+            });
+          $httpBackend.flush();
+        });
+
+      });
+
     });
 
   });
