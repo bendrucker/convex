@@ -21,14 +21,14 @@ module.exports = function ($http, $q, modelCacheFactory) {
     angular.extend(Child, Parent);
     angular.extend(Child, ctor);
 
-    if (!Child.prototype.name) throw new Error('All Models must have a name');
+    if (!Child.prototype.objectName) throw new Error('All Models must have a name');
     internals.createCache(Child);
 
     return Child;
   };
 
   internals.createCache = function (Model) {
-    Model.prototype.cache = modelCacheFactory(Model.prototype.name);
+    Model.prototype.cache = modelCacheFactory(Model.prototype.objectName);
   };
 
   internals.cached = function (model) {
@@ -41,7 +41,7 @@ module.exports = function ($http, $q, modelCacheFactory) {
   };
 
   BaseModel.prototype.url = function () {
-    var base = this.baseURL + '/' + this.name;
+    var base = this.baseURL + '/' + this.objectName;
     return this.isNew() ? base : base + '/' + this.id;
   };
 
@@ -59,6 +59,18 @@ module.exports = function ($http, $q, modelCacheFactory) {
       .then(function () {
         return $http.get(model.url(), options);
       })
+      .then(function (response) {
+        return angular.extend(model, response.data);
+      });
+  };
+
+  internals.saveMethod = function (model) {
+    return model.isNew() ? 'post' : 'put';
+  };
+
+  BaseModel.prototype.save = function (options) {
+    var model = this;
+    return $http[internals.saveMethod(this)](this.url(), model, options)
       .then(function (response) {
         return angular.extend(model, response.data);
       });

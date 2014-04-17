@@ -20,7 +20,7 @@ describe('BaseModel', function () {
     $httpBackend = $injector.get('$httpBackend');
   }));
   beforeEach(function () {
-    Model = BaseModel.extend({name: 'items'});
+    Model = BaseModel.extend({objectName: 'items'});
     model = new Model();
   });
   afterEach(function () {
@@ -71,7 +71,7 @@ describe('BaseModel', function () {
     beforeEach(function () {
       MockBase = sinon.spy();
       MockBase.prototype = {
-        name: 'models'
+        objectName: 'models'
       };
       MockBase.extend = BaseModel.extend;
     });
@@ -112,7 +112,7 @@ describe('BaseModel', function () {
 
     it('creates a new cache for the child model', function () {
       modelCacheFactory.reset();
-      var Child = BaseModel.extend({name: 'models'});
+      var Child = BaseModel.extend({objectName: 'models'});
       expect(modelCacheFactory).to.have.been.calledWith('models');
       expect(Child.prototype.cache).to.equal(modelCacheFactory.firstCall.returnValue);
     });
@@ -151,7 +151,7 @@ describe('BaseModel', function () {
   describe('REST Methods', function () {
 
     beforeEach(function () {
-      model.baseURL = 'https://api';
+      Model.prototype.baseURL = 'https://api';
     });
 
     afterEach(function () {
@@ -162,6 +162,10 @@ describe('BaseModel', function () {
     describe('Instance', function () {
 
       var url = 'https://api/items/0';
+      var res = {
+        id: 0,
+        name: 'Ben'
+      };
 
       beforeEach(function () {
         model.id = 0;
@@ -174,22 +178,39 @@ describe('BaseModel', function () {
           expect(model.fetch()).to.be.rejectedWith(/new model/);
         });
 
-        it('sends a GET to the url', function () {
-          $httpBackend
-            .expectGET(url)
-            .respond(200);
-          model.fetch();
-          $httpBackend.flush();
-        });
-
-        it('populates the model with the response', function () {
-          var res = {
-            name: 'Ben'
-          };
+        it('sends a GET and populates with the response', function () {
           $httpBackend
             .expectGET(url)
             .respond(200, res);
           model.fetch();
+          $httpBackend.flush();
+          expect(angular.extend).to.have.been.calledWith(model, res);
+        });
+
+      });
+
+      describe('#save', function () {
+
+        it('sends a put when the model is not new', function () {
+          $httpBackend
+            .expectPUT(url, {
+              id: 0
+            })
+            .respond(200, res);
+          model.save();
+          $httpBackend.flush();
+          expect(angular.extend).to.have.been.calledWith(model, res);
+        });
+
+        it('sends a post when the model is new', function () {
+          model.id = undefined;
+          model.name = 'Ben';
+          $httpBackend
+            .expectPOST('https://api/items', {
+              name: 'Ben'
+            })
+            .respond(200, res);
+          model.save();
           $httpBackend.flush();
           expect(angular.extend).to.have.been.calledWith(model, res);
         });
