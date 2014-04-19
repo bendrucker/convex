@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "./node_modules/karma/bin/karma start --single-run --browsers PhantomJS",
-    "install": "./node_modules/bower/bin/bower install"
+    "install": "bower install"
   },
   "repository": {
     "type": "git",
