@@ -1,6 +1,6 @@
 {
   "name": "ng-base-model",
-  "version": "0.1.2",
+  "version": "0.1.1",
   "description": "Our base model layer for building Angular applications",
   "main": "src/index.js",
   "scripts": {
@@ -48,7 +48,7 @@
     "angular-mocks": "./bower_components/angular-mocks/angular-mocks.js"
   },
   "browserify-shim": {
-    "angular": "global:angular",
+    "angular": "angular",
     "angular-mocks": {
       "depends": [
         "angular"
