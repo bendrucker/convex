@@ -46,6 +46,8 @@ module.exports = function ($http, $q, modelCacheFactory) {
     return (typeof this.id == 'undefined' || this.id === null);
   };
 
+  BaseModel.prototype.baseURL = 'https://api.valet.io'
+
   BaseModel.prototype.url = function () {
     var base = this.baseURL + '/' + this.objectName;
     return this.isNew() ? base : base + '/' + this.id;

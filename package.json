@@ -1,6 +1,6 @@
 {
   "name": "ng-base-model",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Our base model layer for building Angular applications",
   "main": "src/index.js",
   "scripts": {
