@@ -274,24 +274,55 @@ describe('BaseModel', function () {
 
     describe('Collection', function () {
 
-      describe('#query', function () {
+      var url = 'https://api/items?condition=true';
+      var res = [{id: 0}, {id: 1}]
+
+      describe('#where', function () {
 
         beforeEach(function () {
           $httpBackend
-            .expectGET('https://api/items?condition=true')
-            .respond(200, [{id: 0}, {id: 1}]);
+            .expectGET(url)
+            .respond(200, res);
         });
 
         it('sends a GET request with the query', function () {
-          Model.query({condition: true});
+          Model.where({condition: true});
           $httpBackend.flush();
         });
 
         it('casts the returned array of models', function () {
-          Model.query({condition: true})
+          Model.where({condition: true})
             .then(function (models) {
               expect(models).to.have.length(2);
               expect(models[0]).to.be.an.instanceOf(Model);
+            });
+          $httpBackend.flush();
+        });
+
+      });
+
+      describe('#find', function () {
+
+        it('returns the first model of the results set', function () {
+          $httpBackend
+            .expectGET(url)
+            .respond(200, res);
+          Model.find({condition: true})
+            .then(function (model) {
+              expect(model)
+                .to.be.an.instanceOf(Model)
+                .and.have.property('id', 0);
+            });
+          $httpBackend.flush();
+        });
+
+        it('can handle an empty result', function () {
+          $httpBackend
+            .expectGET(url)
+            .respond(200, []);
+          Model.find({condition: true})
+            .then(function (model) {
+              expect(model).to.be.undefined;
             });
           $httpBackend.flush();
         });
@@ -303,13 +334,15 @@ describe('BaseModel', function () {
         it('sends a GET request to the collection url', function () {
           $httpBackend
             .expectGET('https://api/items')
-            .respond(200, [{id: 0}, {id: 1}]);
+            .respond(200, res);
+          sinon.spy(Model, 'where');
           Model.all()
             .then(function (models) {
               expect(models).to.have.length(2);
               expect(models[0]).to.be.an.instanceOf(Model);
             });
           $httpBackend.flush();
+          expect(Model.where).to.have.been.calledWith(undefined);
         });
 
       });

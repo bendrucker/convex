@@ -104,20 +104,49 @@ module.exports = function ($http, $q, modelCacheFactory) {
       });
   };
 
-  BaseModel.query = function (attributes) {
-    var Model = this;
-    return $http.get(Model.prototype.url(), {
-      params: attributes
-    })
-    .then(function (response) {
-      return response.data.map(function (object) {
+  internals.query = function (Model, attributes) {
+    return $http
+      .get(Model.prototype.url(), {
+        params: attributes
+      })
+      .then(function (response) {
+        return response.data;
+      });
+  };
+
+  internals.cast = function (Model, data) {
+    if (!data) return;
+    if (angular.isArray(data)) {
+      return data.map(function (object) {
         return new Model(object);
       });
-    });
+    } else {
+      return new Model(data);
+    }
+  };
+
+  BaseModel.where = function (attributes) {
+    var Model = this;
+    return internals.query(this, attributes)
+      .then(function (data) {
+        return internals.cast(Model, data);
+      });
+  };
+
+  BaseModel.find = function (attributes) {
+    var Model = this;
+    return internals.query(this, attributes)
+      .then(function (data) {
+        return data.length ? data[0] : void 0;
+      })
+      .then(function (data) {
+        return internals.cast(Model, data);
+      });
+
   };
 
   BaseModel.all = function () {
-    return this.query();
+    return this.where();
   };
 
   return BaseModel;
