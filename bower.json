@@ -1,6 +1,6 @@
 {
   "name": "ng-base-model",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "homepage": "https://github.com/valet-io/ng-base-model",
   "authors": [
     "Ben Drucker <bvdrucker@gmail.com>"
@@ -26,9 +26,9 @@
     "tests"
   ],
   "dependencies": {
-    "angular": "1.2.x"
+    "angular": "~1.2.16"
   },
   "devDependencies": {
-    "angular-mocks": "1.2.x"
+    "angular-mocks": "~1.2.16"
   }
 }
