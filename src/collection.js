@@ -7,6 +7,7 @@ module.exports = function (Model) {
   array.model = Model;
   array.add = function (data) {
     this.push(new this.model(data));
+    return this;
   };
 
   return array;
