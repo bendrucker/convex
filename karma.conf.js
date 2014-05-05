@@ -17,8 +17,7 @@ module.exports = function(config) {
     files: [
       'node_modules/es5-shim/es5-shim.js',
       'node_modules/es5-shim/es5-sham.js',
-      'node_modules/chai-as-promised/lib/chai-as-promised.js',  
-      'test/unit/*.js'
+      'node_modules/chai-as-promised/lib/chai-as-promised.js'
     ],
 
 
@@ -31,11 +30,12 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        'test/unit/*.js' : ['browserify']
+        '/**/*.browserify': 'browserify'
     },
 
     browserify: {
-        watch: true
+        files: ['test/unit/*.js'],
+        debug: true
     },
 
 
