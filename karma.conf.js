@@ -35,7 +35,8 @@ module.exports = function(config) {
 
     browserify: {
         files: ['test/unit/*.js'],
-        debug: true
+        debug: true,
+        watch: true
     },
 
 
