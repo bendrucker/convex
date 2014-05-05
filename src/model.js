@@ -43,10 +43,10 @@ module.exports = function ($http, $q, modelCacheFactory) {
   };
 
   BaseModel.prototype.isNew = function () {
-    return (typeof this.id == 'undefined' || this.id === null);
+    return (typeof this.id === 'undefined' || this.id === null);
   };
 
-  BaseModel.prototype.baseURL = 'https://api.valet.io'
+  BaseModel.prototype.baseURL = 'https://api.valet.io';
 
   BaseModel.prototype.url = function () {
     var base = this.baseURL + '/' + this.objectName;
