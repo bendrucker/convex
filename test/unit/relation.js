@@ -53,8 +53,6 @@ describe('BaseModel', function () {
 
   });
 
-  var relation;
-
   describe('#isSingle', function () {
 
     it('is true for belongsTo relations', function () {
@@ -69,59 +67,50 @@ describe('BaseModel', function () {
 
   describe('#initialize', function () {
 
-    var model;
-    beforeEach(function () {
-      model = {};
-    });
-
     describe('n-to-1 relations', function () {
 
-      it('attaches a new target model by id', function () {
-        model.mock_id = 0;
-        new Relation('belongsTo', 'MockModel').initialize(model);
-        expect(model)
-          .to.have.property('mock')
-          .that.is.an.instanceOf(MockModel);
+      it('returns a new related model using the foreign key', function () {
+        expect(new Relation('belongsTo', 'MockModel').initialize({
+          mock_id: 0
+        }))
+        .to.be.an.instanceOf(MockModel);
         expect(MockModel).to.have.been.calledWithMatch({id: 0});
       });
 
       it('extends the model with existing data', function () {
-        model.mock = {
-          id: 0,
-          name: 'mock'
-        };
-        new Relation('belongsTo', 'MockModel').initialize(model);
-        expect(model.mock)
-          .to.be.an.instanceOf(MockModel)
-          .and.to.contain({
+        expect(new Relation('belongsTo', 'MockModel').initialize({
+          mock: {
             id: 0,
             name: 'mock'
-          });
+          }
+        }))
+        .to.be.an.instanceOf(MockModel)
+        .and.to.contain({
+          id: 0,
+          name: 'mock'
+        });
       });
 
     });
 
     describe('n-to-many relations', function () {
 
-      it('attaches a collection', function () {
-        new Relation('hasMany', 'MockModel').initialize(model);
-        expect(model)
-          .to.have.property('mocks')
-          .with.property('model', MockModel);
+      it('returns a collection', function () {
+        expect(new Relation('hasMany', 'MockModel').initialize({}))
+          .to.have.property('add');
       });
 
       it('casts an existing collection of data', function () {
-        model = sinon.spy();
-        var first = {id: 0};
-        var second = {id: 1};
-        model.mocks = [first, second];
-        new Relation('hasMany', 'MockModel').initialize(model);
-        expect(model)
-          .to.have.property('mocks')
-          .with.length(2);
+        expect(new Relation('hasMany', 'MockModel').initialize({
+          mocks: [
+            {id: 0},
+            {id: 1}
+          ]
+        }))
+        .to.have.length(2);
         expect(MockModel)
-          .to.have.been.calledWith(first)
-          .and.calledWith(second);
+          .to.have.been.calledWithMatch({id: 0})
+          .and.calledWithMatch({id: 1});
       });
 
     });

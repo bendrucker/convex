@@ -17,16 +17,17 @@ module.exports = function ($injector) {
   };
 
   Relation.prototype.initialize = function (parent) {
-    var data = parent[this.key];
+    var data = parent[this.key], relation;
     if (this.isSingle()) {
-      var relation = parent[this.key] = new this.target({
+      relation = new this.target({
         id: parent[this.targetName + '_id']
       });
       angular.extend(relation, data);
     } else {
-      var relation = parent[this.key] = collectionFactory(this.target)
+      relation = collectionFactory(this.target);
       relation.add(data || []);
     }
+    return relation;
   };
 
   return Relation;
