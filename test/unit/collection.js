@@ -1,3 +1,6 @@
+'use strict';
+
+var angular           = require('angular');
 var collectionFactory = require('../../src/collection');
 
 describe('Collection', function () {
@@ -33,6 +36,18 @@ describe('Collection', function () {
       expect(collection).to.have.length(2);
     });
 
+  });
+
+});
+
+describe('#isCollection', function () {
+
+  it('is true for collections', function () {
+    expect(collectionFactory.isCollection(collectionFactory())).to.be.true;
+  });
+
+  it('is false for regular arrays', function () {
+    expect(collectionFactory.isCollection([])).to.be.false;
   });
 
 });

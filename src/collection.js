@@ -2,7 +2,7 @@
 
 var angular = require('angular');
 
-module.exports = function (Model) {
+var collectionFactory = function (Model) {
   var array = [];
   array.model = Model;
   array.add = function (data) {
@@ -15,3 +15,9 @@ module.exports = function (Model) {
 
   return array;
 };
+
+collectionFactory.isCollection = function (value) {
+  return angular.isArray(value) && typeof value.add === 'function';
+};
+
+module.exports = collectionFactory;
