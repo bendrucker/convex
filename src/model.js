@@ -1,6 +1,6 @@
 'use strict';
 
-var angular  = require('angular');
+var angular    = require('angular');
 
 module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
 
@@ -165,6 +165,14 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
     var relation = new ModelRelation('hasMany', Target);
     internals.relations(this)[relation.key] = relation;
     return this;
+  };
+
+  BaseModel.prototype.related = function (name) {
+    if (this[name] && (this[name] instanceof BaseModel || this[name].isCollection)) {
+      return this[name];
+    } else {
+      return (this[name] = this.relations[name].initialize(this));
+    }
   };
 
   return BaseModel;

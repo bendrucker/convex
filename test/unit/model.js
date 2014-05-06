@@ -279,7 +279,7 @@ describe('BaseModel', function () {
     describe('Collection', function () {
 
       var url = 'https://api/items?condition=true';
-      var res = [{id: 0}, {id: 1}]
+      var res = [{id: 0}, {id: 1}];
 
       describe('#where', function () {
 
@@ -377,6 +377,37 @@ describe('BaseModel', function () {
         .to.have.property('targets')
         .that.equals(ModelRelation.firstCall.returnValue);
       expect(ModelRelation).to.have.been.calledWithNew;
+    });
+
+    describe('#related', function () {
+
+      it('returns a related model if already defined', function () {
+        var child = new Model();
+        model.child = child;
+        expect(model.related('child')).to.equal(child);
+      });
+
+      it('returns a related collection if already defined', function () {
+        var child = {
+          isCollection: true
+        };
+        model.child = child;
+        expect(model.related('child')).to.equal(child);
+      });
+
+      it('otherwise instantiates a new related model and returns it', function () {
+        model.relations = {
+          child: {
+            initialize: sinon.spy()
+          }
+        };
+        var related = model.related('child');
+        expect(related)
+          .to.equal(model.relations.child.initialize.firstCall.returnValue);
+        expect(model.child).to.equal(related);
+        expect(model.relations.child.initialize).to.have.been.calledWith(model);
+      });
+
     });
 
   });
