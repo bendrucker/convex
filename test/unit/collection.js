@@ -17,6 +17,10 @@ describe('Collection', function () {
       .and.to.have.property('model', Model);
   });
 
+  it('identifies itself as a collection', function () {
+    expect(collection.isCollection).to.be.true;
+  });
+
   describe('#add', function () {
 
     it('casts model data and pushes it to the array', function () {
@@ -36,18 +40,6 @@ describe('Collection', function () {
       expect(collection).to.have.length(2);
     });
 
-  });
-
-});
-
-describe('#isCollection', function () {
-
-  it('is true for collections', function () {
-    expect(collectionFactory.isCollection(collectionFactory())).to.be.true;
-  });
-
-  it('is false for regular arrays', function () {
-    expect(collectionFactory.isCollection([])).to.be.false;
   });
 
 });
