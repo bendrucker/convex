@@ -1,8 +1,8 @@
 'use strict';
 
-var angular = require('angular');
+var angular  = require('angular');
 
-module.exports = function ($http, $q, modelCacheFactory) {
+module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
 
   var internals = {};
 
@@ -149,6 +149,22 @@ module.exports = function ($http, $q, modelCacheFactory) {
 
   BaseModel.all = function () {
     return this.where();
+  };
+
+  internals.relations = function (Model) {
+    return Model.prototype.relations || (Model.prototype.relations = {});
+  };
+
+  BaseModel.belongsTo = function (Target) {
+    var relation = new ModelRelation('belongsTo', Target);
+    internals.relations(this)[relation.key] = relation;
+    return this;
+  };
+
+  BaseModel.hasMany = function (Target) {
+    var relation = new ModelRelation('hasMany', Target);
+    internals.relations(this)[relation.key] = relation;
+    return this;
   };
 
   return BaseModel;

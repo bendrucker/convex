@@ -7,15 +7,19 @@ require('angular-mocks');
 
 describe('BaseModel', function () {
 
-  var BaseModel, Model, model, modelCacheFactory, $httpBackend, $timeout;
+  var BaseModel, Model, model, ModelRelation, modelCacheFactory, $httpBackend, $timeout;
   beforeEach(angular.mock.module('valet-base-model'));
   beforeEach(angular.mock.module(function ($provide) {
     $provide.factory('modelCacheFactory', function ($cacheFactory) {
       return sinon.spy($cacheFactory);
     });
+    $provide.factory('ModelRelation', function () {
+      return sinon.stub();
+    });
   }));
   beforeEach(angular.mock.inject(function ($injector) {
     BaseModel = $injector.get('BaseModel');
+    ModelRelation = $injector.get('ModelRelation');
     modelCacheFactory = $injector.get('modelCacheFactory');
     $httpBackend = $injector.get('$httpBackend');
     $timeout = $injector.get('$timeout');
@@ -347,6 +351,32 @@ describe('BaseModel', function () {
 
       });
 
+    });
+
+  });
+
+  describe('Relations', function () {
+
+    it('can create a belongsTo relation', function () {
+      ModelRelation.returns({
+        key: 'target'
+      });
+      Model.belongsTo('Target');
+      expect(Model.prototype.relations)
+        .to.have.property('target')
+        .that.equals(ModelRelation.firstCall.returnValue);
+      expect(ModelRelation).to.have.been.calledWithNew;
+    });
+
+    it('can create a hasMany relation', function () {
+      ModelRelation.returns({
+        key: 'targets'
+      });
+      Model.belongsTo('Target');
+      expect(Model.prototype.relations)
+        .to.have.property('targets')
+        .that.equals(ModelRelation.firstCall.returnValue);
+      expect(ModelRelation).to.have.been.calledWithNew;
     });
 
   });
