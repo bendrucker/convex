@@ -28,6 +28,11 @@ describe('Collection', function () {
       });
     });
 
+    it('can handle multiple models', function () {
+      collection.add([{foo: 'bar'}, {baz: 'qux'}]);
+      expect(collection).to.have.length(2);
+    });
+
   });
 
 });

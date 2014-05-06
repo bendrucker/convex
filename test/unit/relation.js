@@ -74,20 +74,56 @@ describe('BaseModel', function () {
       model = {};
     });
 
-    it('attaches a new target model by id for single relations', function () {
-      model.mock_id = 0;
-      new Relation('belongsTo', 'MockModel').initialize(model);
-      expect(model)
-        .to.have.property('mock')
-        .that.is.an.instanceOf(MockModel);
-      expect(MockModel).to.have.been.calledWithMatch({id: 0});
+    describe('n-to-1 relations', function () {
+
+      it('attaches a new target model by id', function () {
+        model.mock_id = 0;
+        new Relation('belongsTo', 'MockModel').initialize(model);
+        expect(model)
+          .to.have.property('mock')
+          .that.is.an.instanceOf(MockModel);
+        expect(MockModel).to.have.been.calledWithMatch({id: 0});
+      });
+
+      it('extends the model with existing data', function () {
+        model.mock = {
+          id: 0,
+          name: 'mock'
+        };
+        new Relation('belongsTo', 'MockModel').initialize(model);
+        expect(model.mock)
+          .to.be.an.instanceOf(MockModel)
+          .and.to.contain({
+            id: 0,
+            name: 'mock'
+          });
+      });
+
     });
 
-    it('attaches a collection for 1-many relations', function () {
-      new Relation('hasMany', 'MockModel').initialize(model);
-      expect(model)
-        .to.have.property('mocks')
-        .with.property('model', MockModel);
+    describe('n-to-many relations', function () {
+
+      it('attaches a collection', function () {
+        new Relation('hasMany', 'MockModel').initialize(model);
+        expect(model)
+          .to.have.property('mocks')
+          .with.property('model', MockModel);
+      });
+
+      it('casts an existing collection of data', function () {
+        model = sinon.spy();
+        var first = {id: 0};
+        var second = {id: 1};
+        model.mocks = [first, second];
+        new Relation('hasMany', 'MockModel').initialize(model);
+        expect(model)
+          .to.have.property('mocks')
+          .with.length(2);
+        expect(MockModel)
+          .to.have.been.calledWith(first)
+          .and.calledWith(second);
+      });
+
     });
 
   });

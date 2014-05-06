@@ -1,5 +1,6 @@
 'use strict';
 
+var angular           = require('angular');
 var pluralize         = require('pluralize');
 var collectionFactory = require('./collection');
 
@@ -16,12 +17,15 @@ module.exports = function ($injector) {
   };
 
   Relation.prototype.initialize = function (parent) {
+    var data = parent[this.key];
     if (this.isSingle()) {
-      parent[this.key] = new this.target({
+      var relation = parent[this.key] = new this.target({
         id: parent[this.targetName + '_id']
       });
+      angular.extend(relation, data);
     } else {
-      parent[this.key] = collectionFactory(this.target);
+      var relation = parent[this.key] = collectionFactory(this.target)
+      relation.add(data || []);
     }
   };
 
