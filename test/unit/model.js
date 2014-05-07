@@ -68,6 +68,14 @@ describe('BaseModel', function () {
       expect(cached).to.have.property('id');
     });
 
+    it('instantiates specified relations', function () {
+      sinon.stub(Model.prototype, 'related');
+      model = new Model({}, {
+        withRelated: ['relation']
+      });
+      expect(model.related).to.have.been.calledWith('relation');
+    });
+
   });
 
   describe('BaseModel#extend', function () {

@@ -6,8 +6,14 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
 
   var internals = {};
 
-  var BaseModel = function (attributes) {
+  var BaseModel = function (attributes, options) {
     angular.extend(this, attributes);
+    if (options && options.withRelated) {
+      var model = this;
+      options.withRelated.forEach(function (relation) {
+        model.related(relation);
+      });
+    }
     return internals.cached(this);
   };
 
