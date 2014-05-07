@@ -25,8 +25,9 @@ describe('Collection', function () {
 
     it('casts model data and pushes it to the array', function () {
       var data = {foo: 'bar'};
-      Model.withArgs(data).returns(angular.extend(data, {id: 0}));
-      expect(collection.add(data)).to.equal(collection);
+      var options = {};
+      Model.withArgs(data, options).returns(angular.extend(data, {id: 0}));
+      expect(collection.add(data, options)).to.equal(collection);
       expect(collection).to.have.length(1);
       expect(Model).to.have.been.calledWithNew;
       expect(collection[0]).to.deep.equal({
