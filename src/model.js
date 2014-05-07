@@ -6,14 +6,16 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
 
   var internals = {};
 
+  internals.relations = function (model, options) {
+    if (options && options.withRelated) {
+      options.withRelated.forEach(model.related, model);
+    }
+    return model;
+  };
+
   var BaseModel = function (attributes, options) {
     angular.extend(this, attributes);
-    if (options && options.withRelated) {
-      var model = this;
-      options.withRelated.forEach(function (relation) {
-        model.related(relation);
-      });
-    }
+    internals.relations(this, options);
     return internals.cached(this);
   };
 
@@ -74,14 +76,25 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
       });
   };
 
+  internals.options = function (options) {
+    options = options || {};
+    options.params = options.params || {};
+    options.params.expand = options.withRelated;
+    return options;
+  };
+
   BaseModel.prototype.fetch = function (options) {
     var model = this;
+    options = internals.options(options);
     return internals.disallowNew(this)
       .then(function () {
         return $http.get(model.url(), options);
       })
       .then(function (response) {
         return angular.extend(model, response.data);
+      })
+      .then(function (model) {
+        return internals.relations(model, options);
       });
   };
 
@@ -157,19 +170,19 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
     return this.where();
   };
 
-  internals.relations = function (Model) {
+  internals.relationStore = function (Model) {
     return Model.prototype.relations || (Model.prototype.relations = {});
   };
 
   BaseModel.belongsTo = function (Target) {
     var relation = new ModelRelation('belongsTo', Target);
-    internals.relations(this)[relation.key] = relation;
+    internals.relationStore(this)[relation.key] = relation;
     return this;
   };
 
   BaseModel.hasMany = function (Target) {
     var relation = new ModelRelation('hasMany', Target);
-    internals.relations(this)[relation.key] = relation;
+    internals.relationStore(this)[relation.key] = relation;
     return this;
   };
 

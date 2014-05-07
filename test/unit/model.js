@@ -74,6 +74,7 @@ describe('BaseModel', function () {
         withRelated: ['relation']
       });
       expect(model.related).to.have.been.calledWith('relation');
+      expect(model.related).to.have.been.calledOn(model);
     });
 
   });
@@ -209,6 +210,20 @@ describe('BaseModel', function () {
           model.fetch();
           $httpBackend.flush();
           expect(angular.extend).to.have.been.calledWith(model, res);
+        });
+
+        it('can handle relations', function () {
+          sinon.stub(model, 'related');
+          $httpBackend
+            .expectGET(url + '?expand=rel1&expand=rel2')
+            .respond(200, res);
+          model.fetch({
+            withRelated: ['rel1', 'rel2']
+          });
+          $httpBackend.flush();
+          expect(model.related)
+            .to.have.been.calledWith('rel1')
+            .and.calledWith('rel2');
         });
 
       });
