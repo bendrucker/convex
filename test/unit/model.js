@@ -230,7 +230,7 @@ describe('BaseModel', function () {
 
       describe('#save', function () {
 
-        it('sends a put when the model is not new', function () {
+        it('sends a PUT when the model is not new', function () {
           $httpBackend
             .expectPUT(url, {
               id: 0
@@ -241,8 +241,8 @@ describe('BaseModel', function () {
           expect(angular.extend).to.have.been.calledWith(model, res);
         });
 
-        it('sends a post when the model is new', function () {
-          model.id = undefined;
+        it('sends a POST when the model is new', function () {
+          delete model.id;
           model.name = 'Ben';
           $httpBackend
             .expectPOST('https://api/items', {
@@ -252,6 +252,35 @@ describe('BaseModel', function () {
           model.save();
           $httpBackend.flush();
           expect(angular.extend).to.have.been.calledWith(model, res);
+        });
+
+        it('can handle related data', function () {
+          Model.prototype.relations = {
+            rel1: null,
+            rel2: null
+          };
+          model.rel1 = {
+            foo: 'bar'
+          };
+          model.rel2 = {
+            foo: 'bar'
+          };
+          sinon.stub(model, 'related');
+          $httpBackend
+            .expectPUT('https://api/items/0?expand=rel1', {
+              id: 0,
+              rel1: {
+                foo: 'bar'
+              }
+            })
+            .respond(200, res);
+          model.save({
+            withRelated: ['rel1']
+          });
+          $httpBackend.flush();
+          expect(model.related)
+            .to.have.been.calledWith('rel1')
+            .and.not.calledWith('rel2');
         });
 
       });

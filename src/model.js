@@ -1,6 +1,7 @@
 'use strict';
 
 var angular    = require('angular');
+var difference = require('lodash.difference');
 
 module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
 
@@ -98,15 +99,32 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
       });
   };
 
+  internals.data = function (model, options) {
+    var data = {};
+    for (var property in model) {
+      if (model.hasOwnProperty(property)) data[property] = model[property];
+    }
+    var relations = Object.keys(model.relations || {});
+    difference(relations, options.withRelated).forEach(function (relation) {
+      delete data[relation];
+    });
+    return data;
+  };
+
   BaseModel.prototype.save = function (options) {
     var model = this;
-    var isNew = this.isNew();
-    return $http[isNew ? 'post' : 'put'](this.url(), model, options)
+    options = internals.options(options);
+    var method = this.isNew() ? 'post' : 'put';
+    options = internals.options(options);
+    return $http[method](this.url(), internals.data(model, options), options)
       .then(function (response) {
         return angular.extend(model, response.data);
       })
       .then(function (model) {
-        if (isNew) model.cache.put(model.id, model);
+        return internals.relations(model, options);
+      })
+      .then(function (model) {
+        if (method === 'post') model.cache.put(model.id, model);
         return model;
       });
   };
