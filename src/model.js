@@ -1,7 +1,8 @@
 'use strict';
 
-var angular    = require('angular');
-var difference = require('lodash.difference');
+var angular           = require('angular');
+var difference        = require('lodash.difference');
+var collectionFactory = require('./collection');
 
 module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
 
@@ -143,49 +144,42 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
       });
   };
 
-  internals.query = function (Model, attributes) {
+  internals.query = function (Model, attributes, options) {
+    angular.extend(options.params, attributes);
     return $http
-      .get(Model.prototype.url(), {
-        params: attributes
-      })
+      .get(Model.prototype.url(), options)
       .then(function (response) {
         return response.data;
       });
   };
 
-  internals.cast = function (Model, data) {
-    if (!data) return;
-    if (angular.isArray(data)) {
-      return data.map(function (object) {
-        return new Model(object);
-      });
-    } else {
-      return new Model(data);
-    }
+  internals.cast = function (Model, data, options) {
+    return collectionFactory(Model).add(data, options);
   };
 
-  BaseModel.where = function (attributes) {
+  BaseModel.where = function (attributes, options) {
     var Model = this;
-    return internals.query(this, attributes)
+    options = internals.options(options);
+    return internals.query(this, attributes, options)
       .then(function (data) {
-        return internals.cast(Model, data);
+        return internals.cast(Model, data, options);
       });
   };
 
-  BaseModel.find = function (attributes) {
+  BaseModel.find = function (attributes, options) {
     var Model = this;
-    return internals.query(this, attributes)
+    options = internals.options(options);
+    return internals.query(this, attributes, options)
       .then(function (data) {
-        return data.length ? data[0] : void 0;
+        return data.length ? data[0] : $q.reject('Not found');
       })
       .then(function (data) {
-        return internals.cast(Model, data);
+        return new Model(data, options);
       });
-
   };
 
-  BaseModel.all = function () {
-    return this.where();
+  BaseModel.all = function (options) {
+    return this.where(null, options);
   };
 
   internals.relationStore = function (Model) {

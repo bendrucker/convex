@@ -333,24 +333,39 @@ describe('BaseModel', function () {
       var url = 'https://api/items?condition=true';
       var res = [{id: 0}, {id: 1}];
 
+      beforeEach(function () {
+        sinon.stub(Model.prototype, 'related');
+      });
+
       describe('#where', function () {
 
-        beforeEach(function () {
+        it('sends a GET request with the query', function () {
           $httpBackend
             .expectGET(url)
             .respond(200, res);
-        });
-
-        it('sends a GET request with the query', function () {
           Model.where({condition: true});
           $httpBackend.flush();
         });
 
         it('casts the returned array of models', function () {
+          $httpBackend
+            .expectGET(url)
+            .respond(200, res);
           Model.where({condition: true})
             .then(function (models) {
               expect(models).to.have.length(2);
               expect(models[0]).to.be.an.instanceOf(Model);
+            });
+          $httpBackend.flush();
+        });
+
+        it('can handle relations', function () {
+          $httpBackend
+            .expectGET(url + '&expand=related')
+            .respond(200, res);
+          Model.where({condition: true}, {withRelated: ['related']})
+            .then(function (models) {
+              expect(models[0].related).to.have.been.calledWith('related');
             });
           $httpBackend.flush();
         });
@@ -372,13 +387,22 @@ describe('BaseModel', function () {
           $httpBackend.flush();
         });
 
-        it('can handle an empty result', function () {
+        it('rejects with an empty result', function () {
           $httpBackend
             .expectGET(url)
             .respond(200, []);
-          Model.find({condition: true})
+          var promise = Model.find({condition: true});
+          $httpBackend.flush();
+          expect(promise).to.be.rejected;
+        });
+
+        it('can handle relations', function () {
+          $httpBackend
+            .expectGET(url + '&expand=related')
+            .respond(200, res);
+          Model.find({condition: true}, {withRelated: ['related']})
             .then(function (model) {
-              expect(model).to.be.undefined;
+              expect(model.related).to.have.been.calledWith('related');
             });
           $httpBackend.flush();
         });
@@ -392,13 +416,14 @@ describe('BaseModel', function () {
             .expectGET('https://api/items')
             .respond(200, res);
           sinon.spy(Model, 'where');
-          Model.all()
+          var options = {};
+          Model.all(options)
             .then(function (models) {
               expect(models).to.have.length(2);
               expect(models[0]).to.be.an.instanceOf(Model);
             });
           $httpBackend.flush();
-          expect(Model.where).to.have.been.calledWith(undefined);
+          expect(Model.where).to.have.been.calledWith(null, options);
         });
 
       });
