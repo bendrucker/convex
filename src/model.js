@@ -2,6 +2,7 @@
 
 var angular           = require('angular');
 var difference        = require('lodash.difference');
+var pluralize         = require('pluralize');
 var collectionFactory = require('./collection');
 
 module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
@@ -59,7 +60,7 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
   BaseModel.prototype.baseURL = 'https://api.valet.io';
 
   BaseModel.prototype.url = function () {
-    var base = this.baseURL + '/' + this.objectName;
+    var base = this.baseURL + '/' + pluralize(this.objectName);
     return this.isNew() ? base : base + '/' + this.id;
   };
 

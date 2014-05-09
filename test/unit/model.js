@@ -25,11 +25,11 @@ describe('BaseModel', function () {
     $timeout = $injector.get('$timeout');
   }));
   beforeEach(function () {
-    Model = BaseModel.extend({objectName: 'items'});
+    Model = BaseModel.extend({objectName: 'item'});
     model = new Model();
   });
   afterEach(function () {
-    modelCacheFactory.get('items').destroy();
+    modelCacheFactory.get('item').destroy();
   });
 
   beforeEach(function () {
