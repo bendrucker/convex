@@ -3,7 +3,13 @@
 module.exports = require('angular')
   .module('valet-base-model', [])
   .provider('BaseModel', require('./provider'))
-  .factory('modelCacheFactory', require('./cache'))
-  .factory('ModelRelation', require('./relation'));
+  .factory('modelCacheFactory', [
+    '$cacheFactory',
+    require('./cache')
+  ])
+  .factory('ModelRelation', [
+    '$injector',
+    require('./relation')
+  ]);
 
 module.exports = 'valet-base-model';
