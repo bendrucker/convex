@@ -3,7 +3,6 @@
 var angular = require('angular');
 
 require('../../src');
-require('angular-mocks');
 
 describe('BaseModel', function () {
 

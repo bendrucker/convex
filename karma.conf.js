@@ -10,14 +10,17 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'chai-sinon', 'browserify'],
+    frameworks: ['browserify', 'mocha', 'chai-sinon'],
 
 
     // list of files / patterns to load in the browser
     files: [
       'node_modules/es5-shim/es5-shim.js',
       'node_modules/es5-shim/es5-sham.js',
-      'node_modules/chai-as-promised/lib/chai-as-promised.js'
+      'node_modules/chai-as-promised/lib/chai-as-promised.js',
+      'components/angular/angular.js',
+      'components/angular-mocks/angular-mocks.js',
+      'test/**/*.js'
     ],
 
 
@@ -30,13 +33,11 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        '/**/*.browserify': 'browserify'
+        'test/**/*.js': 'browserify'
     },
 
     browserify: {
-        files: ['test/unit/*.js'],
         debug: true,
-        watch: true
     },
 
 
