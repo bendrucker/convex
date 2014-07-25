@@ -1,6 +1,7 @@
 'use strict';
 
 var angular = require('angular');
+var uuid    = require('node-uuid');
 
 require('../../src');
 
@@ -42,29 +43,54 @@ describe('BaseModel', function () {
   describe('Constructor', function () {
 
     it('creates an instance with the attributes', function () {
-      var attributes = {};
-      model = new Model(attributes);
-      expect(angular.extend).to.have.been.calledWith(model, attributes);
+      model = new Model({
+        foo: 'bar'
+      });
+      expect(model).to.contain({
+        foo: 'bar'
+      });
+    });
+
+    it('is "saved" if the ID was provided', function () {
+      expect(new Model().saved).to.be.false;
+      expect(new Model({id: uuid.v4()}).saved).to.be.true;
     });
 
     it('stores new models in the cache', function () {
       sinon.stub(Model.prototype.cache, 'put');
-      model = new Model({id: 0});
-      expect(model).to.be.an.instanceOf(Model);
-      expect(model.cache.put).to.have.been.calledWith(0, model);
+      model = new Model();
+      expect(model.cache.put).to.have.been.calledWith(model.id, model);
     });
 
     it('references the cached model if available', function () {
       var cached = {};
-      sinon.stub(Model.prototype.cache, 'get').withArgs(0).returns(cached);
-      expect(new Model({id: 0})).to.equal(cached);
+      var id = uuid.v4();
+      sinon.stub(Model.prototype.cache, 'get').withArgs(id).returns(cached);
+      expect(new Model({id: id})).to.equal(cached);
     });
 
     it('extends the cached model with new attributes', function () {
       var cached = {};
+      var id = uuid.v4();
       sinon.stub(Model.prototype.cache, 'get').returns(cached);
-      new Model({id: 0});
-      expect(cached).to.have.property('id');
+      new Model({id: id, foo: 'bar'});
+      expect(cached).to.have.property('foo', 'bar');
+    });
+
+    it('calls an initialization method on new models', function () {
+      Model.prototype.initialize = sinon.spy();
+      model = new Model();
+      expect(model.initialize).to.have.been.called;
+    });
+
+    it('does not initialize cached models', function () {
+      var cached = {
+        initialize: sinon.spy()
+      };
+      Model.prototype.initialize = sinon.spy();
+      sinon.stub(Model.prototype.cache, 'get').returns(cached);
+      model = new Model();
+      expect(model.initialize).to.not.have.been.called;
     });
 
     it('instantiates specified relations', function () {
@@ -132,31 +158,20 @@ describe('BaseModel', function () {
 
   });
 
-  describe('#isNew', function () {
-
-    it('is false when the model has an id', function () {
-      expect(new Model({id: 0}).isNew()).to.be.false;
-    });
-
-    it('is true when there is no id', function () {
-      expect(new Model().isNew()).to.be.true;
-    });
-
-  });
-
   describe('#url', function () {
 
     beforeEach(function () {
       model.baseURL ='api';
     });
 
-    it('generates the collection endpoint for new models', function () {
+    it('generates the collection endpoint for unsaved models', function () {
       expect(model.url()).to.equal('api/items');
     });
 
-    it('generates a model endpoint for persisted models', function () {
-      model.id = 0;
-      expect(model.url()).to.equal('api/items/0');
+    it('generates a model endpoint for saved models', function () {
+      model.id = uuid.v4();
+      model.saved = true;
+      expect(model.url()).to.equal('api/items/' + model.id);
     });
 
   });
@@ -164,7 +179,7 @@ describe('BaseModel', function () {
   describe('#reset', function () {
 
     it('deletes the own properties of the model', function () {
-      model.id = 1;
+      model.id = uuid.v4();
       model.reset();
       expect(model).to.not.have.property('id');
       expect(model).to.have.property('cache');
@@ -179,27 +194,31 @@ describe('BaseModel', function () {
     });
 
     afterEach(function () {
-      $httpBackend.verifyNoOutstandingExpectation();
-      $httpBackend.verifyNoOutstandingRequest();
+      // $httpBackend.verifyNoOutstandingExpectation();
+      // $httpBackend.verifyNoOutstandingRequest();
     });
 
     describe('Instance', function () {
 
-      var url = 'https://api/items/0';
+      var id  = uuid.v4();
+      var url = 'https://api/items/' + id;
       var res = {
-        id: 0,
+        id: id,
         name: 'Ben'
       };
 
       beforeEach(function () {
-        model.id = 0;
+        model.id = id;
+        model.saved = true;
       });
 
       describe('#fetch', function () {
 
-        it('rejects on a new model', function () {
-          model.id = null;
-          expect(model.fetch()).to.be.rejectedWith(/new model/);
+        it('is a noop on an unsaved model', function () {
+          model.saved = false;
+          var promise = model.fetch();
+          $timeout.flush();
+          expect(promise).to.eventually.equal(this);
         });
 
         it('sends a GET and populates with the response', function () {
@@ -208,7 +227,7 @@ describe('BaseModel', function () {
             .respond(200, res);
           model.fetch();
           $httpBackend.flush();
-          expect(angular.extend).to.have.been.calledWith(model, res);
+          expect(model).to.have.property('name', 'Ben');
         });
 
         it('can handle relations', function () {
@@ -229,31 +248,30 @@ describe('BaseModel', function () {
 
       describe('#save', function () {
 
-        it('sends a PUT when the model is not new', function () {
+        it('sends a PUT when the model is saved', function () {
           $httpBackend
             .expectPUT(url, {
-              id: 0
+              id: id
             })
             .respond(200, res);
           model.save();
           $httpBackend.flush();
-          expect(angular.extend).to.have.been.calledWith(model, res);
+          expect(model).to.have.property('name', 'Ben');
         });
 
-        it('sends a POST when the model is new', function () {
-          delete model.id;
-          model.name = 'Ben';
+        it('sends a POST when the model is unsaved', function () {
+          model.saved = false;
           $httpBackend
             .expectPOST('https://api/items', {
-              name: 'Ben'
+              id: id
             })
-            .respond(200, res);
+            .respond(201, res);
           model.save();
           $httpBackend.flush();
-          expect(angular.extend).to.have.been.calledWith(model, res);
+          expect(model).to.have.property('name', 'Ben');
         });
 
-        it('can handle related data', function () {
+        xit('can excluded related data', function () {
           Model.prototype.relations = {
             rel1: null,
             rel2: null
@@ -287,39 +305,37 @@ describe('BaseModel', function () {
       describe('#delete', function () {
 
         beforeEach(function () {
-          model.id = null;
+          $httpBackend.expectDELETE(url).respond(200);
         });
 
-        it('does not send requests if the model is new', function () {
+        it('does not send requests if the model is unsaved', function () {
+          model.saved = false;
+          $httpBackend.resetExpectations();
           model.delete();
         });
 
-        it('sends a DELETE request if the model is not new', function () {
-          $httpBackend.expectDELETE(url).respond(200);
-          model.id = 0;
+        it('deletes saved models from the server', function () {
           model.delete();
           $httpBackend.flush();
         });
 
-        it('removes the model from the cache if it was not new', function () {
+        it('deletes saved models from the cache', function () {
           sinon.spy(model.cache, 'remove');
-          $httpBackend.expectDELETE(url).respond(200);
-          model.id = 0;
           model.delete();
           $httpBackend.flush();
-          expect(model.cache.remove).to.have.been.calledWith(0);
+          expect(model.cache.remove).to.have.been.calledWith(id);
         });
 
         it('resets the model', function () {
           sinon.spy(Model.prototype, 'reset');
           model.delete();
-          $timeout.flush();
+          $httpBackend.flush();
           expect(model.reset).to.have.been.called;
         });
 
         it('sets a deleted flag in case of direct references', function () {
           model.delete();
-          $timeout.flush();
+          $httpBackend.flush();
           expect(model.deleted).to.be.true;
         });
 
@@ -330,7 +346,7 @@ describe('BaseModel', function () {
     describe('Collection', function () {
 
       var url = 'https://api/items?condition=true';
-      var res = [{id: 0}, {id: 1}];
+      var res = [{id: uuid.v4()}, {id: uuid.v4()}];
 
       beforeEach(function () {
         sinon.stub(Model.prototype, 'related');
@@ -381,7 +397,7 @@ describe('BaseModel', function () {
             .then(function (model) {
               expect(model)
                 .to.be.an.instanceOf(Model)
-                .and.have.property('id', 0);
+                .and.have.property('id', res[0].id);
             });
           $httpBackend.flush();
         });

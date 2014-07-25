@@ -1,6 +1,7 @@
 'use strict';
 
 var angular           = require('angular');
+var uuid              = require('node-uuid');
 var difference        = require('lodash.difference');
 var pluralize         = require('pluralize');
 var collectionFactory = require('./collection');
@@ -18,7 +19,25 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
   var BaseModel = function (attributes, options) {
     angular.extend(this, attributes);
     internals.relations(this, options);
-    return internals.cached(this);
+    Object.defineProperty(this, 'saved', {
+      enumerable: false,
+      writable: true
+    })
+    if (!this.id) {
+      this.saved = false;
+      this.id = uuid.v4();
+    }
+    else {
+      this.saved = true;
+    }
+    var cached = this.cache.get(this.id);
+    if (cached) {
+      return angular.extend(cached, this);
+    }
+    else {
+      if (this.initialize) this.initialize();
+      this.cache.put(this.id, this);
+    }
   };
 
   BaseModel.extend = function (proto, ctor) {
@@ -41,26 +60,11 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
     Model.prototype.cache = modelCacheFactory(Model.prototype.objectName);
   };
 
-  internals.cached = function (model) {
-    var cached = model.cache.get(model.id);
-    if (cached) {
-      return angular.extend(cached, model);
-    } else if (!model.isNew()) {
-      return model.cache.put(model.id, model);
-    } else {
-      return model;
-    }
-  };
-
-  BaseModel.prototype.isNew = function () {
-    return (typeof this.id === 'undefined' || this.id === null);
-  };
-
   BaseModel.prototype.baseURL = this.baseURL;
 
   BaseModel.prototype.url = function () {
     var base = this.baseURL + '/' + pluralize(this.objectName);
-    return this.isNew() ? base : base + '/' + this.id;
+    return this.saved ? base + '/' + this.id : base;
   };
 
   BaseModel.prototype.reset = function () {
@@ -68,14 +72,6 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
       if (this.hasOwnProperty(property)) delete this[property];
     }
     return this;
-  };
-
-  internals.disallowNew = function (model) {
-    return $q
-      .when()
-      .then(function () {
-        if (model.isNew()) return $q.reject('Instance method called on a new model');
-      });
   };
 
   internals.options = function (options) {
@@ -88,10 +84,8 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
   BaseModel.prototype.fetch = function (options) {
     var model = this;
     options = internals.options(options);
-    return internals.disallowNew(this)
-      .then(function () {
-        return $http.get(model.url(), options);
-      })
+    if (!this.saved) return $q.when(this);
+    return $http.get(model.url(), options)
       .then(function (response) {
         return angular.extend(model, response.data);
       })
@@ -115,7 +109,7 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
   BaseModel.prototype.save = function (options) {
     var model = this;
     options = internals.options(options);
-    var method = this.isNew() ? 'post' : 'put';
+    var method = this.saved ? 'put' : 'post';
     options = internals.options(options);
     return $http[method](this.url(), internals.data(model, options), options)
       .then(function (response) {
@@ -132,13 +126,13 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
 
   BaseModel.prototype.delete = function (options) {
     var model = this;
-    var isNew = this.isNew();
     return $q.when()
       .then(function () {
-        if (!isNew) return $http.delete(model.url(), options);
+        if (model.saved) return $http.delete(model.url(), options);
       })
       .then(function () {
-        if (!isNew) model.cache.remove(model.id);
+        model.cache.remove(model.id);
+        model.saved = false;
         model.reset();
         model.deleted = true;
       });
