@@ -81,6 +81,22 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
     return options;
   };
 
+  internals.data = function (model) {
+    var data = angular.copy(model);
+    var relations = Object.keys(model.relations || {});
+    relations.forEach(function (relation) {
+      delete data[relation];
+    });
+    for (var key in data) {
+      if (!model.hasOwnProperty(key)) delete data[key];
+    }
+    return data;
+  };
+
+  BaseModel.prototype.toJSON = function () {
+    return internals.data(this);
+  };
+
   BaseModel.prototype.fetch = function (options) {
     var model = this;
     options = internals.options(options);
@@ -94,33 +110,17 @@ module.exports = function ($http, $q, ModelRelation, modelCacheFactory) {
       });
   };
 
-  internals.data = function (model, options) {
-    var data = {};
-    for (var property in model) {
-      if (model.hasOwnProperty(property)) data[property] = model[property];
-    }
-    var relations = Object.keys(model.relations || {});
-    difference(relations, options.withRelated).forEach(function (relation) {
-      delete data[relation];
-    });
-    return data;
-  };
-
   BaseModel.prototype.save = function (options) {
     var model = this;
     options = internals.options(options);
     var method = this.saved ? 'put' : 'post';
     options = internals.options(options);
-    return $http[method](this.url(), internals.data(model, options), options)
+    return $http[method](this.url(), this, options)
       .then(function (response) {
         return angular.extend(model, response.data);
       })
       .then(function (model) {
         return internals.relations(model, options);
-      })
-      .then(function (model) {
-        if (method === 'post') model.cache.put(model.id, model);
-        return model;
       });
   };
 

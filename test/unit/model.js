@@ -193,11 +193,6 @@ describe('BaseModel', function () {
       Model.prototype.baseURL = 'https://api';
     });
 
-    afterEach(function () {
-      // $httpBackend.verifyNoOutstandingExpectation();
-      // $httpBackend.verifyNoOutstandingRequest();
-    });
-
     describe('Instance', function () {
 
       var id  = uuid.v4();
@@ -271,33 +266,21 @@ describe('BaseModel', function () {
           expect(model).to.have.property('name', 'Ben');
         });
 
-        xit('can excluded related data', function () {
+        it('excludes related data', function () {
           Model.prototype.relations = {
-            rel1: null,
-            rel2: null
+            rel1: null
           };
           model.rel1 = {
             foo: 'bar'
           };
-          model.rel2 = {
-            foo: 'bar'
-          };
           sinon.stub(model, 'related');
           $httpBackend
-            .expectPUT('https://api/items/0?expand=rel1', {
-              id: 0,
-              rel1: {
-                foo: 'bar'
-              }
+            .expectPUT('https://api/items/' + model.id, {
+              id: model.id
             })
             .respond(200, res);
-          model.save({
-            withRelated: ['rel1']
-          });
+          model.save();
           $httpBackend.flush();
-          expect(model.related)
-            .to.have.been.calledWith('rel1')
-            .and.not.calledWith('rel2');
         });
 
       });
