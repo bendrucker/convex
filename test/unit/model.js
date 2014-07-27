@@ -3,41 +3,78 @@
 var angular = require('angular');
 var uuid    = require('node-uuid');
 
-require('../../src');
+describe('ConvexModel', function () {
 
-describe('BaseModel', function () {
-
-  var BaseModel, Model, model, ModelRelation, modelCacheFactory, $httpBackend, $timeout;
-  beforeEach(angular.mock.module('valet-base-model'));
+  var ConvexModel, Model, model, ConvexRelation, ConvexCache, $httpBackend, $timeout;
+  beforeEach(angular.mock.module(require('../../')));
   beforeEach(angular.mock.module(function ($provide) {
-    $provide.factory('modelCacheFactory', function ($cacheFactory) {
-      return sinon.spy($cacheFactory);
-    });
-    $provide.factory('ModelRelation', function () {
+    $provide.factory('ConvexRelation', function () {
       return sinon.stub();
     });
   }));
   beforeEach(angular.mock.inject(function ($injector) {
-    BaseModel = $injector.get('BaseModel');
-    ModelRelation = $injector.get('ModelRelation');
-    modelCacheFactory = $injector.get('modelCacheFactory');
+    ConvexModel = $injector.get('ConvexModel');
+    ConvexRelation = $injector.get('ConvexRelation');
+    ConvexCache = $injector.get('ConvexCache');
     $httpBackend = $injector.get('$httpBackend');
     $timeout = $injector.get('$timeout');
   }));
   beforeEach(function () {
-    Model = BaseModel.extend({objectName: 'item'});
+    Model = ConvexModel.$new({name: 'item'});
     model = new Model();
   });
-  afterEach(function () {
-    modelCacheFactory.get('item').destroy();
-  });
 
-  beforeEach(function () {
-    sinon.spy(angular, 'extend');
-  });
+  describe('ConvexModel#$new', function () {
 
-  afterEach(function () {
-    angular.extend.restore();
+    var MockBase;
+    beforeEach(function () {
+      MockBase = sinon.spy();
+      MockBase.prototype = {
+        name: 'models'
+      };
+      MockBase.$new = ConvexModel.$new;
+    });
+
+    it('calls the parent in the child constructor', function () {
+      var child = new (MockBase.$new({name: 'm'}))('a1', 'a2');
+      expect(MockBase)
+        .to.have.been.calledOn(child)
+        .and.calledWith('a1', 'a2');
+    });
+
+    it('copies the parent prototype', function () {
+      expect(MockBase.$new({name: 'm'}).prototype).to.contain(MockBase.prototype);
+    });
+
+    it('extends the prototype with new properties', function () {
+      expect(MockBase.$new({name: 'm', foo: 'bar'}).prototype).to.have.property('foo', 'bar');
+    });
+
+    it('extends the constructor with the parent', function () {
+      MockBase.foo = 'bar';
+      expect(MockBase.$new({name: 'm'})).to.have.property('foo', 'bar');
+    });
+
+    it('extends the constructor with new methods', function () {
+      expect(MockBase.$new({name: 'm'}, {foo: 'bar'})).to.have.property('foo', 'bar');
+    });
+
+    it('requires a name on the prototype', function () {
+      expect(function () {
+        ConvexModel.$new();
+      }).to.throw(/must have a name/);
+    });
+
+    it('assigns the name as $name', function () {
+      expect(ConvexModel.$new({name: 'm'}).prototype).to.have.property('$name', 'm');
+    });
+
+    it('creates a new cache for the child model', function () {
+      var Child = ConvexModel.$new({name: 'model'});
+      expect(Child.prototype.cache).to.exist;
+      expect(Child.prototype.cache.$name).to.equal('convex-model');
+    });
+
   });
 
   describe('Constructor', function () {
@@ -100,60 +137,6 @@ describe('BaseModel', function () {
       });
       expect(model.related).to.have.been.calledWith('relation');
       expect(model.related).to.have.been.calledOn(model);
-    });
-
-  });
-
-  describe('BaseModel#extend', function () {
-
-    var MockBase;
-    beforeEach(function () {
-      MockBase = sinon.spy();
-      MockBase.prototype = {
-        objectName: 'models'
-      };
-      MockBase.extend = BaseModel.extend;
-    });
-
-    it('calls the parent in the child constructor', function () {
-      var child = new (MockBase.extend())('a1', 'a2');
-      expect(MockBase)
-        .to.have.been.calledOn(child)
-        .and.calledWith('a1', 'a2');
-    });
-
-    it('copies the parent prototype', function () {
-      expect(MockBase.extend().prototype).to.contain(MockBase.prototype);
-    });
-
-    it('extends the prototype with new methods', function () {
-      var proto = {};
-      var Child = MockBase.extend({});
-      expect(angular.extend).to.have.been.calledWith(Child.prototype, proto);
-    });
-
-    it('extends the constructor with the parent', function () {
-      var Child = MockBase.extend();
-      expect(angular.extend).to.have.been.calledWith(Child, MockBase);
-    });
-
-    it('extends the constructor with new methods', function () {
-      var ctor = {};
-      var Child = MockBase.extend(null, ctor);
-      expect(angular.extend).to.have.been.calledWith(Child, ctor);
-    });
-
-    it('requires a name on the prototype', function () {
-      expect(function () {
-        BaseModel.extend();
-      }).to.throw(/must have a name/);
-    });
-
-    it('creates a new cache for the child model', function () {
-      modelCacheFactory.reset();
-      var Child = BaseModel.extend({objectName: 'models'});
-      expect(modelCacheFactory).to.have.been.calledWith('models');
-      expect(Child.prototype.cache).to.equal(modelCacheFactory.firstCall.returnValue);
     });
 
   });
@@ -433,25 +416,25 @@ describe('BaseModel', function () {
   describe('Relations', function () {
 
     it('can create a belongsTo relation', function () {
-      ModelRelation.returns({
+      ConvexRelation.returns({
         key: 'target'
       });
       Model.belongsTo('Target');
       expect(Model.prototype.relations)
         .to.have.property('target')
-        .that.equals(ModelRelation.firstCall.returnValue);
-      expect(ModelRelation).to.have.been.calledWithNew;
+        .that.equals(ConvexRelation.firstCall.returnValue);
+      expect(ConvexRelation).to.have.been.calledWithNew;
     });
 
     it('can create a hasMany relation', function () {
-      ModelRelation.returns({
+      ConvexRelation.returns({
         key: 'targets'
       });
       Model.belongsTo('Target');
       expect(Model.prototype.relations)
         .to.have.property('targets')
-        .that.equals(ModelRelation.firstCall.returnValue);
-      expect(ModelRelation).to.have.been.calledWithNew;
+        .that.equals(ConvexRelation.firstCall.returnValue);
+      expect(ConvexRelation).to.have.been.calledWithNew;
     });
 
     describe('#related', function () {

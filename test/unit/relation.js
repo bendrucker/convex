@@ -2,12 +2,10 @@
 
 var angular = require('angular');
 
-require('../../src');
-
-describe('BaseModel', function () {
+describe('ConvexRelation', function () {
 
   var Relation, MockModel;
-  beforeEach(angular.mock.module('valet-base-model'));
+  beforeEach(angular.mock.module(require('../../')));
   beforeEach(function () {
     MockModel = sinon.spy();
     MockModel.prototype.objectName = 'mock';
@@ -16,7 +14,7 @@ describe('BaseModel', function () {
     $provide.value('MockModel', MockModel);
   }));
   beforeEach(angular.mock.inject(function ($injector) {
-    Relation = $injector.get('ModelRelation');
+    Relation = $injector.get('ConvexRelation');
   }));
 
   describe('Constructor', function () {
