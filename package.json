@@ -36,7 +36,9 @@
     "watchify": "~0.10.2",
     "karma-bro": "~0.6.0",
     "karma-cli": "0.0.4",
-    "mocha": "~1.18.2"
+    "mocha": "~1.18.2",
+    "browserify-istanbul": "~0.1.1",
+    "karma-coverage": "~0.2.4"
   },
   "browserify": {
     "transform": [
