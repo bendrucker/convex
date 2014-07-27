@@ -434,7 +434,7 @@ describe('ConvexModel', function () {
       ConvexRelation.returns({
         key: 'targets'
       });
-      Model.belongsTo('Target');
+      Model.hasMany('Target');
       expect(Model.prototype.relations)
         .to.have.property('targets')
         .that.equals(ConvexRelation.firstCall.returnValue);
