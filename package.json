@@ -22,22 +22,21 @@
   },
   "homepage": "https://github.com/bendrucker/convex",
   "devDependencies": {
-    "karma": "~0.12.9",
+    "karma": "~0.12.19",
     "karma-phantomjs-launcher": "~0.1.4",
-    "mocha": "~1.18.2",
-    "karma-mocha": "~0.1.3",
+    "karma-mocha": "~0.1.6",
     "karma-chrome-launcher": "~0.1.3",
-    "browserify": "~3.41.0",
     "chai": "~1.9.1",
-    "browserify-shim": "~3.4.1",
+    "browserify-shim": "~3.6.0",
     "sinon-chai": "~2.5.0",
     "sinon": "~1.9.1",
     "karma-chai-sinon": "~0.1.3",
     "chai-as-promised": "~4.1.1",
     "es5-shim": "~2.3.0",
-    "watchify": "~0.10.1",
-    "karma-bro": "bendrucker/karma-bro#d66c2b6ebfc47c2b66e132f5a22d9d02fb52b57f",
-    "karma-cli": "0.0.4"
+    "watchify": "~0.10.2",
+    "karma-bro": "~0.6.0",
+    "karma-cli": "0.0.4",
+    "mocha": "~1.18.2"
   },
   "browserify": {
     "transform": [
