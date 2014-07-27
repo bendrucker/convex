@@ -63,7 +63,7 @@ module.exports = function ($q, $http, ConvexCache, ConvexRelation, config) {
   ConvexModel.prototype.baseURL = this.baseURL;
 
   ConvexModel.prototype.url = function () {
-    var base = this.baseURL + '/' + pluralize(this.$name);
+    var base = this.baseURL + '/' + (this.plural || this.$name + 's');
     return this.saved ? base + '/' + this.id : base;
   };
 
