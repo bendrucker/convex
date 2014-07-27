@@ -5,18 +5,18 @@ var pluralize         = require('pluralize');
 var collectionFactory = require('./collection');
 
 module.exports = function ($injector) {
-  var Relation = function (type, target) {
+  var ConvexRelation = function (type, target) {
     this.type = type;
     this.target = $injector.get(target);
     this.targetName = this.target.prototype.objectName;
     this.key = this.isSingle() ? this.targetName : pluralize(this.targetName);
   };
 
-  Relation.prototype.isSingle = function () {
+  ConvexRelation.prototype.isSingle = function () {
     return this.type === 'belongsTo';
   };
 
-  Relation.prototype.initialize = function (parent) {
+  ConvexRelation.prototype.initialize = function (parent) {
     var data = parent[this.key], relation;
     if (this.isSingle()) {
       relation = new this.target({
@@ -30,5 +30,5 @@ module.exports = function ($injector) {
     return relation;
   };
 
-  return Relation;
+  return ConvexRelation;
 };
