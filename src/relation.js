@@ -1,15 +1,16 @@
 'use strict';
 
 var angular           = require('angular');
-var pluralize         = require('pluralize');
 var collectionFactory = require('./collection');
 
 module.exports = function ($injector) {
   var ConvexRelation = function (type, target) {
     this.type = type;
     this.target = $injector.get(target);
-    this.targetName = this.target.prototype.objectName;
-    this.key = this.isSingle() ? this.targetName : pluralize(this.targetName);
+    this.targetName = this.target.prototype.$name;
+    this.key = this.isSingle()
+      ? this.targetName
+      : this.target.prototype.plural || this.targetName + 's';
   };
 
   ConvexRelation.prototype.isSingle = function () {
@@ -25,7 +26,7 @@ module.exports = function ($injector) {
       angular.extend(relation, data);
     } else {
       relation = collectionFactory(this.target);
-      relation.add(data || []);
+      if (data) relation.add(data);
     }
     return relation;
   };

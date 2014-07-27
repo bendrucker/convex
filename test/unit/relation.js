@@ -8,7 +8,7 @@ describe('ConvexRelation', function () {
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(function () {
     MockModel = sinon.spy();
-    MockModel.prototype.objectName = 'mock';
+    MockModel.prototype.$name = 'mock';
   });
   beforeEach(angular.mock.module(function ($provide) {
     $provide.value('MockModel', MockModel);
@@ -41,9 +41,15 @@ describe('ConvexRelation', function () {
           .to.have.property('key', 'mock');
       });
 
-      it('is pluralized for 1-to-many relations', function () {
+      it('is pluralized automatically for 1-to-many relations', function () {
         expect(new Relation('hasMany', 'MockModel'))
           .to.have.property('key', 'mocks');
+      });
+
+      it('is can use a custom plural', function () {
+        MockModel.prototype.plural = 'mockies';
+        expect(new Relation('hasMany', 'MockModel'))
+          .to.have.property('key', 'mockies');
       });
 
     });
@@ -94,7 +100,7 @@ describe('ConvexRelation', function () {
 
       it('returns a collection', function () {
         expect(new Relation('hasMany', 'MockModel').initialize({}))
-          .to.have.property('add');
+          .to.have.property('isCollection', true);
       });
 
       it('casts an existing collection of data', function () {
