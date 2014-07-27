@@ -49,8 +49,6 @@
     "angular": "global:angular"
   },
   "dependencies": {
-    "lodash.difference": "~2.4.1",
-    "node-uuid": "~1.4.1",
-    "pluralize": "0.0.9"
+    "node-uuid": "~1.4.1"
   }
 }
