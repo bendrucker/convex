@@ -1,5 +1,5 @@
 {
-  "name": "ng-base-model",
+  "name": "convex",
   "version": "0.4.1",
   "description": "Our base model layer for building Angular applications",
   "main": "src/index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/valet-io/ng-base-model.git"
+    "url": "git://github.com/bendrucker/convex.git"
   },
   "keywords": [
     "angular",
@@ -18,9 +18,9 @@
   "author": "Ben Drucker <bvdrucker@gmail.com> (http://www.bendrucker.me/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/valet-io/ng-base-model/issues"
+    "url": "https://github.com/bendrucker/convex/issues"
   },
-  "homepage": "https://github.com/valet-io/ng-base-model",
+  "homepage": "https://github.com/bendrucker/convex",
   "devDependencies": {
     "karma": "~0.12.9",
     "karma-phantomjs-launcher": "~0.1.4",

@@ -1,7 +1,7 @@
 {
-  "name": "ng-base-model",
+  "name": "convex",
   "version": "0.4.1",
-  "homepage": "https://github.com/valet-io/ng-base-model",
+  "homepage": "https://github.com/bendrucker/convex",
   "authors": [
     "Ben Drucker <bvdrucker@gmail.com>"
   ],

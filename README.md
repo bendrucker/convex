@@ -1,4 +1,4 @@
-ng-base-model
-=============
+convex
+======
 
-Our base model layer for building Angular applications
+An ORM for Angular with support for caching and batch operations
