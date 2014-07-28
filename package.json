@@ -49,6 +49,7 @@
     "angular": "global:angular"
   },
   "dependencies": {
-    "node-uuid": "~1.4.1"
+    "node-uuid": "~1.4.1",
+    "url-join": "0.0.1"
   }
 }
