@@ -38,7 +38,7 @@ module.exports = function(config) {
 
     browserify: {
         debug: true,
-        transform: ['browserify-shim', 'browserify-istanbul']
+        transform: ['browserify-istanbul', 'browserify-shim']
     },
 
     coverageReporter: {
