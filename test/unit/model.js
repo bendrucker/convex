@@ -180,6 +180,11 @@ describe('ConvexModel', function () {
       Model.prototype.baseURL = 'https://api';
     });
 
+    afterEach(function () {
+      $httpBackend.verifyNoOutstandingExpectation();
+      $httpBackend.verifyNoOutstandingRequest();
+    });
+
     describe('Instance', function () {
 
       var id  = uuid.v4();
@@ -200,7 +205,7 @@ describe('ConvexModel', function () {
           model.saved = false;
           var promise = model.fetch();
           $timeout.flush();
-          expect(promise).to.eventually.equal(this);
+          expect(promise).to.eventually.equal(model);
         });
 
         it('sends a GET and populates with the response', function () {
