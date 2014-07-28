@@ -4,12 +4,14 @@ var angular = require('angular');
 
 describe('ConvexRequest', function () {
 
-  var ConvexRequest, convexConfig, $httpBackend;
+  var ConvexRequest, request, convexConfig, $httpBackend, $timeout;
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(angular.mock.inject(function ($injector) {
     ConvexRequest = $injector.get('ConvexRequest');
     convexConfig = $injector.get('convexConfig');
     $httpBackend = $injector.get('$httpBackend');
+    $timeout = $injector.get('$timeout');
+    request = new ConvexRequest();
   }));
 
   describe('Constructor', function () {
@@ -20,7 +22,7 @@ describe('ConvexRequest', function () {
     });
 
     it('creates a deferred', function () {
-      expect(new ConvexRequest())
+      expect(request)
         .to.have.deep.property('deferred.promise');
     });
 
@@ -29,7 +31,7 @@ describe('ConvexRequest', function () {
   describe('#url', function () {
 
     it('can use a specific url', function () {
-      expect(ConvexRequest.prototype.url.call({
+      expect(request.url.call({
         config: {
           url: 'url'
         }
@@ -38,7 +40,7 @@ describe('ConvexRequest', function () {
     });
 
     it('can use a specific base', function () {
-      expect(ConvexRequest.prototype.url.call({
+      expect(request.url.call({
         config: {
           base: 'base'
         }
@@ -48,20 +50,43 @@ describe('ConvexRequest', function () {
 
     it('falls back to the global base', function () {
       convexConfig.base = 'gbase'
-      expect(ConvexRequest.prototype.url.call({
+      expect(request.url.call({
         config: {}
       }))
       .to.equal('gbase/');
     });
 
     it('appends a path', function () {
-      expect(ConvexRequest.prototype.url.call({
+      expect(request.url.call({
         config: {
           base: 'base',
           path: '/path'
         }
       }))
       .to.equal('base/path');
+    });
+
+  });
+
+  describe('#then', function () {
+
+    it('handles success and failure', function () {
+      var then = sinon.spy(request.deferred.promise, 'then');
+      var success = sinon.spy();
+      var failure = sinon.spy();
+      expect(request.then(success, failure)).to.respondTo('then');
+      expect(then).to.have.been.calledWith(success, failure)
+    });
+
+  });
+
+  describe('#catch', function () {
+
+    it('handles failure', function () {
+      var pCatch = sinon.spy(request.deferred.promise, 'catch');
+      var failure = sinon.spy();
+      expect(request.catch(failure)).to.respondTo('then');
+      expect(pCatch).to.have.been.calledWith(failure)
     });
 
   });
