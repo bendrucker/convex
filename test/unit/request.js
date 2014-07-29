@@ -47,6 +47,20 @@ describe('ConvexRequest', function () {
       });
     });
 
+    it('can accept a query', function () {
+      expect(new ConvexRequest({
+        base: 'http://api',
+        path: '/foo',
+        query: {bar: 'baz'}
+      }))
+      .to.have.property('config')
+      .and.contain({
+        url: 'http://api/foo?bar=baz',
+        base: 'http://api',
+        path: '/foo'
+      });
+    });
+
     it('creates a deferred', function () {
       expect(request)
         .to.have.deep.property('deferred.promise');

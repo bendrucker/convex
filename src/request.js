@@ -1,8 +1,9 @@
 'use strict';
 
-var angular   = require('angular');
-var url       = require('url');
-var internals = {};
+var angular     = require('angular');
+var url         = require('url');
+var querystring = require('querystring');
+var internals   = {};
 
 module.exports = function ($http, $q, convexConfig) {
 
@@ -15,17 +16,27 @@ module.exports = function ($http, $q, convexConfig) {
     var output = angular.extend({}, input);
     output.method = (input.method || 'get').toUpperCase();
     if (output.url) {
-      var parsed = url.parse(output.url);
+      var parsed = url.parse(output.url, true);
       output.base = parsed.protocol + '//' + parsed.host;
       output.path = parsed.pathname;
+      output.query = parsed.query;
     }
     else {
       output.base = input.base || convexConfig.base || '';
       output.path = input.path || '';
-      output.url =  output.base + output.path;
+      output.url = output.base + output.path; 
+      if (output.query) {
+        output.url += '?' + querystring.stringify(output.query);
+      }
     }
     return output;
   };
+
+  // ConvexRequest.prototype.toJSON = function () {
+  //   return {
+
+  //   };
+  // };
 
   ConvexRequest.prototype.send = function () {
     return $http({
@@ -38,7 +49,7 @@ module.exports = function ($http, $q, convexConfig) {
     })
     .catch(function (err) {
       var e = new Error();
-      var invalid = 'Invalid Response'
+      var invalid = 'Invalid Response';
       e.statusCode = err.status;
       e.data = err.data || {};
       e.name = e.data.error || invalid;
