@@ -13,7 +13,7 @@ describe('ConvexRequest', function () {
     request = new ConvexRequest({});
   }));
 
-  describe('Constructor', function () {
+  describe('Constructor/Config', function () {
 
     it('stores the configuration with defaults', function () {
       expect(new ConvexRequest({foo: 'bar'}))
@@ -24,6 +24,29 @@ describe('ConvexRequest', function () {
         });
     });
 
+    it('can accept a full url', function () {
+      expect(new ConvexRequest({url: 'http://api/foo'}))
+        .to.have.property('config')
+        .and.contain({
+          url: 'http://api/foo',
+          base: 'http://api',
+          path: '/foo'
+        });
+    });
+
+    it('can accept a base and path', function () {
+      expect(new ConvexRequest({
+        base: 'http://api',
+        path: '/foo'
+      }))
+      .to.have.property('config')
+      .and.contain({
+        url: 'http://api/foo',
+        base: 'http://api',
+        path: '/foo'
+      });
+    });
+
     it('creates a deferred', function () {
       expect(request)
         .to.have.deep.property('deferred.promise');
@@ -31,56 +54,16 @@ describe('ConvexRequest', function () {
 
   });
 
-  describe('#url', function () {
-
-    it('can use a specific url', function () {
-      expect(request.url.call({
-        config: {
-          url: 'url'
-        }
-      }))
-      .to.equal('url');
-    });
-
-    it('can use a specific base', function () {
-      expect(request.url.call({
-        config: {
-          base: 'base'
-        }
-      }))
-      .to.equal('base/');
-    });
-
-    it('falls back to the global base', function () {
-      convexConfig.base = 'gbase'
-      expect(request.url.call({
-        config: {}
-      }))
-      .to.equal('gbase/');
-    });
-
-    it('appends a path', function () {
-      expect(request.url.call({
-        config: {
-          base: 'base',
-          path: '/path'
-        }
-      }))
-      .to.equal('base/path');
-    });
-
-  });
-
   describe('#send', function () {
 
     it('defaults to a get request', function () {
-      $httpBackend.expectGET(request.url()).respond(200);
+      $httpBackend.expectGET(request.config.url).respond(200);
       request.send();
       $httpBackend.flush();
     });
 
     it('can send a post', function () {
-      $httpBackend.expectPOST(request.url(), {}).respond(200);
+      $httpBackend.expectPOST(request.config.url, {}).respond(200);
       request.config.data = {};
       request.config.method = 'post';
       request.send();
@@ -88,7 +71,7 @@ describe('ConvexRequest', function () {
     });
 
     it('resolves the data', function () {
-      $httpBackend.expectGET(request.url()).respond(200, {
+      $httpBackend.expectGET(request.config.url).respond(200, {
         foo: 'bar'
       });
       request.send().then(function (data) {
@@ -98,7 +81,7 @@ describe('ConvexRequest', function () {
     });
 
     it('handles generic errors', function () {
-      $httpBackend.expectGET(request.url()).respond(404, {
+      $httpBackend.expectGET(request.config.url).respond(404, {
         statusCode: 404,
         error: 'Not Found'
       });
@@ -116,7 +99,7 @@ describe('ConvexRequest', function () {
     });
 
     it('handles custom error messages', function () {
-      $httpBackend.expectGET(request.url()).respond(404, {
+      $httpBackend.expectGET(request.config.url).respond(404, {
         statusCode: 404,
         error: 'Not Found',
         message: 'Oh dear...'
@@ -130,7 +113,7 @@ describe('ConvexRequest', function () {
     });
 
     it('handles bad responses', function () {
-      $httpBackend.expectGET(request.url()).respond(0);
+      $httpBackend.expectGET(request.config.url).respond(0);
       expect(request.send()).to.be.rejected
         .then(function (err) {
           expect(err.statusCode).to.equal(0);

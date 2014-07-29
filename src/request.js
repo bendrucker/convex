@@ -1,14 +1,8 @@
 'use strict';
 
 var angular   = require('angular');
-var join      = require('url-join');
+var url       = require('url');
 var internals = {};
-
-internals.config = function (input) {
-  var output = angular.extend({}, input);
-  output.method = (input.method || 'get').toUpperCase();
-  return output;
-};
 
 module.exports = function ($http, $q, convexConfig) {
 
@@ -17,15 +11,26 @@ module.exports = function ($http, $q, convexConfig) {
     this.deferred = $q.defer();
   };
 
-  ConvexRequest.prototype.url = function () {
-    var c = this.config;
-    return c.url || join(c.base || convexConfig.base, c.path);
+  internals.config = function (input) {
+    var output = angular.extend({}, input);
+    output.method = (input.method || 'get').toUpperCase();
+    if (output.url) {
+      var parsed = url.parse(output.url);
+      output.base = parsed.protocol + '//' + parsed.host;
+      output.path = parsed.pathname;
+    }
+    else {
+      output.base = input.base || convexConfig.base || '';
+      output.path = input.path || '';
+      output.url =  output.base + output.path;
+    }
+    return output;
   };
 
   ConvexRequest.prototype.send = function () {
     return $http({
       method: this.config.method,
-      url: this.url(),
+      url: this.config.url,
       data: this.config.data
     })
     .then(function (response) {
