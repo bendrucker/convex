@@ -1,11 +1,19 @@
 'use strict';
 
-var join = require('url-join');
+var angular   = require('angular');
+var join      = require('url-join');
+var internals = {};
+
+internals.config = function (input) {
+  var output = angular.extend({}, input);
+  output.method = (input.method || 'get').toUpperCase();
+  return output;
+};
 
 module.exports = function ($http, $q, convexConfig) {
 
   var ConvexRequest = function (config) {
-    this.config = config;
+    this.config = internals.config(config);
     this.deferred = $q.defer();
   };
 
@@ -19,6 +27,17 @@ module.exports = function ($http, $q, convexConfig) {
       method: this.config.method,
       url: this.url(),
       data: this.config.data
+    })
+    .then(function (response) {
+      return response.data;
+    })
+    .catch(function (err) {
+      var e = new Error();
+      e.statusCode = err.status;
+      e.data = err.data;
+      e.name = e.data.error;
+      e.message = e.data.message || e.data.error;
+      return $q.reject(e);
     });
   };
 
