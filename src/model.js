@@ -2,7 +2,6 @@
 
 var angular           = require('angular');
 var uuid              = require('node-uuid');
-var pluralize         = require('pluralize');
 var collectionFactory = require('./collection');
 
 module.exports = function ($q, $http, ConvexCache, ConvexRelation, config) {
@@ -175,6 +174,12 @@ module.exports = function ($q, $http, ConvexCache, ConvexRelation, config) {
   ConvexModel.all = function (options) {
     return this.where(null, options);
   };
+
+  // // Callback is called synchronously, outer fn returns a promise
+  // BaseModel.prototype.batch = function (callback) {
+  //   callback.call(this, batch);
+  //   return batch.request().then(angular.bind(batch, batch.process));
+  // };
 
   internals.relationStore = function (Model) {
     return Model.prototype.relations || (Model.prototype.relations = {});
