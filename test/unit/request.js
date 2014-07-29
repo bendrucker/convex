@@ -68,6 +68,21 @@ describe('ConvexRequest', function () {
 
   });
 
+  describe('#toJSON', function () {
+
+    it('outputs parameters needed for batching', function () {
+      expect(request.toJSON()).to.have.keys([
+        'method',
+        'url',
+        'base',
+        'path',
+        'query',
+        'payload'
+      ]);
+    });
+
+  });
+
   describe('#send', function () {
 
     it('defaults to a get request', function () {

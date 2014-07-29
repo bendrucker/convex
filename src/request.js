@@ -32,11 +32,16 @@ module.exports = function ($http, $q, convexConfig) {
     return output;
   };
 
-  // ConvexRequest.prototype.toJSON = function () {
-  //   return {
-
-  //   };
-  // };
+  ConvexRequest.prototype.toJSON = function () {
+    return {
+      method: this.config.method,
+      url: this.config.url,
+      base: this.config.base,
+      path: this.config.path,
+      query: this.config.query,
+      payload: this.config.data
+    };
+  };
 
   ConvexRequest.prototype.send = function () {
     return $http({
