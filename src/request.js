@@ -33,10 +33,11 @@ module.exports = function ($http, $q, convexConfig) {
     })
     .catch(function (err) {
       var e = new Error();
+      var invalid = 'Invalid Response'
       e.statusCode = err.status;
-      e.data = err.data;
-      e.name = e.data.error;
-      e.message = e.data.message || e.data.error;
+      e.data = err.data || {};
+      e.name = e.data.error || invalid;
+      e.message = e.data.message || e.name;
       return $q.reject(e);
     });
   };

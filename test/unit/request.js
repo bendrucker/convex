@@ -129,6 +129,18 @@ describe('ConvexRequest', function () {
       $httpBackend.flush();
     });
 
+    it('handles bad responses', function () {
+      $httpBackend.expectGET(request.url()).respond(0);
+      expect(request.send()).to.be.rejected
+        .then(function (err) {
+          expect(err.statusCode).to.equal(0);
+          expect(err.data).to.be.empty;
+          expect(err.name).to.equal('Invalid Response');
+          expect(err.message).to.equal(err.name);
+        });
+      $httpBackend.flush();
+    });
+
   });
 
   describe('#then', function () {
