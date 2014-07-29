@@ -49,18 +49,42 @@ module.exports = function ($http, $q, convexConfig) {
       url: this.config.url,
       data: this.config.data
     })
-    .then(function (response) {
-      return response.data;
-    })
-    .catch(function (err) {
-      var e = new Error();
-      var invalid = 'Invalid Response';
-      e.statusCode = err.status;
-      e.data = err.data || {};
-      e.name = e.data.error || invalid;
-      e.message = e.data.message || e.name;
-      return $q.reject(e);
-    });
+    .then(angular.bind(this, this.fulfill))
+    .catch(angular.bind(this, this.reject));
+  };
+
+  ConvexRequest.prototype.fulfill = function (response) {
+    $q.when(response)
+      .then(function (response) {
+        if (typeof response.headers !== 'function') {
+          if (response.error) {
+            return $q.reject({
+              status: response.statusCode,
+              data: response,
+            });
+          }
+          else {
+            return response;
+          }
+        }
+        else {
+          return response.data;
+        }
+      })
+      .then(this.deferred.resolve)
+      .catch(angular.bind(this, this.reject));
+    return this;
+  };
+
+  ConvexRequest.prototype.reject = function (err) {
+    var e = new Error();
+    var invalid = 'Invalid Response';
+    e.statusCode = err.status;
+    e.data = err.data || {};
+    e.name = e.data.error || invalid;
+    e.message = e.data.message || e.name;
+    this.deferred.reject(e);
+    return this;
   };
 
   ConvexRequest.prototype.then = function (success, failure) {

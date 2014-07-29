@@ -4,12 +4,13 @@ var angular = require('angular');
 
 describe('ConvexRequest', function () {
 
-  var ConvexRequest, request, convexConfig, $httpBackend;
+  var ConvexRequest, request, convexConfig, $httpBackend, $timeout;
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(angular.mock.inject(function ($injector) {
     ConvexRequest = $injector.get('ConvexRequest');
     convexConfig = $injector.get('convexConfig');
     $httpBackend = $injector.get('$httpBackend');
+    $timeout = $injector.get('$timeout');
     request = new ConvexRequest({});
   }));
 
@@ -85,72 +86,153 @@ describe('ConvexRequest', function () {
 
   describe('#send', function () {
 
-    it('defaults to a get request', function () {
-      $httpBackend.expectGET(request.config.url).respond(200);
-      request.send();
+    it('can send a get', function () {
+      $httpBackend.expectGET(request.config.url)
+        .respond(200, {foo: 'bar'});
+      request.send().then(function (response) {
+        expect(response).to.deep.equal({foo: 'bar'});
+      });
       $httpBackend.flush();
     });
 
     it('can send a post', function () {
-      $httpBackend.expectPOST(request.config.url, {}).respond(200);
+      $httpBackend.expectPOST(request.config.url, {})
+        .respond(200, {bar: 'baz'});
       request.config.data = {};
       request.config.method = 'post';
-      request.send();
+      request.send().then(function (response) {
+        expect(response).to.deep.equal({bar: 'baz'});
+      });
       $httpBackend.flush();
     });
 
-    it('resolves the data', function () {
-      $httpBackend.expectGET(request.config.url).respond(200, {
+    it('uses #fulfill to handle a success', function () {
+      $httpBackend.expectGET(request.config.url)
+        .respond(200);
+      sinon.spy(request, 'fulfill');
+      request.send().then(function () {
+        expect(request.fulfill)
+          .to.have.been.calledWith(sinon.match({
+            status: 200,
+          }));
+      });
+      $httpBackend.flush();
+    });
+
+    it('uses #reject to handle an error', function () {
+      $httpBackend.expectGET(request.config.url)
+        .respond(404);
+      sinon.spy(request, 'reject');
+      request.send().then(function () {
+        expect(request.reject)
+          .to.have.been.calledWith(sinon.match({
+            status: 404
+          }));
+      });
+      $httpBackend.flush();
+    });
+    
+  });
+
+  describe('#fulfill', function () {
+
+    it('handles an angular response object', function () {
+      expect(request.fulfill({
+        status: 200,
+        data: {foo: 'bar'},
+        headers: function () {}
+      }))
+      .to.eventually.deep.equal({
         foo: 'bar'
       });
-      request.send().then(function (data) {
-        expect(data).to.deep.equal({foo: 'bar'});
-      });
-      $httpBackend.flush();
+      $timeout.flush();
     });
 
-    it('handles generic errors', function () {
-      $httpBackend.expectGET(request.config.url).respond(404, {
-        statusCode: 404,
-        error: 'Not Found'
+    it('handles a generic response object', function () {
+      expect(request.fulfill({
+        foo: 'bar'
+      }))
+      .to.eventually.deep.equal({
+        foo: 'bar'
       });
-      expect(request.send())
-        .to.be.rejected
-        .then(function (err) {
-          expect(err.message).to.equal('Not Found');
-          expect(err.statusCode).to.equal(404);
-          expect(err.data).to.deep.equal({
-            statusCode: 404,
-            error: 'Not Found'
-          });
+      $timeout.flush();
+    });
+
+    it('handles a boom error object', function () {
+      sinon.spy(request, 'reject');
+      expect(request.fulfill({
+        error: 'Error!',
+        statusCode: 404
+      }))
+      .to.be.rejected
+      .then(function (err) {
+        expect(request.reject)
+          .to.have.been.calledWith(sinon.match({
+            status: 404,
+            data: {
+              statusCode: 404,
+              error: 'Error!'
+            }
+          }));
+        expect(err.statusCode).to.equal(404);
+        expect(err.message).to.equal('Error!');
+      });
+      $timeout.flush();
+    });
+
+  });
+
+  describe('#reject', function () {
+
+    it('handles generic errors', function () {
+      expect(request.reject({
+        status: 404,
+        data: {
+          statusCode: 404,
+          error: 'Not Found'
+        }
+      }))
+      .to.be.rejected
+      .then(function (err) {
+        expect(err.message).to.equal('Not Found');
+        expect(err.statusCode).to.equal(404);
+        expect(err.data).to.deep.equal({
+          statusCode: 404,
+          error: 'Not Found'
         });
-      $httpBackend.flush();
+      });
+      $timeout.flush();
     });
 
     it('handles custom error messages', function () {
-      $httpBackend.expectGET(request.config.url).respond(404, {
-        statusCode: 404,
-        error: 'Not Found',
-        message: 'Oh dear...'
+      expect(request.reject({
+        status: 404,
+        data: {
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Oh dear...'
+        }
+      }))
+      .to.be.rejected
+      .then(function (err) {
+        expect(err.message).to.equal('Oh dear...');
       });
-      expect(request.send())
-        .to.be.rejected
-        .then(function (err) {
-          expect(err.message).to.equal('Oh dear...');
-        });
-      $httpBackend.flush();
+      $timeout.flush();
     });
 
     it('handles bad responses', function () {
-      $httpBackend.expectGET(request.config.url).respond(0);
-      expect(request.send()).to.be.rejected
-        .then(function (err) {
-          expect(err.statusCode).to.equal(0);
-          expect(err.data).to.be.empty;
-          expect(err.name).to.equal('Invalid Response');
-          expect(err.message).to.equal(err.name);
-        });
-      $httpBackend.flush();
+      expect(request.reject({
+        status: 0,
+        data: void 0
+      }))
+      .to.be.rejected
+      .then(function (err) {
+        expect(err.statusCode).to.equal(0);
+        expect(err.data).to.be.empty;
+        expect(err.name).to.equal('Invalid Response');
+        expect(err.message).to.equal(err.name);
+      });
+      $timeout.flush();
     });
 
   });
