@@ -287,6 +287,7 @@ describe('ConvexModel', function () {
         it('deletes saved models from the server', function () {
           model.delete();
           $httpBackend.flush();
+          expect(model.$saved).to.be.false;
         });
 
         it('deletes saved models from the cache', function () {

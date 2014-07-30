@@ -155,8 +155,8 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
       })
       .then(function () {
         model.cache.remove(model.id);
-        model.$saved = false;
         model.reset();
+        model.$saved = false;
         model.deleted = true;
       });
   };
