@@ -11,6 +11,12 @@ module.exports = require('angular')
     'convexConfig',
     require('./model')
   ])
+  .factory('ConvexRequest', [
+    '$http',
+    '$q',
+    'convexConfig',
+    require('./request')
+  ])
   .factory('ConvexCache', [
     '$cacheFactory',
     require('./cache')
