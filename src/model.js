@@ -28,11 +28,11 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
       }
     });
     if (!this.id) {
-      this.saved = false;
+      this.$saved = false;
       this.id = uuid.v4();
     }
     else {
-      this.saved = true;
+      this.$saved = true;
     }
     var cached = this.cache.get(this.id);
     if (cached) {
@@ -107,19 +107,13 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     }
     var config = angular.extend(defaults, overrides);
     var request = new ConvexRequest(config);
-    if (this.__batch) {
-      this.__batch.add(request);
-      this.__batch = void 0;
-    }
-    else {
-      request.send();
-    }
+    request.send();
     return request;
   };
 
   ConvexModel.prototype.fetch = function (options) {
     var model = this;
-    if (!this.saved) return $q.when(this);
+    if (!this.$saved) return $q.when(this);
     return this.request({
       method: 'get',
       path: this.path(this.id)
@@ -135,11 +129,12 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
   ConvexModel.prototype.save = function (options) {
     var model = this;
     return this.request({
-      method: this.saved ? 'put' : 'post',
-      path: this.saved ? this.path(this.id) : this.path(),
+      method: this.$saved ? 'put' : 'post',
+      path: this.$saved ? this.path(this.id) : this.path(),
       data: this
     }, options)
     .then(function (response) {
+      model.$saved = true;
       return angular.extend(model, response);
     })
     .then(function (model) {
@@ -151,7 +146,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     var model = this;
     return $q.when()
       .then(function () {
-        if (model.saved) {
+        if (model.$saved) {
           return model.request({
             method: 'delete',
             path: model.path(model.id)
@@ -160,7 +155,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
       })
       .then(function () {
         model.cache.remove(model.id);
-        model.saved = false;
+        model.$saved = false;
         model.reset();
         model.deleted = true;
       });
