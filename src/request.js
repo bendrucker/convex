@@ -20,14 +20,15 @@ module.exports = function ($http, $q, convexConfig) {
       var parsed = url.parse(output.url, true);
       output.base = parsed.protocol + '//' + parsed.host;
       output.path = parsed.pathname;
-      output.query = parsed.query;
+      output.params = parsed.query;
     }
     else {
       output.base = input.base || convexConfig.base || '';
       output.path = input.path || '';
+      output.params = input.params || {};
       output.url = output.base + output.path; 
-      if (output.query) {
-        output.url += '?' + querystring.stringify(output.query);
+      if (Object.keys(output.params).length) {
+        output.url += '?' + querystring.stringify(output.params);
       }
     }
     return output;
@@ -39,7 +40,7 @@ module.exports = function ($http, $q, convexConfig) {
       url: this.config.url,
       base: this.config.base,
       path: this.config.path,
-      query: this.config.query,
+      query: this.config.params,
       payload: this.config.data
     };
   };

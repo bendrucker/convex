@@ -7,7 +7,7 @@ module.exports = require('angular')
   })
   .factory('ConvexModel', [
     '$q',
-    '$http',
+    'ConvexRequest',
     'ConvexCache',
     'ConvexRelation',
     'convexConfig',

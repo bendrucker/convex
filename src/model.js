@@ -3,13 +3,13 @@
 var angular           = require('angular');
 var uuid              = require('node-uuid');
 var collectionFactory = require('./collection');
+var internals         = {};
 
-module.exports = function ($q, $http, ConvexCache, ConvexRelation, config) {
-  var internals = {};
+module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
 
   internals.relations = function (model, options) {
-    if (options && options.withRelated) {
-      options.withRelated.forEach(model.related, model);
+    if (options && options.expand) {
+      options.expand.forEach(model.related, model);
     }
     return model;
   };
@@ -17,9 +17,15 @@ module.exports = function ($q, $http, ConvexCache, ConvexRelation, config) {
   var ConvexModel = function (attributes, options) {
     angular.extend(this, attributes);
     internals.relations(this, options);
-    Object.defineProperty(this, 'saved', {
-      enumerable: false,
-      writable: true
+    Object.defineProperties(this, {
+      saved: {
+        enumerable: false,
+        writable: true
+      },
+      __batch: {
+        enumerable: false,
+        writable: true
+      }
     });
     if (!this.id) {
       this.saved = false;
@@ -61,9 +67,14 @@ module.exports = function ($q, $http, ConvexCache, ConvexRelation, config) {
 
   ConvexModel.prototype.baseURL = this.baseURL;
 
-  ConvexModel.prototype.url = function () {
-    var base = this.baseURL + '/' + (this.plural || this.$name + 's');
-    return this.saved ? base + '/' + this.id : base;
+  internals.plural = function (model) {
+    return model.$plural || model.$name + 's';
+  };
+
+  ConvexModel.prototype.path = function (id) {
+    var path = '/' + internals.plural(this);
+    if (id) path += ('/' + id);
+    return path;
   };
 
   ConvexModel.prototype.reset = function () {
@@ -73,19 +84,11 @@ module.exports = function ($q, $http, ConvexCache, ConvexRelation, config) {
     return this;
   };
 
-  internals.options = function (options) {
-    options = options || {};
-    options.params = options.params || {};
-    options.params.expand = options.withRelated;
-    return options;
-  };
-
   internals.data = function (model) {
     var data = angular.copy(model);
-    var relations = Object.keys(model.relations || {});
-    relations.forEach(function (relation) {
+    for (var relation in model.relations) {
       delete data[relation];
-    });
+    }
     for (var key in data) {
       if (!model.hasOwnProperty(key)) delete data[key];
     }
@@ -96,38 +99,64 @@ module.exports = function ($q, $http, ConvexCache, ConvexRelation, config) {
     return internals.data(this);
   };
 
+  ConvexModel.prototype.request = function (defaults, overrides) {
+    overrides = overrides || {};
+    defaults.params = defaults.params || {};
+    if (overrides.expand) {
+      defaults.params.expand = overrides.expand;
+    }
+    var config = angular.extend(defaults, overrides);
+    var request = new ConvexRequest(config);
+    if (this.__batch) {
+      this.__batch.add(request);
+      this.__batch = void 0;
+    }
+    else {
+      request.send();
+    }
+    return request;
+  };
+
   ConvexModel.prototype.fetch = function (options) {
     var model = this;
-    options = internals.options(options);
     if (!this.saved) return $q.when(this);
-    return $http.get(model.url(), options)
-      .then(function (response) {
-        return angular.extend(model, response.data);
-      })
-      .then(function (model) {
-        return internals.relations(model, options);
-      });
+    return this.request({
+      method: 'get',
+      path: this.path(this.id)
+    }, options)
+    .then(function (response) {
+      return angular.extend(model, response);
+    })
+    .then(function (model) {
+      return internals.relations(model, options);
+    });
   };
 
   ConvexModel.prototype.save = function (options) {
     var model = this;
-    options = internals.options(options);
-    var method = this.saved ? 'put' : 'post';
-    options = internals.options(options);
-    return $http[method](this.url(), this, options)
-      .then(function (response) {
-        return angular.extend(model, response.data);
-      })
-      .then(function (model) {
-        return internals.relations(model, options);
-      });
+    return this.request({
+      method: this.saved ? 'put' : 'post',
+      path: this.saved ? this.path(this.id) : this.path(),
+      data: this
+    }, options)
+    .then(function (response) {
+      return angular.extend(model, response);
+    })
+    .then(function (model) {
+      return internals.relations(model, options);
+    });
   };
 
   ConvexModel.prototype.delete = function (options) {
     var model = this;
     return $q.when()
       .then(function () {
-        if (model.saved) return $http.delete(model.url(), options);
+        if (model.saved) {
+          return model.request({
+            method: 'delete',
+            path: model.path(model.id)
+          }, options);
+        }
       })
       .then(function () {
         model.cache.remove(model.id);
@@ -138,12 +167,11 @@ module.exports = function ($q, $http, ConvexCache, ConvexRelation, config) {
   };
 
   internals.query = function (Model, attributes, options) {
-    angular.extend(options.params, attributes);
-    return $http
-      .get(Model.prototype.url(), options)
-      .then(function (response) {
-        return response.data;
-      });
+    return Model.prototype.request({
+      method: 'get',
+      path: Model.prototype.path(),
+      params: attributes
+    }, options);
   };
 
   internals.cast = function (Model, data, options) {
@@ -152,7 +180,6 @@ module.exports = function ($q, $http, ConvexCache, ConvexRelation, config) {
 
   ConvexModel.where = function (attributes, options) {
     var Model = this;
-    options = internals.options(options);
     return internals.query(this, attributes, options)
       .then(function (data) {
         return internals.cast(Model, data, options);
@@ -161,7 +188,6 @@ module.exports = function ($q, $http, ConvexCache, ConvexRelation, config) {
 
   ConvexModel.find = function (attributes, options) {
     var Model = this;
-    options = internals.options(options);
     return internals.query(this, attributes, options)
       .then(function (data) {
         return data.length ? data[0] : $q.reject('Not found');

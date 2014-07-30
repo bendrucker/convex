@@ -137,7 +137,7 @@ describe('ConvexModel', function () {
     it('instantiates specified relations', function () {
       sinon.stub(Model.prototype, 'related');
       model = new Model({}, {
-        withRelated: ['relation']
+        expand: ['relation']
       });
       expect(model.related).to.have.been.calledWith('relation');
       expect(model.related).to.have.been.calledOn(model);
@@ -145,20 +145,14 @@ describe('ConvexModel', function () {
 
   });
 
-  describe('#url', function () {
+  describe('#path', function () {
 
-    beforeEach(function () {
-      model.baseURL ='api';
+    it('generates the collection endpoint', function () {
+      expect(model.path()).to.equal('/items');
     });
 
-    it('generates the collection endpoint for unsaved models', function () {
-      expect(model.url()).to.equal('api/items');
-    });
-
-    it('generates a model endpoint for saved models', function () {
-      model.id = uuid.v4();
-      model.saved = true;
-      expect(model.url()).to.equal('api/items/' + model.id);
+    it('generates a an instance endpoint with an id', function () {
+      expect(model.path('id')).to.equal('/items/id');
     });
 
   });
@@ -188,7 +182,7 @@ describe('ConvexModel', function () {
     describe('Instance', function () {
 
       var id  = uuid.v4();
-      var url = 'https://api/items/' + id;
+      var url = '/items/' + id;
       var res = {
         id: id,
         name: 'Ben'
@@ -223,7 +217,7 @@ describe('ConvexModel', function () {
             .expectGET(url + '?expand=rel1&expand=rel2')
             .respond(200, res);
           model.fetch({
-            withRelated: ['rel1', 'rel2']
+            expand: ['rel1', 'rel2']
           });
           $httpBackend.flush();
           expect(model.related)
@@ -249,7 +243,7 @@ describe('ConvexModel', function () {
         it('sends a POST when the model is unsaved', function () {
           model.saved = false;
           $httpBackend
-            .expectPOST('https://api/items', {
+            .expectPOST('/items', {
               id: id
             })
             .respond(201, res);
@@ -267,7 +261,7 @@ describe('ConvexModel', function () {
           };
           sinon.stub(model, 'related');
           $httpBackend
-            .expectPUT('https://api/items/' + model.id, {
+            .expectPUT(url, {
               id: model.id
             })
             .respond(200, res);
@@ -320,7 +314,7 @@ describe('ConvexModel', function () {
 
     describe('Collection', function () {
 
-      var url = 'https://api/items?condition=true';
+      var url = '/items?condition=true';
       var res = [{id: uuid.v4()}, {id: uuid.v4()}];
 
       beforeEach(function () {
@@ -353,7 +347,7 @@ describe('ConvexModel', function () {
           $httpBackend
             .expectGET(url + '&expand=related')
             .respond(200, res);
-          Model.where({condition: true}, {withRelated: ['related']})
+          Model.where({condition: true}, {expand: ['related']})
             .then(function (models) {
               expect(models[0].related).to.have.been.calledWith('related');
             });
@@ -390,7 +384,7 @@ describe('ConvexModel', function () {
           $httpBackend
             .expectGET(url + '&expand=related')
             .respond(200, res);
-          Model.find({condition: true}, {withRelated: ['related']})
+          Model.find({condition: true}, {expand: ['related']})
             .then(function (model) {
               expect(model.related).to.have.been.calledWith('related');
             });
@@ -403,7 +397,7 @@ describe('ConvexModel', function () {
 
         it('sends a GET request to the collection url', function () {
           $httpBackend
-            .expectGET('https://api/items')
+            .expectGET('/items')
             .respond(200, res);
           sinon.spy(Model, 'where');
           var options = {};

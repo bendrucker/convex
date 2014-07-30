@@ -52,7 +52,7 @@ describe('ConvexRequest', function () {
       expect(new ConvexRequest({
         base: 'http://api',
         path: '/foo',
-        query: {bar: 'baz'}
+        params: {bar: 'baz'}
       }))
       .to.have.property('config')
       .and.contain({
