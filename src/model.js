@@ -9,7 +9,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
 
   internals.relations = function (model, options) {
     if (options && options.expand) {
-      options.expand.forEach(model.related, model);
+      options.expand.forEach(model.$related, model);
     }
     return model;
   };
@@ -34,13 +34,13 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     else {
       this.$saved = true;
     }
-    var cached = this.cache.get(this.id);
+    var cached = this.$cache.get(this.id);
     if (cached) {
       return angular.extend(cached, this);
     }
     else {
-      if (this.initialize) this.initialize();
-      this.cache.put(this.id, this);
+      if (this.$initialize) this.$initialize();
+      this.$cache.put(this.id, this);
     }
   };
 
@@ -59,25 +59,22 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     if (!proto.name) throw new Error('All models must have a name');
     Child.prototype.$name = proto.name;
     delete Child.prototype.name;
-    Child.prototype.cache = new ConvexCache(proto.name);
+    Child.prototype.$cache = new ConvexCache(proto.name);
 
     return Child;
   };
-
-
-  ConvexModel.prototype.baseURL = this.baseURL;
 
   internals.plural = function (model) {
     return model.$plural || model.$name + 's';
   };
 
-  ConvexModel.prototype.path = function (id) {
+  ConvexModel.prototype.$path = function (id) {
     var path = '/' + internals.plural(this);
     if (id) path += ('/' + id);
     return path;
   };
 
-  ConvexModel.prototype.reset = function () {
+  ConvexModel.prototype.$reset = function () {
     for (var property in this) {
       if (this.hasOwnProperty(property)) delete this[property];
     }
@@ -86,7 +83,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
 
   internals.data = function (model) {
     var data = angular.copy(model);
-    for (var relation in model.relations) {
+    for (var relation in model.$$relations) {
       delete data[relation];
     }
     for (var key in data) {
@@ -99,7 +96,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     return internals.data(this);
   };
 
-  ConvexModel.prototype.request = function (defaults, overrides) {
+  ConvexModel.prototype.$request = function (defaults, overrides) {
     overrides = overrides || {};
     defaults.params = defaults.params || {};
     if (overrides.expand) {
@@ -111,12 +108,12 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     return request;
   };
 
-  ConvexModel.prototype.fetch = function (options) {
+  ConvexModel.prototype.$fetch = function (options) {
     var model = this;
     if (!this.$saved) return $q.when(this);
-    return this.request({
+    return this.$request({
       method: 'get',
-      path: this.path(this.id)
+      path: this.$path(this.id)
     }, options)
     .then(function (response) {
       return angular.extend(model, response);
@@ -126,11 +123,11 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     });
   };
 
-  ConvexModel.prototype.save = function (options) {
+  ConvexModel.prototype.$save = function (options) {
     var model = this;
-    return this.request({
+    return this.$request({
       method: this.$saved ? 'put' : 'post',
-      path: this.$saved ? this.path(this.id) : this.path(),
+      path: this.$saved ? this.$path(this.id) : this.$path(),
       data: this
     }, options)
     .then(function (response) {
@@ -142,29 +139,29 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     });
   };
 
-  ConvexModel.prototype.delete = function (options) {
+  ConvexModel.prototype.$delete = function (options) {
     var model = this;
     return $q.when()
       .then(function () {
         if (model.$saved) {
-          return model.request({
+          return model.$request({
             method: 'delete',
-            path: model.path(model.id)
+            path: model.$path(model.id)
           }, options);
         }
       })
       .then(function () {
-        model.cache.remove(model.id);
-        model.reset();
+        model.$cache.remove(model.id);
+        model.$reset();
         model.$saved = false;
-        model.deleted = true;
+        model.$deleted = true;
       });
   };
 
   internals.query = function (Model, attributes, options) {
-    return Model.prototype.request({
+    return Model.prototype.$request({
       method: 'get',
-      path: Model.prototype.path(),
+      path: Model.prototype.$path(),
       params: attributes
     }, options);
   };
@@ -173,7 +170,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     return collectionFactory(Model).add(data, options);
   };
 
-  ConvexModel.where = function (attributes, options) {
+  ConvexModel.$where = function (attributes, options) {
     var Model = this;
     return internals.query(this, attributes, options)
       .then(function (data) {
@@ -181,7 +178,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
       });
   };
 
-  ConvexModel.find = function (attributes, options) {
+  ConvexModel.$find = function (attributes, options) {
     var Model = this;
     return internals.query(this, attributes, options)
       .then(function (data) {
@@ -192,37 +189,37 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
       });
   };
 
-  ConvexModel.all = function (options) {
-    return this.where(null, options);
+  ConvexModel.$all = function (options) {
+    return this.$where(null, options);
   };
 
   // // Callback is called synchronously, outer fn returns a promise
-  // BaseModel.prototype.batch = function (callback) {
+  // BaseModel.prototype.$batch = function (callback) {
   //   callback.call(this, batch);
   //   return batch.request().then(angular.bind(batch, batch.process));
   // };
 
   internals.relationStore = function (Model) {
-    return Model.prototype.relations || (Model.prototype.relations = {});
+    return Model.prototype.$$relations || (Model.prototype.$$relations = {});
   };
 
-  ConvexModel.belongsTo = function (Target) {
+  ConvexModel.$belongsTo = function (Target) {
     var relation = new ConvexRelation('belongsTo', Target);
     internals.relationStore(this)[relation.key] = relation;
     return this;
   };
 
-  ConvexModel.hasMany = function (Target) {
+  ConvexModel.$hasMany = function (Target) {
     var relation = new ConvexRelation('hasMany', Target);
     internals.relationStore(this)[relation.key] = relation;
     return this;
   };
 
-  ConvexModel.prototype.related = function (name) {
+  ConvexModel.prototype.$related = function (name) {
     if (this[name] && (this[name] instanceof ConvexModel || this[name].isCollection)) {
       return this[name];
     } else {
-      return (this[name] = this.relations[name].initialize(this));
+      return (this[name] = this.$$relations[name].initialize(this));
     }
   };
 
