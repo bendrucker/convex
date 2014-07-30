@@ -5,16 +5,21 @@ var uuid    = require('node-uuid');
 
 describe('ConvexModel', function () {
 
-  var ConvexModel, Model, model, ConvexRelation, ConvexCache, $httpBackend, $timeout;
+  var ConvexModel, Model, model, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(angular.mock.module(function ($provide) {
     $provide.factory('ConvexRelation', function () {
       return sinon.stub();
     });
+    $provide.decorator('ConvexRequest', function ($delegate) {
+      return sinon.spy($delegate);
+    });
   }));
   beforeEach(angular.mock.inject(function ($injector) {
     ConvexModel = $injector.get('ConvexModel');
+    ConvexRequest = $injector.get('ConvexRequest');
     ConvexRelation = $injector.get('ConvexRelation');
+    ConvexBatch = $injector.get('ConvexBatch');
     ConvexCache = $injector.get('ConvexCache');
     $httpBackend = $injector.get('$httpBackend');
     $timeout = $injector.get('$timeout');
@@ -168,6 +173,73 @@ describe('ConvexModel', function () {
 
   });
 
+  describe('#toJSON', function () {
+
+    it('only includes own properties', function () {
+      model.foo = 'bar';
+      expect(model.toJSON()).to.not.respondTo('toJSON');
+      expect(model.toJSON()).to.have.property('foo', 'bar');
+    });
+
+    it('excludes relations', function () {
+      model.$$relations = {foo: null};
+      model.foo = 'bar'
+      expect(model.toJSON()).to.not.have.property('foo');
+    });
+
+  });
+
+  describe('#$request', function () {
+
+    beforeEach(function () {
+      sinon.stub(ConvexRequest.prototype, 'send');
+    });
+
+    it('extends defaults with options', function () {
+      model.$request({
+        foo: 'bar'
+      },
+      {
+        foo: 'baz',
+        bar: 'baz'
+      });
+      expect(ConvexRequest).to.have.been.calledWithMatch({
+        foo: 'baz',
+        bar: 'baz'
+      });
+    });
+
+    it('sets expansion parameters', function () {
+      model.$request({}, {
+        expand: ['foo', 'bar']
+      });
+      expect(ConvexRequest).to.have.been.calledWithMatch({
+        params: {
+          expand: ['foo', 'bar']
+        }
+      });
+    });
+
+    it('can handle batch requests', function () {
+      var batch = {
+        add: sinon.spy()
+      };
+      var request = model.$request({batch: batch});
+      expect(batch.add)
+        .to.have.been.calledWith(request);
+    });
+
+    it('defaults to normal requests', function () {
+      var request = model.$request();
+      expect(request.send).to.have.been.called;
+    });
+
+    it('returns the request', function () {
+      expect(model.$request()).to.equal(ConvexRequest.firstCall.returnValue);
+    });
+
+  });
+
   describe('REST Methods', function () {
 
     afterEach(function () {
@@ -310,6 +382,30 @@ describe('ConvexModel', function () {
 
     });
 
+    describe('#$batch', function () {
+
+      var callback, promise;
+      beforeEach(function () {
+        callback = sinon.spy();
+        promise = {};
+        sinon.stub(ConvexBatch.prototype, 'process').returns(promise);
+        
+      });
+
+      it('passes a batch into the callback', function () {
+        model.$batch(callback);
+        expect(callback)
+          .to.have.been.calledWith(sinon.match.instanceOf(ConvexBatch));
+        expect(callback).to.have.been.calledOn(model);
+
+      });
+
+      it('returns the batch promise', function () {
+        expect(model.$batch(callback)).to.equal(promise);
+      });
+
+    });
+
     describe('Collection', function () {
 
       var url = '/items?condition=true';
@@ -420,7 +516,7 @@ describe('ConvexModel', function () {
       ConvexRelation.returns({
         key: 'target'
       });
-      Model.$belongsTo('Target');
+      Model.belongsTo('Target');
       expect(Model.prototype.$$relations)
         .to.have.property('target')
         .that.equals(ConvexRelation.firstCall.returnValue);
@@ -431,7 +527,7 @@ describe('ConvexModel', function () {
       ConvexRelation.returns({
         key: 'targets'
       });
-      Model.$hasMany('Target');
+      Model.hasMany('Target');
       expect(Model.prototype.$$relations)
         .to.have.property('targets')
         .that.equals(ConvexRelation.firstCall.returnValue);

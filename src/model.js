@@ -5,7 +5,7 @@ var uuid              = require('node-uuid');
 var collectionFactory = require('./collection');
 var internals         = {};
 
-module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
+module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRelation) {
 
   internals.relations = function (model, options) {
     if (options && options.expand) {
@@ -19,10 +19,6 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     internals.relations(this, options);
     Object.defineProperties(this, {
       saved: {
-        enumerable: false,
-        writable: true
-      },
-      __batch: {
         enumerable: false,
         writable: true
       }
@@ -97,6 +93,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
   };
 
   ConvexModel.prototype.$request = function (defaults, overrides) {
+    defaults = defaults || {};
     overrides = overrides || {};
     defaults.params = defaults.params || {};
     if (overrides.expand) {
@@ -104,7 +101,12 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     }
     var config = angular.extend(defaults, overrides);
     var request = new ConvexRequest(config);
-    request.send();
+    if (config.batch) {
+      config.batch.add(request);
+    }
+    else {
+      request.send();
+    }
     return request;
   };
 
@@ -158,6 +160,12 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
       });
   };
 
+  ConvexModel.prototype.$batch = function (callback) {
+    var batch = new ConvexBatch();
+    callback.call(this, batch);
+    return batch.process();
+  };
+
   internals.query = function (Model, attributes, options) {
     return Model.prototype.$request({
       method: 'get',
@@ -193,23 +201,17 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexRelation) {
     return this.$where(null, options);
   };
 
-  // // Callback is called synchronously, outer fn returns a promise
-  // BaseModel.prototype.$batch = function (callback) {
-  //   callback.call(this, batch);
-  //   return batch.request().then(angular.bind(batch, batch.process));
-  // };
-
   internals.relationStore = function (Model) {
     return Model.prototype.$$relations || (Model.prototype.$$relations = {});
   };
 
-  ConvexModel.$belongsTo = function (Target) {
+  ConvexModel.belongsTo = function (Target) {
     var relation = new ConvexRelation('belongsTo', Target);
     internals.relationStore(this)[relation.key] = relation;
     return this;
   };
 
-  ConvexModel.$hasMany = function (Target) {
+  ConvexModel.hasMany = function (Target) {
     var relation = new ConvexRelation('hasMany', Target);
     internals.relationStore(this)[relation.key] = relation;
     return this;

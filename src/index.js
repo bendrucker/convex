@@ -9,6 +9,7 @@ module.exports = require('angular')
     '$q',
     'ConvexRequest',
     'ConvexCache',
+    'ConvexBatch',
     'ConvexRelation',
     'convexConfig',
     require('./model')
