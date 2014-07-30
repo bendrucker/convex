@@ -2,7 +2,9 @@
 
 module.exports = require('angular')
   .module('convex', [])
-  .constant('convexConfig', {})
+  .constant('convexConfig', {
+    batch: '/batch'
+  })
   .factory('ConvexModel', [
     '$q',
     '$http',
@@ -16,6 +18,12 @@ module.exports = require('angular')
     '$q',
     'convexConfig',
     require('./request')
+  ])
+  .factory('ConvexBatch', [
+    'ConvexRequest',
+    '$q',
+    'convexConfig',
+    require('./batch')
   ])
   .factory('ConvexCache', [
     '$cacheFactory',
