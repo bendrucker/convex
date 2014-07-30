@@ -13,6 +13,7 @@ module.exports = function ($http, $q, convexConfig) {
   };
 
   internals.config = function (input) {
+    input = input || {};
     var output = angular.extend({}, input);
     output.method = (input.method || 'get').toUpperCase();
     if (output.url) {
