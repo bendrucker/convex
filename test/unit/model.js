@@ -80,8 +80,8 @@ describe('ConvexModel', function () {
 
     it('creates a new cache for the child model', function () {
       var Child = ConvexModel.$new({name: 'model'});
-      expect(Child.prototype.$cache).to.exist;
-      expect(Child.prototype.$cache.$name).to.equal('convex-model');
+      expect(Child.prototype.$$cache).to.exist;
+      expect(Child.prototype.$$cache.$name).to.equal('convex-model');
     });
 
   });
@@ -103,22 +103,22 @@ describe('ConvexModel', function () {
     });
 
     it('stores new models in the cache', function () {
-      sinon.stub(Model.prototype.$cache, 'put');
+      sinon.stub(Model.prototype.$$cache, 'put');
       model = new Model();
-      expect(model.$cache.put).to.have.been.calledWith(model.id, model);
+      expect(model.$$cache.put).to.have.been.calledWith(model.id, model);
     });
 
     it('references the cached model if available', function () {
       var cached = {};
       var id = uuid.v4();
-      sinon.stub(Model.prototype.$cache, 'get').withArgs(id).returns(cached);
+      sinon.stub(Model.prototype.$$cache, 'get').withArgs(id).returns(cached);
       expect(new Model({id: id})).to.equal(cached);
     });
 
     it('extends the cached model with new attributes', function () {
       var cached = {};
       var id = uuid.v4();
-      sinon.stub(Model.prototype.$cache, 'get').returns(cached);
+      sinon.stub(Model.prototype.$$cache, 'get').returns(cached);
       new Model({id: id, foo: 'bar'});
       expect(cached).to.have.property('foo', 'bar');
     });
@@ -134,7 +134,7 @@ describe('ConvexModel', function () {
         $initialize: sinon.spy()
       };
       Model.prototype.$initialize = sinon.spy();
-      sinon.stub(Model.prototype.$cache, 'get').returns(cached);
+      sinon.stub(Model.prototype.$$cache, 'get').returns(cached);
       model = new Model();
       expect(model.$initialize).to.not.have.been.called;
     });
@@ -168,7 +168,7 @@ describe('ConvexModel', function () {
       model.id = uuid.v4();
       model.$reset();
       expect(model).to.not.have.property('id');
-      expect(model).to.have.property('$cache');
+      expect(model).to.have.property('$$cache');
     });
 
   });
@@ -359,10 +359,10 @@ describe('ConvexModel', function () {
         });
 
         it('deletes saved models from the cache', function () {
-          sinon.spy(model.$cache, 'remove');
+          sinon.spy(model.$$cache, 'remove');
           model.$delete();
           $httpBackend.flush();
-          expect(model.$cache.remove).to.have.been.calledWith(id);
+          expect(model.$$cache.remove).to.have.been.calledWith(id);
         });
 
         it('resets the model', function () {

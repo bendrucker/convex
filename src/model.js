@@ -30,13 +30,13 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     else {
       this.$saved = true;
     }
-    var cached = this.$cache.get(this.id);
+    var cached = this.$$cache.get(this.id);
     if (cached) {
       return angular.extend(cached, this);
     }
     else {
       if (this.$initialize) this.$initialize();
-      this.$cache.put(this.id, this);
+      this.$$cache.put(this.id, this);
     }
   };
 
@@ -55,7 +55,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     if (!proto.name) throw new Error('All models must have a name');
     Child.prototype.$name = proto.name;
     delete Child.prototype.name;
-    Child.prototype.$cache = new ConvexCache(proto.name);
+    Child.prototype.$$cache = new ConvexCache(proto.name);
 
     return Child;
   };
@@ -153,7 +153,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
         }
       })
       .then(function () {
-        model.$cache.remove(model.id);
+        model.$$cache.remove(model.id);
         model.$reset();
         model.$saved = false;
         model.$deleted = true;
