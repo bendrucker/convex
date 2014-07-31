@@ -28,6 +28,8 @@ module.exports = require('angular')
   ])
   .factory('ConvexCache', [
     '$cacheFactory',
+    '$window',
+    '$q',
     require('./cache')
   ])
   .factory('ConvexRelation', [
