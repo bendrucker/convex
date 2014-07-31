@@ -9,29 +9,31 @@ describe('ConvexCache', function () {
 
   it('handles browsers without localStorage', function () {
     angular.mock.module(function ($provide) {
-      $provide.decorator('$window', function ($delegate) {
-        $delegate.localStorage = void 0;
-        return $delegate;
+      $provide.decorator('$window', function () {
+        return {};
       });
     });
-    angular.mock.inject(function (ConvexCache) {
+    angular.mock.inject(function (ConvexCache, $window, $timeout) {
       var cache = new ConvexCache();
       cache.persist('', {});
       cache.fetch('');
+      $timeout.flush();
+      cache.remove();
+      cache.destroy();
     });
   });
 
   describe('API', function () {
 
-    var ConvexCache, $cacheFactory, cache, $$cache;
+    var ConvexCache, $cacheFactory, $window, $timeout, cache, $$cache;
     beforeEach(angular.mock.inject(function ($injector) {
       ConvexCache = $injector.get('ConvexCache');
       $cacheFactory = $injector.get('$cacheFactory');
-    }));
-    beforeEach(function () {
+      $window = $injector.get('$window');
+      $timeout = $injector.get('$timeout');
       cache = new ConvexCache('model');
       $$cache = cache.$$cache;
-    });
+    }));
     afterEach(function () {
       cache.destroy();
     });
@@ -62,8 +64,30 @@ describe('ConvexCache', function () {
     describe('#get', function () {
 
       it('gets a value from the cache by key', function () {
-        cache.put('key', 'value');
+        cache.$$cache.put('key', 'value');
         expect(cache.get('key')).to.equal('value');
+      });
+
+    });
+
+    describe('#persist', function () {
+
+      it('persists a value to localStorage by key', function () {
+        cache.persist('key', {foo: 'bar'});
+        expect($window.localStorage.getItem('convex-key'))
+          .to.equal(JSON.stringify({foo: 'bar'}));
+        $timeout.flush();
+      });
+
+    });
+
+    describe('#fetch', function () {
+
+      it('fetchs a value from localStorage by key', function () {
+        cache.persist('key', {foo: 'bar'});
+        $timeout.flush();
+        expect(cache.fetch('key')).to.eventually.deep.equal({foo: 'bar'});
+        $timeout.flush();
       });
 
     });
@@ -72,18 +96,31 @@ describe('ConvexCache', function () {
 
       it('removes a value from the cache by key', function () {
         cache.put('key', 'value');
+        cache.persist('key', 'value');
+        $timeout.flush();
         cache.remove('key');
         expect(cache.get('key')).to.be.undefined;
+        expect(cache.fetch('key')).to.eventually.be.null;
+        $timeout.flush();
       });
 
     });
 
     describe('#removeAll', function () {
 
-      it('removes all values from the cache', function () {
+      it('removes all values from the memory cache', function () {
         cache.put('key', 'value');
         cache.removeAll();
         expect(cache.get('key')).to.be.undefined;
+      });
+
+      it('removes only prefixed values from localStorage', function () {
+        cache.persist('key', 'value');
+        $timeout.flush();
+        localStorage.setItem('key2', 'foo');
+        cache.removeAll();
+        expect(localStorage.getItem('convex-key')).to.be.null;
+        expect(localStorage.getItem('key2')).to.equal('foo');
       });
 
     });

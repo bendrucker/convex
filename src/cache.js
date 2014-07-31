@@ -7,7 +7,9 @@ module.exports = function ($cacheFactory, $window, $q) {
   var prefix = 'convex-';
   var localStorage = $window.localStorage || {
     setItem: angular.noop,
-    getItem: angular.noop
+    getItem: angular.noop,
+    removeItem: angular.noop,
+    clear: angular.noop
   };
   
   var ConvexCache = function (name) {
@@ -33,14 +35,23 @@ module.exports = function ($cacheFactory, $window, $q) {
   };
 
   ConvexCache.prototype.remove = function (key) {
-    return this.$$cache.remove(key);
+    localStorage.removeItem(prefix + key);
+    this.$$cache.remove(key);
   };
 
   ConvexCache.prototype.removeAll = function () {
-    return this.$$cache.removeAll();
+    Object.keys(localStorage)
+      .filter(function (key) {
+        return key.match(new RegExp('^' + prefix));
+      })
+      .forEach(function (key) {
+        localStorage.removeItem(key);
+      });
+    return this.$$cache.removeAll();  
   };
 
   ConvexCache.prototype.destroy = function () {
+    this.removeAll();
     return this.$$cache.destroy();
   };
 
