@@ -27,7 +27,6 @@
     "browserify-shim": "~3.6.0",
     "chai": "~1.9.1",
     "chai-as-promised": "~4.1.1",
-    "coveralls": "~2.11.1",
     "es5-shim": "~2.3.0",
     "karma": "~0.12.19",
     "karma-chai-sinon": "~0.1.3",

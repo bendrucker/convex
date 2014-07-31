@@ -2,9 +2,11 @@ language: node_js
 node_js:
 - '0.10'
 before_install:
-  - 'npm install -g bower'
-  - 'bower install'
-after_script: npm run coveralls
+- npm install -g bower
+- bower install
+after_script:
+- npm i -g codeclimate-test-reporter
+- codeclimate < ./coverage/lcov.info
 env:
   global:
-  - COVERALLS_REPO_TOKEN=sDYyXQ0lOh6zPDiGOKHrzpxosNPvUEhJ8
+  - secure: ahvnOEHpQNYh/iheqFEBy2mBhlQou4HaRg4y2R8ikAeMYpubTQWuRmJr/2n5BbrcdB5uXtkx6EKZzSpGPJJbZaklSM/CAcNMWNSbC9Dyu4g8L4ONSo7hFgaqNTEsXW1h4DvXBFlyOc2PwH7E9kaILXe+UDAMU8hHFd4vs7XEMCc=
