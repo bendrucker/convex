@@ -2,7 +2,7 @@
 
 var angular = require('angular');
 
-module.exports = function ($cacheFactory, $window, $q) {
+module.exports = function ($cacheFactory, $window) {
 
   var prefix = 'convex-';
   var localStorage = $window.localStorage || {
@@ -17,21 +17,14 @@ module.exports = function ($cacheFactory, $window, $q) {
     this.$$cache = $cacheFactory(this.$name);
   };
 
-  ConvexCache.prototype.put = function (key, value) {
+  ConvexCache.prototype.put = function (key, value, persist) {
+    if (persist) localStorage.setItem(prefix + key, angular.toJson(value));
     return this.$$cache.put(key, value);
   };
 
-  ConvexCache.prototype.get = function (key) {
-    return this.$$cache.get(key);
-  };
-
-  ConvexCache.prototype.persist = function (key, value) {
-    localStorage.setItem(prefix + key, angular.toJson(value));
-    return $q.when(value);
-  };
-
-  ConvexCache.prototype.fetch = function (key) {
-    return $q.when(angular.fromJson(localStorage.getItem(prefix + key)));
+  ConvexCache.prototype.get = function (key, persist) {
+    return this.$$cache.get(key) ||
+      (persist ? angular.fromJson(localStorage.getItem(prefix + key)) : void 0);
   };
 
   ConvexCache.prototype.remove = function (key) {

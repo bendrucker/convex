@@ -13,11 +13,10 @@ describe('ConvexCache', function () {
         return {};
       });
     });
-    angular.mock.inject(function (ConvexCache, $window, $timeout) {
+    angular.mock.inject(function (ConvexCache, $window) {
       var cache = new ConvexCache();
-      cache.persist('', {});
-      cache.fetch('');
-      $timeout.flush();
+      cache.get('', true);
+      cache.put('', {}, true);
       cache.remove();
       cache.destroy();
     });
@@ -25,12 +24,12 @@ describe('ConvexCache', function () {
 
   describe('API', function () {
 
-    var ConvexCache, $cacheFactory, $window, $timeout, cache, $$cache;
+    var ConvexCache, $cacheFactory, $window, cache, $$cache;
     beforeEach(angular.mock.inject(function ($injector) {
       ConvexCache = $injector.get('ConvexCache');
       $cacheFactory = $injector.get('$cacheFactory');
       $window = $injector.get('$window');
-      $timeout = $injector.get('$timeout');
+      localStorage = $window.localStorage;
       cache = new ConvexCache('model');
       $$cache = cache.$$cache;
     }));
@@ -59,6 +58,11 @@ describe('ConvexCache', function () {
         expect(cache.get('key')).to.equal('value');
       });
 
+      it('can put a key/value pair into local storage', function () {
+        cache.put('key', 'value', true);
+        expect(localStorage.getItem('convex-key')).to.equal('"value"');
+      });
+
     });
 
     describe('#get', function () {
@@ -68,26 +72,10 @@ describe('ConvexCache', function () {
         expect(cache.get('key')).to.equal('value');
       });
 
-    });
-
-    describe('#persist', function () {
-
-      it('persists a value to localStorage by key', function () {
-        cache.persist('key', {foo: 'bar'});
-        expect($window.localStorage.getItem('convex-key'))
-          .to.equal(JSON.stringify({foo: 'bar'}));
-        $timeout.flush();
-      });
-
-    });
-
-    describe('#fetch', function () {
-
-      it('fetchs a value from localStorage by key', function () {
-        cache.persist('key', {foo: 'bar'});
-        $timeout.flush();
-        expect(cache.fetch('key')).to.eventually.deep.equal({foo: 'bar'});
-        $timeout.flush();
+      it('can get from local storage', function () {
+        localStorage.setItem('convex-foo', '{}');
+        expect(cache.get('foo')).to.be.undefined;
+        expect(cache.get('foo', true)).to.not.be.undefined;
       });
 
     });
@@ -96,12 +84,8 @@ describe('ConvexCache', function () {
 
       it('removes a value from the cache by key', function () {
         cache.put('key', 'value');
-        cache.persist('key', 'value');
-        $timeout.flush();
         cache.remove('key');
         expect(cache.get('key')).to.be.undefined;
-        expect(cache.fetch('key')).to.eventually.be.null;
-        $timeout.flush();
       });
 
     });
@@ -115,12 +99,9 @@ describe('ConvexCache', function () {
       });
 
       it('removes only prefixed values from localStorage', function () {
-        cache.persist('key', 'value');
-        $timeout.flush();
-        localStorage.setItem('key2', 'foo');
-        cache.removeAll();
-        expect(localStorage.getItem('convex-key')).to.be.null;
-        expect(localStorage.getItem('key2')).to.equal('foo');
+        // cache.removeAll();
+        // expect(localStorage.getItem('convex-key')).to.be.null;
+        // expect(localStorage.getItem('key2')).to.equal('foo');
       });
 
     });

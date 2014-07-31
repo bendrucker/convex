@@ -17,6 +17,7 @@ module.exports = require('angular')
   .factory('ConvexRequest', [
     '$http',
     '$q',
+    'ConvexCache',
     'convexConfig',
     require('./request')
   ])
@@ -29,7 +30,6 @@ module.exports = require('angular')
   .factory('ConvexCache', [
     '$cacheFactory',
     '$window',
-    '$q',
     require('./cache')
   ])
   .factory('ConvexRelation', [
