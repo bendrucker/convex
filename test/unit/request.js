@@ -4,15 +4,20 @@ var angular = require('angular');
 
 describe('ConvexRequest', function () {
 
-  var ConvexRequest, request, convexConfig, $httpBackend, $timeout;
+  var ConvexRequest, request, convexConfig, $httpBackend, $window, $timeout;
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(angular.mock.inject(function ($injector) {
     ConvexRequest = $injector.get('ConvexRequest');
     convexConfig = $injector.get('convexConfig');
     $httpBackend = $injector.get('$httpBackend');
+    $window = $injector.get('$window');
     $timeout = $injector.get('$timeout');
     request = new ConvexRequest({});
   }));
+
+  afterEach(function () {
+    request.$$cache.destroy();
+  });
 
   describe('Constructor/Config', function () {
 
@@ -86,7 +91,11 @@ describe('ConvexRequest', function () {
 
   describe('#send', function () {
 
-    it('can send a get', function () {
+    beforeEach(function () {
+      request.config.url = 'http://api';
+    });
+
+    it('can send a GET', function () {
       $httpBackend.expectGET(request.config.url)
         .respond(200, {foo: 'bar'});
       request.send().then(function (response) {
@@ -95,7 +104,55 @@ describe('ConvexRequest', function () {
       $httpBackend.flush();
     });
 
-    it('can send a post', function () {
+    it('can cache a GET in memory', function () {
+      $httpBackend.expectGET(request.config.url)
+        .respond(200, {foo: 'bar'});
+      request.config.cache = true;
+      request.send().then(function (response) {
+        expect(request.$$cache.get(request.config.url))
+          .to.deep.equal({
+            foo: 'bar'
+          });
+      });
+      $httpBackend.flush();
+    });
+
+    it('can skip a $http call for GET in cache', function () {
+      request.config.cache = true;
+      request.$$cache.put(request.config.url, {foo: 'bar'});
+      request.send().then(function (response) {
+        expect(response)
+          .to.deep.equal({
+            foo: 'bar'
+          });
+      });
+      $timeout.flush();
+    });
+
+    it('can cache in localStorage', function () {
+      $httpBackend.expectGET(request.config.url)
+        .respond(200, {foo: 'bar'});
+      request.config.cache = 'persist';
+      request.send().then(function () {
+        expect($window.localStorage.getItem('convex-' + request.config.url))
+          .to.equal('{"foo":"bar"}');
+      });
+      $httpBackend.flush();
+    });
+
+    it('can respond from localStorage', function () {
+      $window.localStorage
+        .setItem('convex-' + request.config.url, angular.toJson({
+          bar: 'baz'
+        }));
+      request.config.cache = 'persist';
+      request.send().then(function (response) {
+        expect(response).to.deep.equal({bar: 'baz'});
+      });
+      $timeout.flush();
+    });
+
+    it('can send a POST', function () {
       $httpBackend.expectPOST(request.config.url, {})
         .respond(200, {bar: 'baz'});
       request.config.data = {};
