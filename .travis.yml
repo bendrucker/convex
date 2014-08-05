@@ -4,6 +4,8 @@ node_js:
 before_install:
 - npm install -g bower
 - bower install
+before_script:
+- gulp lint
 after_script:
 - npm i -g codeclimate-test-reporter
 - codeclimate < ./coverage/lcov.info
