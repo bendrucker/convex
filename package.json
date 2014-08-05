@@ -4,7 +4,7 @@
   "description": "Our base model layer for building Angular applications",
   "main": "src/index.js",
   "scripts": {
-    "test": "karma start --single-run --browsers PhantomJS"
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
