@@ -98,8 +98,10 @@ describe('ConvexCache', function () {
       });
 
       it('removes only prefixed values from ls', function () {
+        cache.put('key', 'val', true);
+        ls.setItem('key2', 'foo');
         cache.removeAll();
-        expect(ls.getItem('convex-key')).to.be.null;
+        expect(cache.get('key', true)).to.be.null;
         expect(ls.getItem('key2')).to.equal('foo');
       });
 
