@@ -1,0 +1,6 @@
+test/
+coverage/
+components/
+**/.*
+bower.json
+gulpfile.js
