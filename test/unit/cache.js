@@ -1,7 +1,6 @@
 'use strict';
 
 var angular = require('angular');
-var uuid    = require('node-uuid');
 
 describe('ConvexCache', function () {
 
@@ -13,7 +12,7 @@ describe('ConvexCache', function () {
         return {};
       });
     });
-    angular.mock.inject(function (ConvexCache, $window) {
+    angular.mock.inject(function (ConvexCache) {
       var cache = new ConvexCache();
       cache.get('', true);
       cache.put('', {}, true);
@@ -24,12 +23,12 @@ describe('ConvexCache', function () {
 
   describe('API', function () {
 
-    var ConvexCache, $cacheFactory, $window, cache, $$cache;
+    var ConvexCache, $cacheFactory, ls, $window, cache, $$cache;
     beforeEach(angular.mock.inject(function ($injector) {
       ConvexCache = $injector.get('ConvexCache');
       $cacheFactory = $injector.get('$cacheFactory');
       $window = $injector.get('$window');
-      localStorage = $window.localStorage;
+      ls = $window.localStorage;
       cache = new ConvexCache('model');
       $$cache = cache.$$cache;
     }));
@@ -60,7 +59,7 @@ describe('ConvexCache', function () {
 
       it('can put a key/value pair into local storage', function () {
         cache.put('key', 'value', true);
-        expect(localStorage.getItem('convex-key')).to.equal('"value"');
+        expect(ls.getItem('convex-key')).to.equal('"value"');
       });
 
     });
@@ -73,7 +72,7 @@ describe('ConvexCache', function () {
       });
 
       it('can get from local storage', function () {
-        localStorage.setItem('convex-foo', '{}');
+        ls.setItem('convex-foo', '{}');
         expect(cache.get('foo')).to.be.undefined;
         expect(cache.get('foo', true)).to.not.be.undefined;
       });
@@ -98,10 +97,10 @@ describe('ConvexCache', function () {
         expect(cache.get('key')).to.be.undefined;
       });
 
-      it('removes only prefixed values from localStorage', function () {
-        // cache.removeAll();
-        // expect(localStorage.getItem('convex-key')).to.be.null;
-        // expect(localStorage.getItem('key2')).to.equal('foo');
+      it('removes only prefixed values from ls', function () {
+        cache.removeAll();
+        expect(ls.getItem('convex-key')).to.be.null;
+        expect(ls.getItem('key2')).to.equal('foo');
       });
 
     });

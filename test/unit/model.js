@@ -183,7 +183,7 @@ describe('ConvexModel', function () {
 
     it('excludes relations', function () {
       model.$$relations = {foo: null};
-      model.foo = 'bar'
+      model.foo = 'bar';
       expect(model.toJSON()).to.not.have.property('foo');
     });
 

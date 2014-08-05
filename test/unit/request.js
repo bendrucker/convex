@@ -108,7 +108,7 @@ describe('ConvexRequest', function () {
       $httpBackend.expectGET(request.config.url)
         .respond(200, {foo: 'bar'});
       request.config.cache = true;
-      request.send().then(function (response) {
+      request.send().then(function () {
         expect(request.$$cache.get(request.config.url))
           .to.deep.equal({
             foo: 'bar'
@@ -301,7 +301,7 @@ describe('ConvexRequest', function () {
       var success = sinon.spy();
       var failure = sinon.spy();
       expect(request.then(success, failure)).to.respondTo('then');
-      expect(then).to.have.been.calledWith(success, failure)
+      expect(then).to.have.been.calledWith(success, failure);
     });
 
   });
@@ -312,7 +312,7 @@ describe('ConvexRequest', function () {
       var pCatch = sinon.spy(request.deferred.promise, 'catch');
       var failure = sinon.spy();
       expect(request.catch(failure)).to.respondTo('then');
-      expect(pCatch).to.have.been.calledWith(failure)
+      expect(pCatch).to.have.been.calledWith(failure);
     });
 
   });

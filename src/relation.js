@@ -8,9 +8,8 @@ module.exports = function ($injector) {
     this.type = type;
     this.target = $injector.get(target);
     this.targetName = this.target.prototype.$name;
-    this.key = this.isSingle()
-      ? this.targetName
-      : this.target.prototype.plural || this.targetName + 's';
+    this.key = this.isSingle() ? 
+      this.targetName : this.target.prototype.plural || this.targetName + 's';
   };
 
   ConvexRelation.prototype.isSingle = function () {
