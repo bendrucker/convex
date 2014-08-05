@@ -18,7 +18,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     angular.extend(this, attributes);
     internals.relations(this, options);
     Object.defineProperties(this, {
-      saved: {
+      $saved: {
         enumerable: false,
         writable: true
       }
@@ -77,19 +77,15 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return this;
   };
 
-  internals.data = function (model) {
-    var data = angular.copy(model);
-    for (var relation in model.$$relations) {
+  ConvexModel.prototype.toJSON = function () {
+    var data = angular.copy(this, {});
+    for (var relation in this.$$relations) {
       delete data[relation];
     }
     for (var key in data) {
-      if (!model.hasOwnProperty(key)) delete data[key];
+      if (!this.hasOwnProperty(key)) delete data[key];
     }
     return data;
-  };
-
-  ConvexModel.prototype.toJSON = function () {
-    return internals.data(this);
   };
 
   ConvexModel.prototype.$request = function (defaults, overrides) {
