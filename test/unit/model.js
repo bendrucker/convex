@@ -242,6 +242,12 @@ describe('ConvexModel', function () {
 
   describe('REST Methods', function () {
 
+    var encodeBrackets = function (string) {
+      return string
+        .replace(/\[/g, encodeURIComponent('['))
+        .replace(/\]/g, encodeURIComponent(']'));
+    };
+
     afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
@@ -282,7 +288,7 @@ describe('ConvexModel', function () {
         it('can handle relations', function () {
           sinon.stub(model, '$related');
           $httpBackend
-            .expectGET(url + '?expand=rel1&expand=rel2')
+            .expectGET(url + encodeBrackets('?expand[0]=rel1&expand[1]=rel2'))
             .respond(200, res);
           model.$fetch({
             expand: ['rel1', 'rel2']
@@ -439,7 +445,7 @@ describe('ConvexModel', function () {
 
         it('can handle relations', function () {
           $httpBackend
-            .expectGET(url + '&expand=related')
+            .expectGET(url + encodeBrackets('&expand[0]=related'))
             .respond(200, res);
           Model.$where({condition: true}, {expand: ['related']})
             .then(function (models) {
@@ -476,7 +482,7 @@ describe('ConvexModel', function () {
 
         it('can handle relations', function () {
           $httpBackend
-            .expectGET(url + '&expand=related')
+            .expectGET(url + encodeBrackets('&expand[0]=related'))
             .respond(200, res);
           Model.$find({condition: true}, {expand: ['related']})
             .then(function (model) {

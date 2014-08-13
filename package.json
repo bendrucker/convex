@@ -53,6 +53,8 @@
     "angular": "global:angular"
   },
   "dependencies": {
-    "node-uuid": "~1.4.1"
+    "karma-mocha": "~0.1.7",
+    "node-uuid": "~1.4.1",
+    "qs": "~1.2.1"
   }
 }

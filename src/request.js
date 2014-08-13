@@ -1,9 +1,9 @@
 'use strict';
 
-var angular     = require('angular');
-var url         = require('url');
-var querystring = require('querystring');
-var internals   = {};
+var angular   = require('angular');
+var url       = require('url');
+var qs        = require('qs');
+var internals = {};
 
 module.exports = function ($http, $q, ConvexCache, convexConfig) {
 
@@ -28,7 +28,7 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
       output.params = input.params || {};
       output.url = output.base + output.path; 
       if (Object.keys(output.params).length) {
-        output.url += '?' + querystring.stringify(output.params);
+        output.url += '?' + qs.stringify(output.params);
       }
     }
     return output;
