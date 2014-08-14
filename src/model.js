@@ -7,9 +7,36 @@ var internals         = {};
 
 module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRelation) {
 
+  internals.depth = function (string) {
+    return (string.match(/\./g) || []).length;
+  };
+
+  internals.relation = function (base, relation) {
+    var parent = base;
+    for (var i = 0; i < relation.depth - 1; i++) {
+      var child = relation.segments[i];
+      parent = parent.$related(child);
+    }
+  };
+
   internals.relations = function (model, options) {
     if (options && options.expand) {
-      options.expand.forEach(model.$related, model);
+      options.expand
+        .map(function (relation) {
+          var segments = relation.split('.');
+          return {
+            accessor: relation,
+            depth: segments.length + 1,
+            segments: segments
+          };
+        })
+        .sort(function ($1, $2) {
+          var diff = $2.depth - $1.depth;
+          if (diff === 0) return 0;
+          if (diff < 0) return -1;
+          if (diff > 0) return 1;
+        })
+        .forEach(angular.bind(null, internals.relation, model));
     }
     return model;
   };

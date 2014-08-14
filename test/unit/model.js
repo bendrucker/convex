@@ -140,12 +140,24 @@ describe('ConvexModel', function () {
     });
 
     it('instantiates specified relations', function () {
-      sinon.stub(Model.prototype, '$related');
+      var relation = {
+        $related: sinon.stub()
+          .withArgs('subrelation')
+          .returns(subrelation)
+      };
+      var subrelation = {};
+      sinon.stub(Model.prototype, '$related')
+        .withArgs('relation')
+        .returns(relation);
       model = new Model({}, {
-        expand: ['relation']
+        expand: ['relation', 'relation.subrelation']
       });
-      expect(model.$related).to.have.been.calledWith('relation');
-      expect(model.$related).to.have.been.calledOn(model);
+      expect(model.$related)
+        .to.have.been.calledWith('relation')
+        .and.calledOn(model);
+      expect(relation.$related)
+        .to.have.been.calledWith('subrelation')
+        .and.calledOn(relation);
     });
 
   });
