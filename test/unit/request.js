@@ -79,11 +79,13 @@ describe('ConvexRequest', function () {
     it('outputs parameters needed for batching', function () {
       expect(request.toJSON()).to.have.keys([
         'method',
-        'url',
-        'base',
         'path',
         'query',
         'payload'
+      ]);
+      expect(request.toJSON()).to.not.have.keys([
+        'url',
+        'base'
       ]);
     });
 

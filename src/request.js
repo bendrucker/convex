@@ -39,8 +39,6 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
   ConvexRequest.prototype.toJSON = function () {
     return {
       method: this.config.method,
-      url: this.config.url,
-      base: this.config.base,
       path: this.config.path,
       query: this.config.params,
       payload: this.config.data
