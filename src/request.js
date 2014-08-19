@@ -12,6 +12,15 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
     this.deferred = $q.defer();
   };
 
+  internals.qs = function (params) {
+    if (Object.keys(params).length) {
+      return '?' + qs.stringify(params);
+    }
+    else {
+      return '';
+    }
+  };
+
   internals.config = function (input) {
     input = input || {};
     var output = angular.extend({}, input);
@@ -27,9 +36,7 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
       output.path = input.path || '';
       output.params = input.params || {};
       output.url = output.base + output.path; 
-      if (Object.keys(output.params).length) {
-        output.url += '?' + qs.stringify(output.params);
-      }
+      output.url += internals.qs(output.params);
     }
     return output;
   };
@@ -39,8 +46,7 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
   ConvexRequest.prototype.toJSON = function () {
     return {
       method: this.config.method,
-      path: this.config.path,
-      query: this.config.params,
+      path: this.config.path + internals.qs(this.config.params),
       payload: this.config.data
     };
   };

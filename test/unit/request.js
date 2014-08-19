@@ -80,13 +80,16 @@ describe('ConvexRequest', function () {
       expect(request.toJSON()).to.have.keys([
         'method',
         'path',
-        'query',
         'payload'
       ]);
       expect(request.toJSON()).to.not.have.keys([
         'url',
+        'query',
         'base'
       ]);
+      request.config.path = '/p'
+      request.config.params = {foo: 'bar'};
+      expect(request.toJSON().path).to.equal('/p?foo=bar')
     });
 
   });
