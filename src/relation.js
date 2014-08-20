@@ -4,6 +4,7 @@ var angular           = require('angular');
 var collectionFactory = require('./collection');
 
 module.exports = function ($injector) {
+  
   var ConvexRelation = function (type, target) {
     this.type = type;
     this.target = $injector.get(target);
@@ -31,4 +32,7 @@ module.exports = function ($injector) {
   };
 
   return ConvexRelation;
+
 };
+
+module.exports.$inject = ['$injector'];

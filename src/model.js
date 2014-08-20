@@ -251,3 +251,12 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   return ConvexModel;
 
 };
+
+module.exports.$inject = [
+  '$q',
+  'ConvexRequest',
+  'ConvexCache',
+  'ConvexBatch',
+  'ConvexRelation',
+  'convexConfig'
+];

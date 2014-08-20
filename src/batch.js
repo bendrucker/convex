@@ -1,7 +1,5 @@
 'use strict';
 
-var angular = require('angular');
-
 module.exports = function (ConvexRequest, $q, convexConfig) {
 
   var ConvexBatch = function () {
@@ -44,4 +42,10 @@ module.exports = function (ConvexRequest, $q, convexConfig) {
 
   return ConvexBatch;
 
-};    
+};
+
+module.exports.$inject = [
+  'ConvexRequest',
+  '$q',
+  'convexConfig'
+];

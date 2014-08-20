@@ -51,3 +51,5 @@ module.exports = function ($cacheFactory, $window) {
   return ConvexCache;
 
 };
+
+module.exports.$inject = ['$cacheFactory', '$window'];

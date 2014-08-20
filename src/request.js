@@ -132,3 +132,10 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
   return ConvexRequest;
 
 };
+
+module.exports.$inject = [
+  '$http',
+  '$q',
+  'ConvexCache',
+  'convexConfig'
+];
