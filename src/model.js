@@ -2,10 +2,9 @@
 
 var angular           = require('angular');
 var uuid              = require('node-uuid');
-var collectionFactory = require('./collection');
 var internals         = {};
 
-module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRelation) {
+module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRelation, ConvexCollection) {
 
   internals.depth = function (string) {
     return (string.match(/\./g) || []).length;
@@ -44,22 +43,16 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   var ConvexModel = function (attributes, options) {
     angular.extend(this, attributes);
     internals.relations(this, options);
-    Object.defineProperties(this, {
-      $saved: {
-        enumerable: false,
-        writable: true
-      }
-    });
     if (!this.id) {
-      this.$saved = false;
+      this.$$saved = false;
       this.id = uuid.v4();
     }
     else {
-      this.$saved = true;
+      this.$$saved = true;
     }
     var cached = this.$$cache.get(this.id);
     if (cached) {
-      return angular.extend(cached, this);
+      return angular.extend(cached, attributes);
     }
     else {
       if (this.$initialize) this.$initialize();
@@ -135,7 +128,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
 
   ConvexModel.prototype.$fetch = function (options) {
     var model = this;
-    if (!this.$saved) return $q.when(this);
+    if (!this.$$saved) return $q.when(this);
     return this.$request({
       method: 'get',
       path: this.$path(this.id)
@@ -151,12 +144,12 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   ConvexModel.prototype.$save = function (options) {
     var model = this;
     return this.$request({
-      method: this.$saved ? 'put' : 'post',
-      path: this.$saved ? this.$path(this.id) : this.$path(),
+      method: this.$$saved ? 'put' : 'post',
+      path: this.$$saved ? this.$path(this.id) : this.$path(),
       data: this
     }, options)
     .then(function (response) {
-      model.$saved = true;
+      model.$$saved = true;
       return angular.extend(model, response);
     })
     .then(function (model) {
@@ -168,7 +161,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     var model = this;
     return $q.when()
       .then(function () {
-        if (model.$saved) {
+        if (model.$$saved) {
           return model.$request({
             method: 'delete',
             path: model.$path(model.id)
@@ -178,7 +171,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
       .then(function () {
         model.$$cache.remove(model.id);
         model.$reset();
-        model.$saved = false;
+        model.$$saved = false;
         model.$deleted = true;
       });
   };
@@ -197,15 +190,15 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     }, options);
   };
 
-  internals.cast = function (Model, data, options) {
-    return collectionFactory(Model).add(data, options);
+  internals.cast = function (Model, data) {
+    return new ConvexCollection(Model).add(data);
   };
 
   ConvexModel.$where = function (attributes, options) {
     var Model = this;
     return internals.query(this, attributes, options)
       .then(function (data) {
-        return internals.cast(Model, data, options);
+        return internals.cast(Model, data);
       });
   };
 
@@ -258,5 +251,5 @@ module.exports.$inject = [
   'ConvexCache',
   'ConvexBatch',
   'ConvexRelation',
-  'convexConfig'
+  'ConvexCollection'
 ];

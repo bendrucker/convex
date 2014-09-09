@@ -97,9 +97,9 @@ describe('ConvexModel', function () {
       });
     });
 
-    it('is "$saved" if the ID was provided', function () {
-      expect(new Model().$saved).to.be.false;
-      expect(new Model({id: uuid.v4()}).$saved).to.be.true;
+    it('is "$$saved" if the ID was provided', function () {
+      expect(new Model().$$saved).to.be.false;
+      expect(new Model({id: uuid.v4()}).$$saved).to.be.true;
     });
 
     it('stores new models in the cache', function () {
@@ -276,13 +276,13 @@ describe('ConvexModel', function () {
 
       beforeEach(function () {
         model.id = id;
-        model.$saved = true;
+        model.$$saved = true;
       });
 
       describe('#$fetch', function () {
 
         it('is a noop on an unsaved model', function () {
-          model.$saved = false;
+          model.$$saved = false;
           var promise = model.$fetch();
           $timeout.flush();
           expect(promise).to.eventually.equal(model);
@@ -327,7 +327,7 @@ describe('ConvexModel', function () {
         });
 
         it('sends a POST when the model is unsaved', function () {
-          model.$saved = false;
+          model.$$saved = false;
           $httpBackend
             .expectPOST('/items', {
               id: id
@@ -336,7 +336,7 @@ describe('ConvexModel', function () {
           model.$save();
           $httpBackend.flush();
           expect(model).to.have.property('name', 'Ben');
-          expect(model.$saved).to.be.true;
+          expect(model.$$saved).to.be.true;
         });
 
         it('excludes related data', function () {
@@ -365,7 +365,7 @@ describe('ConvexModel', function () {
         });
 
         it('does not send requests if the model is unsaved', function () {
-          model.$saved = false;
+          model.$$saved = false;
           $httpBackend.resetExpectations();
           model.$delete();
         });
@@ -373,7 +373,7 @@ describe('ConvexModel', function () {
         it('deletes saved models from the server', function () {
           model.$delete();
           $httpBackend.flush();
-          expect(model.$saved).to.be.false;
+          expect(model.$$saved).to.be.false;
         });
 
         it('deletes saved models from the cache', function () {
