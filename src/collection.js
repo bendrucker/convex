@@ -1,20 +1,17 @@
 'use strict';
 
-var angular = require('angular');
+module.exports = function () {
 
-module.exports = function (Model) {
-  var array = [];
-
-  array.model = Model;
-  array.isCollection = true;
-
-  array.add = function (data, options) {
-    if (!angular.isArray(data)) data = [data];
-    array.push.apply(array, data.map(function (modelData) {
-      return new array.model(modelData, options);
-    }));
-    return array;
+  var ConvexCollection = function (Model) {
+    this.model = Model;
+    this.models = [];
   };
 
-  return array;
+  ConvexCollection.prototype.push = function (model) {
+    if (!(model instanceof this.Model) model = new this.model(model);
+    this.models.push.apply(this, model);
+  };
+
+  return ConvexCollection;
+  
 };
