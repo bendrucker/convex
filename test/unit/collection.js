@@ -48,4 +48,12 @@ describe('ConvexCollection', function () {
 
   });
 
+  describe('#asArray', function () {
+
+    it('returns the models', function () {
+      expect(collection.asArray()).to.equal(collection.models);
+    });
+
+  });
+
 });

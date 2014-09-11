@@ -19,6 +19,10 @@ module.exports = function () {
     return this;
   };
 
+  ConvexCollection.prototype.asArray = function () {
+    return this.models;
+  };
+
   return ConvexCollection;
   
 };
