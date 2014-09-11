@@ -29,11 +29,6 @@ describe('ConvexRelation', function () {
         .to.have.property('target', MockModel);
     });
 
-    it('sets the target name for easy access', function () {
-      expect(new Relation(null, 'MockModel'))
-        .to.have.property('targetName', 'mock');
-    });
-
     describe('key', function () {
 
       it('is the name for singular relations', function () {
@@ -44,12 +39,6 @@ describe('ConvexRelation', function () {
       it('is pluralized automatically for 1-to-many relations', function () {
         expect(new Relation('hasMany', 'MockModel'))
           .to.have.property('key', 'mocks');
-      });
-
-      it('is can use a custom plural', function () {
-        MockModel.prototype.plural = 'mockies';
-        expect(new Relation('hasMany', 'MockModel'))
-          .to.have.property('key', 'mockies');
       });
 
     });
@@ -70,53 +59,44 @@ describe('ConvexRelation', function () {
 
   describe('#initialize', function () {
 
-    describe('n-to-1 relations', function () {
+    describe('belongsTo', function () {
 
-      it('returns a new related model using the foreign key', function () {
-        expect(new Relation('belongsTo', 'MockModel').initialize({
-          mock_id: 0
-        }))
-        .to.be.an.instanceOf(MockModel);
-        expect(MockModel).to.have.been.calledWithMatch({id: 0});
+      var model, relation;
+      beforeEach(function () {
+        model = {};
+        relation = new Relation('belongsTo', 'MockModel');
       });
 
-      it('extends the model with existing data', function () {
-        expect(new Relation('belongsTo', 'MockModel').initialize({
-          mock: {
-            id: 0,
-            name: 'mock'
-          }
-        }))
-        .to.be.an.instanceOf(MockModel)
-        .and.to.contain({
-          id: 0,
-          name: 'mock'
-        });
+      it('creates a related object using an existing foreign key', function () {
+        model.mock_id = 'i';
+        relation.initialize(model);
+        expect(model.mock).to.be.an.instanceOf(MockModel);
+        expect(MockModel).to.have.been.calledWith({id: 'i'});
       });
 
-    });
-
-    describe('n-to-many relations', function () {
-
-      it('returns a collection', function () {
-        expect(new Relation('hasMany', 'MockModel').initialize({}))
-          .to.have.property('isCollection', true);
+      it('references the related object for the foreign key', function () {
+        relation.initialize(model);
+        model.mock = {id: 'foo'};
+        expect(model.mock_id).to.equal('foo');
       });
 
-      it('casts an existing collection of data', function () {
-        expect(new Relation('hasMany', 'MockModel').initialize({
-          mocks: [
-            {id: 0},
-            {id: 1}
-          ]
-        }))
-        .to.have.length(2);
-        expect(MockModel)
-          .to.have.been.calledWithMatch({id: 0})
-          .and.calledWithMatch({id: 1});
+      it('creates a new related object when changing the key', function () {
+        relation.initialize(model);
+        model.mock_id = 'bar';
+        expect(model.mock).to.be.an.instanceOf(MockModel);
+        expect(MockModel).to.have.been.calledWithMatch({id: 'bar'});
       });
 
-    });
+      it('is a noop when setting the key is a noop', function () {
+        model.mock_id = 'bar';
+        relation.initialize(model);
+        model.mock.id = 'bar'; // normally set by model ctor
+        var mock = model.mock;
+        model.mock_id = 'bar';
+        expect(model.mock).to.equal(mock);
+      });
+
+    });    
 
   });
 

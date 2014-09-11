@@ -1,34 +1,43 @@
 'use strict';
 
-var angular           = require('angular');
-var collectionFactory = require('./collection');
+var internals         = {};
+
+internals.key = function (Model, singular) {
+  var name = Model.prototype.$name;
+  return singular ? name : name + 's';
+};
 
 module.exports = function ($injector) {
-  
+
   var ConvexRelation = function (type, target) {
     this.type = type;
     this.target = $injector.get(target);
-    this.targetName = this.target.prototype.$name;
-    this.key = this.isSingle() ? 
-      this.targetName : this.target.prototype.plural || this.targetName + 's';
+    this.key = internals.key(this.target, this.isSingle());
   };
 
   ConvexRelation.prototype.isSingle = function () {
-    return this.type === 'belongsTo';
+    return this.type === 'belongsTo' || this.type === 'hasOne';
   };
 
-  ConvexRelation.prototype.initialize = function (parent) {
-    var data = parent[this.key], relation;
-    if (this.isSingle()) {
-      relation = new this.target({
-        id: parent[this.targetName + '_id']
+  ConvexRelation.prototype.initialize = function (model) {
+    var relation = this;
+    if (this.type === 'belongsTo') {
+      var key = this.key + '_id';
+      if (model[key]) {
+        model[this.key] = new this.target({id: model[key]});
+      }
+      Object.defineProperty(model, key, {
+        get: function () {
+          return this[relation.key].id;
+        },
+        set: function (id) {
+          if (!this[relation.key] || this[relation.key].id !== id) {
+            this[relation.key] = new relation.target({id: id});
+          }
+        },
+        enumerable: true
       });
-      angular.extend(relation, data);
-    } else {
-      relation = collectionFactory(this.target);
-      if (data) relation.add(data);
     }
-    return relation;
   };
 
   return ConvexRelation;
