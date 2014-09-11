@@ -455,7 +455,7 @@ describe('ConvexModel', function () {
           $httpBackend.flush();
         });
 
-        it('can handle relations', function () {
+        xit('can handle relations', function () {
           $httpBackend
             .expectGET(url + encodeBrackets('&expand[0]=related'))
             .respond(200, res);
