@@ -8,8 +8,15 @@ module.exports = function () {
   };
 
   ConvexCollection.prototype.push = function (model) {
-    if (!(model instanceof this.Model) model = new this.model(model);
-    this.models.push.apply(this, model);
+    var models = arguments;
+    if (!(model instanceof this.model)) {
+      models = Array.prototype.splice.call(arguments, 0)
+        .map(function (data) {
+          return new this.model(data);
+        }, this);
+    }
+    this.models.push.apply(this.models, models);
+    return this;
   };
 
   return ConvexCollection;

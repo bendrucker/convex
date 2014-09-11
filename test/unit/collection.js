@@ -1,44 +1,49 @@
 'use strict';
 
-var angular           = require('angular');
-var collectionFactory = require('../../src/collection');
+var angular = require('angular');
 
-describe('Collection', function () {
+describe('ConvexCollection', function () {
 
-  var Model, collection;
-  beforeEach(function () {
+  beforeEach(angular.mock.module(require('../../')));
+
+  var Model, ConvexCollection, collection;
+  beforeEach(angular.mock.inject(function (_ConvexCollection_) {
+    ConvexCollection = _ConvexCollection_;
     Model = sinon.stub();
-    collection = collectionFactory(Model);
-  });
+    collection = new ConvexCollection(Model);
+  }));
 
-  it('returns an array with a reference to the model', function () {
-    expect(collection)
-      .to.be.an.instanceOf(Array)
-      .and.to.have.property('model', Model);
-  });
+  describe('Constructor', function () {
 
-  it('identifies itself as a collection', function () {
-    expect(collection.isCollection).to.be.true;
-  });
-
-  describe('#add', function () {
-
-    it('casts model data and pushes it to the array', function () {
-      var data = {foo: 'bar'};
-      var options = {};
-      Model.withArgs(data, options).returns(angular.extend(data, {id: 0}));
-      expect(collection.add(data, options)).to.equal(collection);
-      expect(collection).to.have.length(1);
-      expect(Model).to.have.been.calledWithNew;
-      expect(collection[0]).to.deep.equal({
-        id: 0,
-        foo: 'bar'
-      });
+    it('sets the model constructor', function () {
+      expect(collection).to.have.property('model', Model);
     });
 
-    it('can handle multiple models', function () {
-      collection.add([{foo: 'bar'}, {baz: 'qux'}]);
-      expect(collection).to.have.length(2);
+    it('creates an empty array of models', function () {
+      expect(collection)
+        .to.have.a.property('models')
+        .that.is.an('array')
+        .and.is.empty;
+    });
+
+  });
+
+  describe('#push', function () {
+
+    it('can receive plain objects', function () {
+      var data = [{foo: 'bar'}, {baz: 'qux'}];
+      collection.push.apply(collection, data);
+      expect(collection.models).to.have.length(2);
+      expect(Model).to.have.been.calledWith(data[0]);
+      expect(Model).to.have.been.calledWith(data[1]);
+    });
+
+    it('receive models', function () {
+      var data = [new Model(), new Model()];
+      Model.reset();
+      collection.push.apply(collection, data);
+      expect(collection.models).to.have.length(2);
+      expect(Model).to.not.have.been.called;
     });
 
   });
