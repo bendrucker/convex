@@ -27,17 +27,18 @@ module.exports = function (ConvexRequest, $q, convexConfig) {
       data: this
     })
     .send()
-    .then(function (responses) {
-      responses.forEach(function (response, index) {
-        batch.requests[index].fulfill(response);
-      });
-    })
     .catch(function (err) {
       batch.requests.forEach(function (request) {
         request.reject(err);
       });
       return $q.reject(err);
-    });
+    })
+    .then(function (responses) {
+      responses.forEach(function (response, index) {
+        batch.requests[index].fulfill(response);
+      });
+      return batch.requests;
+    });    
   };
 
   return ConvexBatch;

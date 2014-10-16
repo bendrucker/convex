@@ -92,6 +92,11 @@ describe('ConvexBatch', function () {
       expect(request.reject).to.have.been.calledWith(err);
     });
 
+    it('resolves the requests', function () {
+      expect(batch.process()).to.eventually.equal(batch.requests);
+      $timeout.flush();
+    });
+
   });
 
 });
