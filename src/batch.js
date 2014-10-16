@@ -37,7 +37,7 @@ module.exports = function (ConvexRequest, $q, convexConfig) {
       responses.forEach(function (response, index) {
         batch.requests[index].fulfill(response);
       });
-      return batch.requests;
+      return $q.all(batch.requests);
     });    
   };
 
