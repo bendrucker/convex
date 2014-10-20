@@ -177,7 +177,6 @@ describe('ConvexModel', function () {
   describe('#$reset', function () {
 
     it('deletes the own properties of the model', function () {
-      model.id = uuid.v4();
       model.$reset();
       expect(model).to.not.have.property('id');
       expect(model).to.have.property('$$cache');
