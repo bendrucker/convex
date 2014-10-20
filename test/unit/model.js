@@ -184,6 +184,19 @@ describe('ConvexModel', function () {
 
   });
 
+  describe('#clone', function () {
+
+    it('clones the data to a new model', function () {
+      model.foo = {
+        bar: 'baz'
+      };
+      var cloned = model.$clone();
+      expect(cloned.id).to.not.equal(model.id);
+      expect(cloned.foo).to.equal(model.foo);
+    });
+
+  });
+
   describe('#toJSON', function () {
 
     it('only includes own properties', function () {

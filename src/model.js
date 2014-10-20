@@ -83,6 +83,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     Child.prototype.$name = proto.name;
     delete Child.prototype.name;
     Child.prototype.$$cache = new ConvexCache(proto.name);
+    Child.prototype.constructor = Child;
 
     return Child;
   };
@@ -102,6 +103,15 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
       if (this.hasOwnProperty(property)) delete this[property];
     }
     return this;
+  };
+
+  ConvexModel.prototype.$clone = function () {
+    var data = {};
+    for (var property in this) {
+      if (this.hasOwnProperty(property)) data[property] = this[property];
+    }
+    data.id = void 0;
+    return new this.constructor(data);
   };
 
   ConvexModel.prototype.toJSON = function () {
