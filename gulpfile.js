@@ -35,7 +35,7 @@ gulp.task('test', function () {
     },
     reporters: ['progress', 'coverage'],
     browsers: ['PhantomJS'],
-    singleRun: true
+    singleRun: !!process.env.CI
   });
 });
 
