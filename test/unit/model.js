@@ -131,6 +131,15 @@ describe('ConvexModel', function () {
 
   });
 
+  describe('#$set', function () {
+
+    it('can set simple data', function () {
+      model.$set({foo: 'bar'});
+      expect(model.foo).to.equal('bar');
+    });
+
+  });
+
   describe('#$path', function () {
 
     it('generates the collection endpoint', function () {
