@@ -6,7 +6,7 @@ var pick      = require('lodash.pick');
 
 module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRelation, ConvexCollection) {
 
-  function ConvexModel (attributes, options) {
+  function ConvexModel (attributes) {
     // internals.relations(this, options);
     attributes = attributes || {};
     if (!attributes.id) {

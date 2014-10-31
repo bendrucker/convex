@@ -5,7 +5,7 @@ var uuid    = require('node-uuid');
 
 describe('ConvexModel', function () {
 
-  var ConvexModel, Model, model, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
+  var ConvexModel, Model, Related1, Related2, model, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(angular.mock.module(function ($provide) {
     $provide.decorator('ConvexRequest', function ($delegate) {
