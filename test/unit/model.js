@@ -322,17 +322,32 @@ describe('ConvexModel', function () {
           expect(model).to.have.property('name', 'Ben');
         });
 
-        xit('can handle relations', function () {
+        it('can handle relations', function () {
           $httpBackend
             .expectGET(url + encodeBrackets('?expand[0]=rel1&expand[1]=rel2'))
-            .respond(200, res);
+            .respond(200, {
+              id: id,
+              name: 'Ben',
+              rel1_id: 1,
+              rel2_id: 2,
+              rel1: {
+                id: 1,
+                foo: 'bar'
+              },
+              rel2: {
+                id: 1,
+                bar: 'baz'
+              }
+            });
           model.$fetch({
             expand: ['rel1', 'rel2']
           });
           $httpBackend.flush();
-          expect(model.$related)
-            .to.have.been.calledWith('rel1')
-            .and.calledWith('rel2');
+          expect(model.rel1_id).to.equal(1);
+          expect(model.rel1).to.contain({
+            id: 1,
+            foo: 'bar'
+          });
         });
 
       });
@@ -448,14 +463,10 @@ describe('ConvexModel', function () {
 
     });
 
-    xdescribe('Collection', function () {
+    describe('Collection', function () {
 
       var url = '/items?condition=true';
       var res = [{id: uuid.v4()}, {id: uuid.v4()}];
-
-      beforeEach(function () {
-        sinon.stub(Model.prototype, '$related');
-      });
 
       describe('#$where', function () {
 
@@ -479,22 +490,21 @@ describe('ConvexModel', function () {
           $httpBackend.flush();
         });
 
-        xit('can handle relations', function () {
+        it('can handle relations', function () {
           var response = [{
             id: uuid.v4(),
-            related: {
+            rel1: {
               id: uuid.v4(),
               foo: 'bar'
             }
           }];
           $httpBackend
-            .expectGET(url + encodeBrackets('&expand[0]=related'))
+            .expectGET(url + encodeBrackets('&expand[0]=rel1'))
             .respond(200, response);
-          Model.$where({condition: true}, {expand: ['related']})
+          Model.$where({condition: true}, {expand: ['rel1']})
             .then(function (models) {
               model = models[0];
-              console.log(model.related_id);
-              expect(model.related_id).to.equal(response[0].related.id);
+              expect(model.rel1_id).to.equal(response[0].rel1.id);
             });
           $httpBackend.flush();
         });
@@ -523,17 +533,6 @@ describe('ConvexModel', function () {
           var promise = Model.$find({condition: true});
           $httpBackend.flush();
           expect(promise).to.be.rejected;
-        });
-
-        it('can handle relations', function () {
-          $httpBackend
-            .expectGET(url + encodeBrackets('&expand[0]=related'))
-            .respond(200, res);
-          Model.$find({condition: true}, {expand: ['related']})
-            .then(function (model) {
-              expect(model.$related).to.have.been.calledWith('related');
-            });
-          $httpBackend.flush();
         });
 
       });
@@ -584,37 +583,6 @@ describe('ConvexModel', function () {
           target: fn,
           type: 'hasMany'
         });
-    });
-
-    xdescribe('#$related', function () {
-
-      it('returns a related model if already defined', function () {
-        var child = new Model();
-        model.child = child;
-        expect(model.$related('child')).to.equal(child);
-      });
-
-      it('returns a related collection if already defined', function () {
-        var child = {
-          isCollection: true
-        };
-        model.child = child;
-        expect(model.$related('child')).to.equal(child);
-      });
-
-      it('otherwise instantiates a new related model and returns it', function () {
-        model.$$relations = {
-          child: {
-            initialize: sinon.spy()
-          }
-        };
-        var related = model.$related('child');
-        expect(related)
-          .to.equal(model.$$relations.child.initialize.firstCall.returnValue);
-        expect(model.child).to.equal(related);
-        expect(model.$$relations.child.initialize).to.have.been.calledWith(model);
-      });
-
     });
 
   });
