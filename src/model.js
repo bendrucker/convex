@@ -41,8 +41,8 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   };
 
   function ConvexModel (attributes, options) {
-    angular.extend(this, attributes);
-    internals.relations(this, options);
+    this.$set(attributes);
+    // internals.relations(this, options);
     if (!this.id) {
       this.$$saved = false;
       this.id = uuid.v4();
@@ -52,13 +52,17 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     }
     var cached = this.$$cache.get(this.id);
     if (cached) {
-      return angular.extend(cached, attributes);
+      return cached.$set(attributes);
     }
     else {
       if (this.$initialize) this.$initialize();
       this.$$cache.put(this.id, this);
     }
   }
+
+  ConvexModel.prototype.$set = function (attributes) {
+    return angular.extend(this, attributes);
+  };
 
   ConvexModel.$new = function (proto, ctor) {
     var Parent = this;
@@ -219,28 +223,20 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return this.$where(null, options);
   };
 
-  internals.relationStore = function (Model) {
-    return Model.prototype.$$relations || (Model.prototype.$$relations = {});
-  };
+  function relations () {
+    return this.prototype.$$relations || (this.prototype.$$relations = {});
+  }
 
   ConvexModel.belongsTo = function (Target) {
     var relation = new ConvexRelation('belongsTo', Target);
-    internals.relationStore(this)[relation.key] = relation;
+    relations.call(this)[relation.key] = relation;
     return this;
   };
 
   ConvexModel.hasMany = function (Target) {
     var relation = new ConvexRelation('hasMany', Target);
-    internals.relationStore(this)[relation.key] = relation;
+    relations.call(this)[relation.key] = relation;
     return this;
-  };
-
-  ConvexModel.prototype.$related = function (name) {
-    if (this[name] && (this[name] instanceof ConvexModel || this[name].isCollection)) {
-      return this[name];
-    } else {
-      return (this[name] = this.$$relations[name].initialize(this));
-    }
   };
 
   return ConvexModel;
