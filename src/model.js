@@ -3,7 +3,6 @@
 var angular   = require('angular');
 var uuid      = require('node-uuid');
 var pick      = require('lodash.pick');
-var internals = {};
 
 module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRelation, ConvexCollection) {
 
@@ -94,12 +93,12 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return Child;
   };
 
-  internals.plural = function (model) {
+  function plural (model) {
     return model.$plural || model.$name + 's';
-  };
+  }
 
   ConvexModel.prototype.$path = function (id) {
-    var path = '/' + internals.plural(this);
+    var path = '/' + plural(this);
     if (id) path += ('/' + id);
     return path;
   };
@@ -190,31 +189,31 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return batch.process();
   };
 
-  internals.query = function (Model, attributes, options) {
+  function query (Model, attributes, options) {
     return Model.prototype.$request({
       method: 'get',
       path: Model.prototype.$path(),
       params: attributes
     }, options);
-  };
+  }
 
-  internals.cast = function (Model, data) {
+  function cast (Model, data) {
     var collection = new ConvexCollection(Model);
     collection.$push.apply(collection, data);
     return collection;
-  };
+  }
 
   ConvexModel.$where = function (attributes, options) {
     var Model = this;
-    return internals.query(this, attributes, options)
+    return query(this, attributes, options)
       .then(function (data) {
-        return internals.cast(Model, data);
+        return cast(Model, data);
       });
   };
 
   ConvexModel.$find = function (attributes, options) {
     var Model = this;
-    return internals.query(this, attributes, options)
+    return query(this, attributes, options)
       .then(function (data) {
         return data.length ? data[0] : $q.reject('Not found');
       })
