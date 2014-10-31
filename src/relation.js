@@ -11,7 +11,7 @@ module.exports = function ($injector) {
 
   function ConvexRelation (type, target) {
     this.type = type;
-    this.target = $injector.get(target);
+    this.target = typeof target === 'function' ? target : $injector.get(target);
     this.key = internals.key(this.target, this.isSingle());
   }
 
