@@ -9,11 +9,11 @@ internals.key = function (Model, singular) {
 
 module.exports = function ($injector) {
 
-  var ConvexRelation = function (type, target) {
+  function ConvexRelation (type, target) {
     this.type = type;
     this.target = $injector.get(target);
     this.key = internals.key(this.target, this.isSingle());
-  };
+  }
 
   ConvexRelation.prototype.isSingle = function () {
     return this.type === 'belongsTo' || this.type === 'hasOne';

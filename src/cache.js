@@ -12,10 +12,10 @@ module.exports = function ($cacheFactory, $window) {
     clear: angular.noop
   };
   
-  var ConvexCache = function (name) {
+  function ConvexCache (name) {
     this.$name = prefix + name;
     this.$$cache = $cacheFactory(this.$name);
-  };
+  }
 
   ConvexCache.prototype.put = function (key, value, persist) {
     if (persist) localStorage.setItem(prefix + key, angular.toJson(value));

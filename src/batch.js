@@ -2,9 +2,9 @@
 
 module.exports = function (ConvexRequest, $q, convexConfig) {
 
-  var ConvexBatch = function () {
+  function ConvexBatch () {
     this.requests = [];
-  };
+  }
 
   ConvexBatch.prototype.parallel = true;
 

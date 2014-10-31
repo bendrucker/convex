@@ -7,10 +7,10 @@ var internals = {};
 
 module.exports = function ($http, $q, ConvexCache, convexConfig) {
 
-  var ConvexRequest = function (config) {
+  function ConvexRequest (config) {
     this.config = internals.config(config);
     this.deferred = $q.defer();
-  };
+  }
 
   internals.qs = function (params) {
     if (Object.keys(params).length) {

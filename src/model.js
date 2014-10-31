@@ -40,7 +40,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return model;
   };
 
-  var ConvexModel = function (attributes, options) {
+  function ConvexModel (attributes, options) {
     angular.extend(this, attributes);
     internals.relations(this, options);
     if (!this.id) {
@@ -58,7 +58,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
       if (this.$initialize) this.$initialize();
       this.$$cache.put(this.id, this);
     }
-  };
+  }
 
   ConvexModel.$new = function (proto, ctor) {
     var Parent = this;
@@ -191,7 +191,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   };
 
   internals.cast = function (Model, data) {
-    var collection = new ConvexCollection(Model)
+    var collection = new ConvexCollection(Model);
     collection.$push.apply(collection, data);
     return collection;
   };
