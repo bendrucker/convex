@@ -16,24 +16,23 @@ describe('ConvexCollection', function () {
   describe('Constructor', function () {
 
     it('sets the model constructor', function () {
-      expect(collection).to.have.property('model', Model);
+      expect(collection).to.have.property('$$model', Model);
     });
 
     it('creates an empty array of models', function () {
       expect(collection)
-        .to.have.a.property('models')
-        .that.is.an('array')
-        .and.is.empty;
+        .to.be.an('array')
+        .that.is.empty;
     });
 
   });
 
-  describe('#push', function () {
+  describe('#$push', function () {
 
     it('can receive plain objects', function () {
       var data = [{foo: 'bar'}, {baz: 'qux'}];
-      collection.push.apply(collection, data);
-      expect(collection.models).to.have.length(2);
+      collection.$push.apply(collection, data);
+      expect(collection).to.have.length(2);
       expect(Model).to.have.been.calledWith(data[0]);
       expect(Model).to.have.been.calledWith(data[1]);
     });
@@ -41,17 +40,9 @@ describe('ConvexCollection', function () {
     it('receive models', function () {
       var data = [new Model(), new Model()];
       Model.reset();
-      collection.push.apply(collection, data);
-      expect(collection.models).to.have.length(2);
+      collection.$push.apply(collection, data);
+      expect(collection).to.have.length(2);
       expect(Model).to.not.have.been.called;
-    });
-
-  });
-
-  describe('#asArray', function () {
-
-    it('returns the models', function () {
-      expect(collection.asArray()).to.equal(collection.models);
     });
 
   });

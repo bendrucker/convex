@@ -192,8 +192,8 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
 
   internals.cast = function (Model, data) {
     var collection = new ConvexCollection(Model)
-    collection.push.apply(collection, data);
-    return collection.asArray();
+    collection.$push.apply(collection, data);
+    return collection;
   };
 
   ConvexModel.$where = function (attributes, options) {
