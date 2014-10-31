@@ -1,8 +1,9 @@
 'use strict';
 
-var angular           = require('angular');
-var uuid              = require('node-uuid');
-var internals         = {};
+var angular   = require('angular');
+var uuid      = require('node-uuid');
+var pick      = require('lodash.pick');
+var internals = {};
 
 module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRelation, ConvexCollection) {
 
@@ -72,8 +73,38 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   }
 
   ConvexModel.prototype.$set = function (attributes) {
-    // if ()
-    return angular.extend(this, attributes);
+    var self = this;
+    var properties = Object.keys(attributes || {}).reduce(function (acc, key) {
+      if (self.$$relations && self.$$relations[key]) {
+        acc.related.push(key);
+      }
+      else if (/_id$/.test(key)) {
+        acc.foreignKeys.push(key);
+      }
+      else {
+        acc.data.push(key);
+      }
+      return acc;
+    },
+    {
+      data: [],
+      foreignKeys: [],
+      related: []
+    });
+    angular.extend(this, pick(attributes, properties.foreignKeys));
+    angular.extend(this, pick(attributes, properties.data));
+    properties.related.forEach(function (property) {
+      var relation = self.$$relations[property];
+      var key = relation.key;
+      var relatedData = attributes[property];
+      if (self[key]) {
+        self[key].$set(relatedData);
+      }
+      else {
+        self[key] = new relation.target(relatedData);
+      }
+    }, this);
+    return this;
   };
 
   ConvexModel.$new = function (proto, ctor) {

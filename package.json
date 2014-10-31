@@ -53,6 +53,7 @@
     "angular": "global:angular"
   },
   "dependencies": {
+    "lodash.pick": "~2.4.1",
     "node-uuid": "~1.4.1",
     "qs": "~1.2.1"
   }

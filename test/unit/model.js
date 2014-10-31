@@ -167,15 +167,18 @@ describe('ConvexModel', function () {
     });
 
     it('can handle models with existing nested objects', function () {
-      model.rel1 = {
+      model.rel1 = new Related1({
         id: 1
-      };
+      });
       model.$set({
         rel1: {
           foo: 'bar'
         }
       });
-      expect(model.rel1).to.have.property('id');
+      expect(model.rel1).to.contain({
+        id: 1,
+        foo: 'bar'
+      });
     });
 
   });
