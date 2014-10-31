@@ -55,6 +55,9 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
       return cached.$set(attributes);
     }
     else {
+      this.$$relations.forEach(function (relation) {
+        relation.initialize(this);
+      }, this);
       this.$set(attributes);
       if (this.$initialize) this.$initialize();
       this.$$cache.put(this.id, this);
@@ -62,6 +65,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   }
 
   ConvexModel.prototype.$set = function (attributes) {
+    // if ()
     return angular.extend(this, attributes);
   };
 
@@ -225,7 +229,15 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   };
 
   function relations () {
-    return this.prototype.$$relations || (this.prototype.$$relations = {});
+    return this.prototype.$$relations || (this.prototype.$$relations = {
+      forEach: function (callback, ctx) {
+        for (var relation in this) {
+          if (relation !== 'forEach') {
+            callback.call(ctx, this[relation]);            
+          }
+        }
+      }
+    });
   }
 
   ConvexModel.belongsTo = function (Target) {

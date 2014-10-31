@@ -25,11 +25,7 @@ module.exports = function ($injector) {
   ConvexRelation.prototype.initialize = function (model) {
     var relation = this;
     if (this.type === 'belongsTo') {
-      var key = this.key + '_id';
-      if (model[key]) {
-        model[this.key] = new this.target({id: model[key]});
-      }
-      Object.defineProperty(model, key, {
+      Object.defineProperty(model, this.foreignKey, {
         get: function () {
           return this[relation.key].id;
         },

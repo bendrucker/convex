@@ -78,13 +78,6 @@ describe('ConvexRelation', function () {
         relation = new Relation('belongsTo', 'MockModel');
       });
 
-      it('creates a related object using an existing foreign key', function () {
-        model.mock_id = 'i';
-        relation.initialize(model);
-        expect(model.mock).to.be.an.instanceOf(MockModel);
-        expect(MockModel).to.have.been.calledWith({id: 'i'});
-      });
-
       it('references the related object for the foreign key', function () {
         relation.initialize(model);
         model.mock = {id: 'foo'};
@@ -99,9 +92,10 @@ describe('ConvexRelation', function () {
       });
 
       it('is a noop when setting the key is a noop', function () {
-        model.mock_id = 'bar';
         relation.initialize(model);
-        model.mock.id = 'bar'; // normally set by model ctor
+        model.mock = {
+          id: 'bar'
+        };
         var mock = model.mock;
         model.mock_id = 'bar';
         expect(model.mock).to.equal(mock);
