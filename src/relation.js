@@ -1,18 +1,21 @@
 'use strict';
 
-var internals         = {};
+function name (Model) {
+  return Model.prototype.$name;
+}
 
-internals.key = function (Model, singular) {
-  var name = Model.prototype.$name;
-  return singular ? name : name + 's';
-};
+function key (Model, singular) {
+  var k = name(Model);
+  return singular ? k : k + 's';
+}
 
 module.exports = function ($injector) {
 
   function ConvexRelation (type, target) {
     this.type = type;
     this.target = typeof target === 'function' ? target : $injector.get(target);
-    this.key = internals.key(this.target, this.isSingle());
+    this.foreignKey = this.isSingle() ? name(this.target) + '_id' : null;
+    this.key = key(this.target, this.isSingle());
   }
 
   ConvexRelation.prototype.isSingle = function () {

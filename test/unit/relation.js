@@ -35,6 +35,11 @@ describe('ConvexRelation', function () {
         .to.have.property('target', MockModel);
     });
 
+    it('sets a foreign key for single relations', function () {
+      expect(new Relation('belongsTo', 'MockModel'))
+        .to.have.property('foreignKey', 'mock_id');
+    });
+
     describe('key', function () {
 
       it('is the name for singular relations', function () {
