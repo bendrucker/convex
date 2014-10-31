@@ -7,40 +7,6 @@ var internals = {};
 
 module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRelation, ConvexCollection) {
 
-  internals.depth = function (string) {
-    return (string.match(/\./g) || []).length;
-  };
-
-  internals.relation = function (base, relation) {
-    var parent = base;
-    for (var i = 0; i < relation.depth - 1; i++) {
-      var child = relation.segments[i];
-      parent = parent.$related(child);
-    }
-  };
-
-  internals.relations = function (model, options) {
-    if (options && options.expand) {
-      options.expand
-        .map(function (relation) {
-          var segments = relation.split('.');
-          return {
-            accessor: relation,
-            depth: segments.length + 1,
-            segments: segments
-          };
-        })
-        .sort(function ($1, $2) {
-          var diff = $2.depth - $1.depth;
-          if (diff === 0) return 0;
-          if (diff < 0) return -1;
-          if (diff > 0) return 1;
-        })
-        .forEach(angular.bind(null, internals.relation, model));
-    }
-    return model;
-  };
-
   function ConvexModel (attributes, options) {
     // internals.relations(this, options);
     attributes = attributes || {};
@@ -181,10 +147,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
       path: this.$path(this.id)
     }, options)
     .then(function (response) {
-      return angular.extend(model, response);
-    })
-    .then(function (model) {
-      return internals.relations(model, options);
+      return model.$set(response);
     });
   };
 
@@ -197,10 +160,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     }, options)
     .then(function (response) {
       model.$$saved = true;
-      return angular.extend(model, response);
-    })
-    .then(function (model) {
-      return internals.relations(model, options);
+      return model.$set(response);
     });
   };
 
