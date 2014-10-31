@@ -23,6 +23,7 @@ describe('ConvexCollection', function () {
       expect(collection)
         .to.be.an('array')
         .that.is.empty;
+      expect(angular.isArray(collection)).to.be.true;
     });
 
   });
