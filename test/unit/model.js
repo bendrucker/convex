@@ -8,9 +8,6 @@ describe('ConvexModel', function () {
   var ConvexModel, Model, model, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(angular.mock.module(function ($provide) {
-    $provide.factory('ConvexRelation', function () {
-      return sinon.stub();
-    });
     $provide.decorator('ConvexRequest', function ($delegate) {
       return sinon.spy($delegate);
     });
@@ -424,7 +421,7 @@ describe('ConvexModel', function () {
 
     });
 
-    describe('Collection', function () {
+    xdescribe('Collection', function () {
 
       var url = '/items?condition=true';
       var res = [{id: uuid.v4()}, {id: uuid.v4()}];
@@ -456,12 +453,21 @@ describe('ConvexModel', function () {
         });
 
         xit('can handle relations', function () {
+          var response = [{
+            id: uuid.v4(),
+            related: {
+              id: uuid.v4(),
+              foo: 'bar'
+            }
+          }];
           $httpBackend
             .expectGET(url + encodeBrackets('&expand[0]=related'))
-            .respond(200, res);
+            .respond(200, response);
           Model.$where({condition: true}, {expand: ['related']})
             .then(function (models) {
-              expect(models[0].$related).to.have.been.calledWith('related');
+              model = models[0];
+              console.log(model.related_id);
+              expect(model.related_id).to.equal(response[0].related.id);
             });
           $httpBackend.flush();
         });
@@ -530,26 +536,27 @@ describe('ConvexModel', function () {
 
   describe('Relations', function () {
 
+    var fn = function () {};
+    fn.prototype.$name = 'foo';
+
     it('can create a belongsTo relation', function () {
-      ConvexRelation.returns({
-        key: 'target'
-      });
-      Model.belongsTo('Target');
+      Model.belongsTo(fn);
       expect(Model.prototype.$$relations)
-        .to.have.property('target')
-        .that.equals(ConvexRelation.firstCall.returnValue);
-      expect(ConvexRelation).to.have.been.calledWithNew;
+        .to.have.property('foo')
+        .and.contain({
+          target: fn,
+          type: 'belongsTo'
+        });
     });
 
     it('can create a hasMany relation', function () {
-      ConvexRelation.returns({
-        key: 'targets'
-      });
-      Model.hasMany('Target');
+      Model.hasMany(fn);
       expect(Model.prototype.$$relations)
-        .to.have.property('targets')
-        .that.equals(ConvexRelation.firstCall.returnValue);
-      expect(ConvexRelation).to.have.been.calledWithNew;
+        .to.have.property('foos')
+        .and.contain({
+          target: fn,
+          type: 'hasMany'
+        });
     });
 
     describe('#$related', function () {
