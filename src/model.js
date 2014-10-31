@@ -73,7 +73,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return this;
   };
 
-  ConvexModel.$new = function (proto, ctor) {
+  ConvexModel.extend = function (proto, ctor) {
     var Parent = this;
     var Child = function () {
       return Parent.apply(this, arguments);
@@ -89,6 +89,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     Child.prototype.$name = proto.name;
     delete Child.prototype.name;
     Child.prototype.$$cache = new ConvexCache(proto.name);
+    Child.prototype.$$relations = {};
 
     return Child;
   };
@@ -226,19 +227,15 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return this.$where(null, options);
   };
 
-  function relations () {
-    return this.prototype.$$relations || (this.prototype.$$relations = {});
-  }
-
   ConvexModel.belongsTo = function (Target) {
     var relation = new ConvexRelation('belongsTo', Target);
-    relations.call(this)[relation.key] = relation;
+    this.prototype.$$relations[relation.key] = relation;
     return this;
   };
 
   ConvexModel.hasMany = function (Target) {
     var relation = new ConvexRelation('hasMany', Target);
-    relations.call(this)[relation.key] = relation;
+    this.prototype.$$relations[relation.key] = relation;
     return this;
   };
 

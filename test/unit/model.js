@@ -22,14 +22,14 @@ describe('ConvexModel', function () {
     $timeout = $injector.get('$timeout');
   }));
   beforeEach(function () {
-    Model = ConvexModel.$new({name: 'item'});
-    Related1 = ConvexModel.$new({name: 'rel1'});
-    Related2 = ConvexModel.$new({name: 'rel2'});
+    Model = ConvexModel.extend({name: 'item'});
+    Related1 = ConvexModel.extend({name: 'rel1'});
+    Related2 = ConvexModel.extend({name: 'rel2'});
     Model.belongsTo(Related1).belongsTo(Related2);
     model = new Model();
   });
 
-  describe('ConvexModel#$new', function () {
+  describe('ConvexModel#extend', function () {
 
     var MockBase;
     beforeEach(function () {
@@ -37,51 +37,56 @@ describe('ConvexModel', function () {
       MockBase.prototype = {
         name: 'models'
       };
-      MockBase.$new = ConvexModel.$new;
+      MockBase.extend = ConvexModel.extend;
     });
 
     it('calls the parent in the child constructor', function () {
-      var child = new (MockBase.$new({name: 'm'}))('a1', 'a2');
+      var child = new (MockBase.extend({name: 'm'}))('a1', 'a2');
       expect(MockBase)
         .to.have.been.calledOn(child)
         .and.calledWith('a1', 'a2');
     });
 
     it('copies the parent prototype', function () {
-      expect(MockBase.$new({name: 'm'}).prototype)
+      expect(MockBase.extend({name: 'm'}).prototype)
         .to.contain(MockBase.prototype);
     });
 
     it('extends the prototype with new properties', function () {
-      expect(MockBase.$new({name: 'm', foo: 'bar'}).prototype)
+      expect(MockBase.extend({name: 'm', foo: 'bar'}).prototype)
         .to.have.property('foo', 'bar');
     });
 
     it('extends the constructor with the parent', function () {
       MockBase.foo = 'bar';
-      expect(MockBase.$new({name: 'm'})).to.have.property('foo', 'bar');
+      expect(MockBase.extend({name: 'm'})).to.have.property('foo', 'bar');
     });
 
     it('extends the constructor with new methods', function () {
-      expect(MockBase.$new({name: 'm'}, {foo: 'bar'}))
+      expect(MockBase.extend({name: 'm'}, {foo: 'bar'}))
         .to.have.property('foo', 'bar');
     });
 
     it('requires a name on the prototype', function () {
       expect(function () {
-        ConvexModel.$new();
+        ConvexModel.extend();
       }).to.throw(/must have a name/);
     });
 
     it('assigns the name as $name', function () {
-      expect(ConvexModel.$new({name: 'm'}).prototype)
+      expect(ConvexModel.extend({name: 'm'}).prototype)
         .to.have.property('$name', 'm');
     });
 
     it('creates a new cache for the child model', function () {
-      var Child = ConvexModel.$new({name: 'model'});
+      var Child = ConvexModel.extend({name: 'model'});
       expect(Child.prototype.$$cache).to.exist;
       expect(Child.prototype.$$cache.$name).to.equal('convex-model');
+    });
+
+    it('creates a relation store for the child model', function () {
+      var Child = ConvexModel.extend({name: 'model'});
+      expect(Child.prototype.$$relations).to.be.empty;
     });
 
   });
