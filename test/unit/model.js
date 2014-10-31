@@ -146,11 +146,37 @@ describe('ConvexModel', function () {
         .with.property('id', 1);
     });
 
-    it('can handle data with new nested objects');
+    it('can handle data with new nested objects', function () {
+      model.$set({
+        rel1: {
+          foo: 'bar'
+        }
+      });
+      expect(model.rel1).to.have.property('foo', 'bar');
+      expect(model.rel1).to.have.property('id');
+    });
 
-    it('can handle data with foreign keys and new nested objects');
+    it('can handle data with foreign keys and new nested objects', function () {
+      model.$set({
+        rel1_id: 1,
+        rel1: {
+          id: 1,
+          foo: 'bar'
+        }
+      });
+    });
 
-    it('can handle models with existing nested objects');
+    it('can handle models with existing nested objects', function () {
+      model.rel1 = {
+        id: 1
+      };
+      model.$set({
+        rel1: {
+          foo: 'bar'
+        }
+      });
+      expect(model.rel1).to.have.property('id');
+    });
 
   });
 
