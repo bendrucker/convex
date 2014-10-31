@@ -138,7 +138,13 @@ describe('ConvexModel', function () {
       expect(model.foo).to.equal('bar');
     });
 
-    it('can handle data with foreign keys');
+    it('can handle data with foreign keys', function () {
+      model.$set({rel1_id: 1});
+      expect(model)
+        .to.have.property('rel1')
+        .that.is.an.instanceOf(Related1)
+        .with.property('id', 1);
+    });
 
     it('can handle data with new nested objects');
 

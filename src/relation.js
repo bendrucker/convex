@@ -27,7 +27,8 @@ module.exports = function ($injector) {
     if (this.type === 'belongsTo') {
       Object.defineProperty(model, this.foreignKey, {
         get: function () {
-          return this[relation.key].id;
+          var related = this[relation.key];
+          return related ? related.id : void 0;
         },
         set: function (id) {
           if (!this[relation.key] || this[relation.key].id !== id) {

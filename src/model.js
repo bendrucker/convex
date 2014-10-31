@@ -55,12 +55,19 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
       return cached.$set(attributes);
     }
     else {
-      this.$$relations.forEach(function (relation) {
-        relation.initialize(this);
-      }, this);
+      initializeRelations(this);
       this.$set(attributes);
       if (this.$initialize) this.$initialize();
       this.$$cache.put(this.id, this);
+    }
+  }
+
+  function initializeRelations (model) {
+    var relations = model.$$relations;
+    if (relations) {
+      for (var relation in relations) {
+        relations[relation].initialize(model);
+      }
     }
   }
 
@@ -229,15 +236,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   };
 
   function relations () {
-    return this.prototype.$$relations || (this.prototype.$$relations = {
-      forEach: function (callback, ctx) {
-        for (var relation in this) {
-          if (relation !== 'forEach') {
-            callback.call(ctx, this[relation]);            
-          }
-        }
-      }
-    });
+    return this.prototype.$$relations || (this.prototype.$$relations = {});
   }
 
   ConvexModel.belongsTo = function (Target) {
