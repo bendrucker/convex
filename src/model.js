@@ -41,20 +41,21 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   };
 
   function ConvexModel (attributes, options) {
-    this.$set(attributes);
     // internals.relations(this, options);
-    if (!this.id) {
-      this.$$saved = false;
-      this.id = uuid.v4();
+    attributes = attributes || {};
+    if (!attributes.id) {
+      attributes.$$saved = false;
+      attributes.id = uuid.v4();
     }
     else {
-      this.$$saved = true;
+      attributes.$$saved = true;
     }
-    var cached = this.$$cache.get(this.id);
+    var cached = this.$$cache.get(attributes.id);
     if (cached) {
       return cached.$set(attributes);
     }
     else {
+      this.$set(attributes);
       if (this.$initialize) this.$initialize();
       this.$$cache.put(this.id, this);
     }
