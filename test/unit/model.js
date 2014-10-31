@@ -138,6 +138,14 @@ describe('ConvexModel', function () {
       expect(model.foo).to.equal('bar');
     });
 
+    it('can handle data with foreign keys');
+
+    it('can handle data with new nested objects');
+
+    it('can handle data with foreign keys and new nested objects');
+
+    it('can handle models with existing nested objects');
+
   });
 
   describe('#$path', function () {
@@ -247,6 +255,10 @@ describe('ConvexModel', function () {
 
       var id  = uuid.v4();
       var url = '/items/' + id;
+      var res = {
+        id: id,
+        name: 'Ben'
+      };
 
       beforeEach(function () {
         model.id = id;
@@ -264,16 +276,13 @@ describe('ConvexModel', function () {
         it('sends a GET and populates with the response', function () {
           $httpBackend
             .expectGET(url)
-            .respond(200, {
-              id: id,
-              name: 'Ben'
-            });
+            .respond(200, res);
           model.$fetch();
           $httpBackend.flush();
           expect(model).to.have.property('name', 'Ben');
         });
 
-        it('can handle relations', function () {
+        xit('can handle relations', function () {
           $httpBackend
             .expectGET(url + encodeBrackets('?expand[0]=rel1&expand[1]=rel2'))
             .respond(200, res);
