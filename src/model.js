@@ -205,17 +205,6 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
       });
   };
 
-  ConvexModel.$find = function (attributes, options) {
-    var Model = this;
-    return query(this, attributes, options)
-      .then(function (data) {
-        return data.length ? data[0] : $q.reject('Not found');
-      })
-      .then(function (data) {
-        return new Model(data, options);
-      });
-  };
-
   ConvexModel.$all = function (options) {
     return this.$where(null, options);
   };

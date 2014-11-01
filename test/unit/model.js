@@ -511,32 +511,6 @@ describe('ConvexModel', function () {
 
       });
 
-      describe('#$find', function () {
-
-        it('returns the first model of the results set', function () {
-          $httpBackend
-            .expectGET(url)
-            .respond(200, res);
-          Model.$find({condition: true})
-            .then(function (model) {
-              expect(model)
-                .to.be.an.instanceOf(Model)
-                .and.have.property('id', res[0].id);
-            });
-          $httpBackend.flush();
-        });
-
-        it('rejects with an empty result', function () {
-          $httpBackend
-            .expectGET(url)
-            .respond(200, []);
-          var promise = Model.$find({condition: true});
-          $httpBackend.flush();
-          expect(promise).to.be.rejected;
-        });
-
-      });
-
       describe('#$all', function () {
 
         it('sends a GET request to the collection url', function () {
