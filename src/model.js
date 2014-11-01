@@ -43,7 +43,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     Object.keys(attributes)
       .filter(function (key) {
         if (isForeignKey(key) || !hasRelation(model, key)) {
-          model[key] = attributes[key]
+          model[key] = attributes[key];
         }
         else {
           return true;
