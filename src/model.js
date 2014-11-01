@@ -192,14 +192,6 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return batch.process();
   };
 
-  function query (Model, attributes, options) {
-    return Model.prototype.$request({
-      method: 'get',
-      path: Model.prototype.$path(),
-      params: attributes
-    }, options);
-  }
-
   ConvexModel.$where = function (query, options) {
     return new ConvexCollection(this).$fetch(query, options);
   };
