@@ -30,17 +30,15 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
 
   function initializeRelations (model) {
     var relations = model.$$relations;
-    if (relations) {
-      for (var relation in relations) {
-        relations[relation].initialize(model);
-      }
-    }
+    Object.keys(relations).forEach(function (relation) {
+      relations[relation].initialize(model);
+    });
   }
 
   ConvexModel.prototype.$set = function (attributes) {
     var self = this;
-    var properties = Object.keys(attributes || {}).reduce(function (acc, key) {
-      if (self.$$relations && self.$$relations[key]) {
+    var properties = Object.keys(attributes).reduce(function (acc, key) {
+      if (self.$$relations[key]) {
         acc.related.push(key);
       }
       else if (/_id$/.test(key)) {
@@ -105,7 +103,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
 
   ConvexModel.prototype.$reset = function () {
     for (var property in this) {
-      if (this.hasOwnProperty(property)) delete this[property];
+      if (this.hasOwnProperty(property)) this[property] = void 0;
     }
     return this;
   };
@@ -113,10 +111,10 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   ConvexModel.prototype.toJSON = function () {
     var data = angular.copy(this, {});
     for (var relation in this.$$relations) {
-      delete data[relation];
+      data[relation] = void 0;
     }
     for (var key in data) {
-      if (!this.hasOwnProperty(key)) delete data[key];
+      if (!this.hasOwnProperty(key)) data[key] = void 0;
     }
     return data;
   };
