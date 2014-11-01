@@ -1,38 +1,52 @@
 'use strict';
 
-var angular           = require('angular');
-var collectionFactory = require('./collection');
+function name (Model) {
+  return Model.prototype.$name;
+}
 
-module.exports = function ($injector) {
-  
-  var ConvexRelation = function (type, target) {
+function key (Model, singular) {
+  var k = name(Model);
+  return singular ? k : k + 's';
+}
+
+module.exports = function ($injector, ConvexCollection) {
+
+  function ConvexRelation (type, target) {
     this.type = type;
-    this.target = $injector.get(target);
-    this.targetName = this.target.prototype.$name;
-    this.key = this.isSingle() ? 
-      this.targetName : this.target.prototype.plural || this.targetName + 's';
-  };
+    this.target = typeof target === 'function' ? target : $injector.get(target);
+    this.foreignKey = this.isSingle() ? name(this.target) + '_id' : null;
+    this.key = key(this.target, this.isSingle());
+  }
 
   ConvexRelation.prototype.isSingle = function () {
-    return this.type === 'belongsTo';
+    return this.type === 'belongsTo' || this.type === 'hasOne';
   };
 
-  ConvexRelation.prototype.initialize = function (parent) {
-    var data = parent[this.key], relation;
-    if (this.isSingle()) {
-      relation = new this.target({
-        id: parent[this.targetName + '_id']
-      });
-      angular.extend(relation, data);
-    } else {
-      relation = collectionFactory(this.target);
-      if (data) relation.add(data);
+  ConvexRelation.prototype.initialize = function (model) {
+    var relation = this;
+    switch (this.type) {
+      case 'belongsTo':
+        Object.defineProperty(model, this.foreignKey, {
+          get: function () {
+            var related = this[relation.key];
+            return related ? related.id : void 0;
+          },
+          set: function (id) {
+            if (!this[relation.key] || this[relation.key].id !== id) {
+              this[relation.key] = new relation.target({id: id});
+            }
+          },
+          enumerable: true
+        });
+        break;
+      case 'hasMany':
+        model[relation.key] = new ConvexCollection(this.target);
+        break;
     }
-    return relation;
   };
 
   return ConvexRelation;
 
 };
 
-module.exports.$inject = ['$injector'];
+module.exports.$inject = ['$injector', 'ConvexCollection'];

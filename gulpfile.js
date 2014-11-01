@@ -29,13 +29,13 @@ gulp.task('test', function () {
       transform: ['browserify-istanbul', 'browserify-shim']
     },
     coverageReporter: {
-      type: 'lcovonly',
+      type: 'html',
       dir: './coverage',
       subdir: './'
     },
     reporters: ['progress', 'coverage'],
     browsers: ['PhantomJS'],
-    singleRun: true
+    singleRun: !!process.env.CI
   });
 });
 

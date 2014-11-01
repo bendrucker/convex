@@ -1,44 +1,81 @@
 'use strict';
 
-var angular           = require('angular');
-var collectionFactory = require('../../src/collection');
+var angular = require('angular');
+var uuid    = require('node-uuid');
 
-describe('Collection', function () {
+describe('ConvexCollection', function () {
 
-  var Model, collection;
-  beforeEach(function () {
-    Model = sinon.stub();
-    collection = collectionFactory(Model);
-  });
+  beforeEach(angular.mock.module(require('../../')));
 
-  it('returns an array with a reference to the model', function () {
-    expect(collection)
-      .to.be.an.instanceOf(Array)
-      .and.to.have.property('model', Model);
-  });
+  var Model, ConvexCollection, collection, $httpBackend;
+  beforeEach(angular.mock.inject(function ($injector) {
+    ConvexCollection = $injector.get('ConvexCollection');
+    Model = $injector.get('ConvexModel').extend({name: 'item'});
+    collection = new ConvexCollection(Model);
+    $httpBackend = $injector.get('$httpBackend');
+  }));
 
-  it('identifies itself as a collection', function () {
-    expect(collection.isCollection).to.be.true;
-  });
+  describe('Constructor', function () {
 
-  describe('#add', function () {
-
-    it('casts model data and pushes it to the array', function () {
-      var data = {foo: 'bar'};
-      var options = {};
-      Model.withArgs(data, options).returns(angular.extend(data, {id: 0}));
-      expect(collection.add(data, options)).to.equal(collection);
-      expect(collection).to.have.length(1);
-      expect(Model).to.have.been.calledWithNew;
-      expect(collection[0]).to.deep.equal({
-        id: 0,
-        foo: 'bar'
-      });
+    it('sets the model constructor', function () {
+      expect(collection).to.have.property('$$model', Model);
     });
 
-    it('can handle multiple models', function () {
-      collection.add([{foo: 'bar'}, {baz: 'qux'}]);
+    it('creates an empty array of models', function () {
+      expect(collection)
+        .to.be.an('array')
+        .that.is.empty;
+      expect(angular.isArray(collection)).to.be.true;
+    });
+
+    it('can receive models', function () {
+      var collection = new ConvexCollection(Model, [{}]);
+      expect(collection).to.have.length(1);
+    });
+
+  });
+
+  describe('#$push', function () {
+
+    it('can receive plain objects', function () {
+      var data = [{foo: 'bar'}, {baz: 'qux'}];
+      collection.$push.apply(collection, data);
       expect(collection).to.have.length(2);
+      expect(collection[0])
+        .to.be.an.instanceOf(Model)
+        .and.contain({
+          foo: 'bar'
+        });
+      expect(collection[1])
+        .to.be.an.instanceOf(Model)
+        .and.contain({
+          baz: 'qux'
+        });
+    });
+
+    it('can push models', function () {
+      var data = [new Model(), new Model()];
+      collection.$push.apply(collection, data);
+      expect(collection).to.have.length(2);
+    });
+
+    it('returns the model array', function () {
+      expect(collection.$push()).to.equal(collection);
+    });
+
+  });
+
+  describe('#fetch', function () {
+
+    it('can fetch a collection of data using a query', function () {
+      $httpBackend
+        .expectGET('/items?condition=true')
+        .respond(200, [{id: uuid.v4()}, {id: uuid.v4()}]);
+      collection.$fetch({condition: true})
+        .then(function (collection) {
+          expect(collection).to.have.length(2);
+        });
+      $httpBackend.flush();
     });
 
   });

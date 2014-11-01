@@ -6,6 +6,7 @@ require('angular')
     batch: '/batch'
   })
   .factory('ConvexModel', require('./model'))
+  .factory('ConvexCollection', require('./collection'))
   .factory('ConvexRequest', require('./request'))
   .factory('ConvexBatch', require('./batch'))
   .factory('ConvexCache', require('./cache'))

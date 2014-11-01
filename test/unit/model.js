@@ -5,18 +5,16 @@ var uuid    = require('node-uuid');
 
 describe('ConvexModel', function () {
 
-  var ConvexModel, Model, model, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
+  var ConvexModel, Model, Related1, Related2, model, ConvexCollection, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(angular.mock.module(function ($provide) {
-    $provide.factory('ConvexRelation', function () {
-      return sinon.stub();
-    });
     $provide.decorator('ConvexRequest', function ($delegate) {
       return sinon.spy($delegate);
     });
   }));
   beforeEach(angular.mock.inject(function ($injector) {
     ConvexModel = $injector.get('ConvexModel');
+    ConvexCollection = $injector.get('ConvexCollection');
     ConvexRequest = $injector.get('ConvexRequest');
     ConvexRelation = $injector.get('ConvexRelation');
     ConvexBatch = $injector.get('ConvexBatch');
@@ -25,11 +23,14 @@ describe('ConvexModel', function () {
     $timeout = $injector.get('$timeout');
   }));
   beforeEach(function () {
-    Model = ConvexModel.$new({name: 'item'});
+    Model = ConvexModel.extend({name: 'item'});
+    Related1 = ConvexModel.extend({name: 'rel1'});
+    Related2 = ConvexModel.extend({name: 'rel2'});
+    Model.belongsTo(Related1).belongsTo(Related2);
     model = new Model();
   });
 
-  describe('ConvexModel#$new', function () {
+  describe('ConvexModel#extend', function () {
 
     var MockBase;
     beforeEach(function () {
@@ -37,51 +38,56 @@ describe('ConvexModel', function () {
       MockBase.prototype = {
         name: 'models'
       };
-      MockBase.$new = ConvexModel.$new;
+      MockBase.extend = ConvexModel.extend;
     });
 
     it('calls the parent in the child constructor', function () {
-      var child = new (MockBase.$new({name: 'm'}))('a1', 'a2');
+      var child = new (MockBase.extend({name: 'm'}))('a1', 'a2');
       expect(MockBase)
         .to.have.been.calledOn(child)
         .and.calledWith('a1', 'a2');
     });
 
     it('copies the parent prototype', function () {
-      expect(MockBase.$new({name: 'm'}).prototype)
+      expect(MockBase.extend({name: 'm'}).prototype)
         .to.contain(MockBase.prototype);
     });
 
     it('extends the prototype with new properties', function () {
-      expect(MockBase.$new({name: 'm', foo: 'bar'}).prototype)
+      expect(MockBase.extend({name: 'm', foo: 'bar'}).prototype)
         .to.have.property('foo', 'bar');
     });
 
     it('extends the constructor with the parent', function () {
       MockBase.foo = 'bar';
-      expect(MockBase.$new({name: 'm'})).to.have.property('foo', 'bar');
+      expect(MockBase.extend({name: 'm'})).to.have.property('foo', 'bar');
     });
 
     it('extends the constructor with new methods', function () {
-      expect(MockBase.$new({name: 'm'}, {foo: 'bar'}))
+      expect(MockBase.extend({name: 'm'}, {foo: 'bar'}))
         .to.have.property('foo', 'bar');
     });
 
     it('requires a name on the prototype', function () {
       expect(function () {
-        ConvexModel.$new();
+        ConvexModel.extend();
       }).to.throw(/must have a name/);
     });
 
     it('assigns the name as $name', function () {
-      expect(ConvexModel.$new({name: 'm'}).prototype)
+      expect(ConvexModel.extend({name: 'm'}).prototype)
         .to.have.property('$name', 'm');
     });
 
     it('creates a new cache for the child model', function () {
-      var Child = ConvexModel.$new({name: 'model'});
+      var Child = ConvexModel.extend({name: 'model'});
       expect(Child.prototype.$$cache).to.exist;
       expect(Child.prototype.$$cache.$name).to.equal('convex-model');
+    });
+
+    it('creates a relation store for the child model', function () {
+      var Child = ConvexModel.extend({name: 'model'});
+      expect(Child.prototype.$$relations).to.be.empty;
     });
 
   });
@@ -97,9 +103,9 @@ describe('ConvexModel', function () {
       });
     });
 
-    it('is "$saved" if the ID was provided', function () {
-      expect(new Model().$saved).to.be.false;
-      expect(new Model({id: uuid.v4()}).$saved).to.be.true;
+    it('is "$$saved" if the ID was provided', function () {
+      expect(new Model().$$saved).to.be.false;
+      expect(new Model({id: uuid.v4()}).$$saved).to.be.true;
     });
 
     it('stores new models in the cache', function () {
@@ -109,18 +115,12 @@ describe('ConvexModel', function () {
     });
 
     it('references the cached model if available', function () {
-      var cached = {};
-      var id = uuid.v4();
-      sinon.stub(Model.prototype.$$cache, 'get').withArgs(id).returns(cached);
-      expect(new Model({id: id})).to.equal(cached);
+      expect(new Model({id: model.id})).to.equal(model);
     });
 
     it('extends the cached model with new attributes', function () {
-      var cached = {};
-      var id = uuid.v4();
-      sinon.stub(Model.prototype.$$cache, 'get').returns(cached);
-      new Model({id: id, foo: 'bar'});
-      expect(cached).to.have.property('foo', 'bar');
+      new Model({id: model.id, foo: 'bar'});
+      expect(model).to.have.property('foo', 'bar');
     });
 
     it('calls an initialization method on new models', function () {
@@ -130,34 +130,61 @@ describe('ConvexModel', function () {
     });
 
     it('does not initialize cached models', function () {
-      var cached = {
-        $initialize: sinon.spy()
-      };
       Model.prototype.$initialize = sinon.spy();
-      sinon.stub(Model.prototype.$$cache, 'get').returns(cached);
-      model = new Model();
-      expect(model.$initialize).to.not.have.been.called;
+      model = new Model({id: model.id});
+      expect(Model.prototype.$initialize).to.not.have.been.called;
     });
 
-    it('instantiates specified relations', function () {
-      var relation = {
-        $related: sinon.stub()
-          .withArgs('subrelation')
-          .returns(subrelation)
-      };
-      var subrelation = {};
-      sinon.stub(Model.prototype, '$related')
-        .withArgs('relation')
-        .returns(relation);
-      model = new Model({}, {
-        expand: ['relation', 'relation.subrelation']
+  });
+
+  describe('#$set', function () {
+
+    it('can set simple data', function () {
+      model.$set({foo: 'bar'});
+      expect(model.foo).to.equal('bar');
+    });
+
+    it('can handle data with foreign keys', function () {
+      model.$set({rel1_id: 1});
+      expect(model)
+        .to.have.property('rel1')
+        .that.is.an.instanceOf(Related1)
+        .with.property('id', 1);
+    });
+
+    it('can handle data with new nested objects', function () {
+      model.$set({
+        rel1: {
+          foo: 'bar'
+        }
       });
-      expect(model.$related)
-        .to.have.been.calledWith('relation')
-        .and.calledOn(model);
-      expect(relation.$related)
-        .to.have.been.calledWith('subrelation')
-        .and.calledOn(relation);
+      expect(model.rel1).to.have.property('foo', 'bar');
+      expect(model.rel1).to.have.property('id');
+    });
+
+    it('can handle data with foreign keys and new nested objects', function () {
+      model.$set({
+        rel1_id: 1,
+        rel1: {
+          id: 1,
+          foo: 'bar'
+        }
+      });
+    });
+
+    it('can handle models with existing nested objects', function () {
+      model.rel1 = new Related1({
+        id: 1
+      });
+      model.$set({
+        rel1: {
+          foo: 'bar'
+        }
+      });
+      expect(model.rel1).to.contain({
+        id: 1,
+        foo: 'bar'
+      });
     });
 
   });
@@ -288,16 +315,15 @@ describe('ConvexModel', function () {
 
       beforeEach(function () {
         model.id = id;
-        model.$saved = true;
+        model.$$saved = true;
       });
 
       describe('#$fetch', function () {
 
         it('is a noop on an unsaved model', function () {
-          model.$saved = false;
-          var promise = model.$fetch();
+          model.$$saved = false;
+          expect(model.$fetch()).to.eventually.equal(model);
           $timeout.flush();
-          expect(promise).to.eventually.equal(model);
         });
 
         it('sends a GET and populates with the response', function () {
@@ -310,17 +336,31 @@ describe('ConvexModel', function () {
         });
 
         it('can handle relations', function () {
-          sinon.stub(model, '$related');
           $httpBackend
             .expectGET(url + encodeBrackets('?expand[0]=rel1&expand[1]=rel2'))
-            .respond(200, res);
+            .respond(200, {
+              id: id,
+              name: 'Ben',
+              rel1_id: 1,
+              rel2_id: 2,
+              rel1: {
+                id: 1,
+                foo: 'bar'
+              },
+              rel2: {
+                id: 1,
+                bar: 'baz'
+              }
+            });
           model.$fetch({
             expand: ['rel1', 'rel2']
           });
           $httpBackend.flush();
-          expect(model.$related)
-            .to.have.been.calledWith('rel1')
-            .and.calledWith('rel2');
+          expect(model.rel1_id).to.equal(1);
+          expect(model.rel1).to.contain({
+            id: 1,
+            foo: 'bar'
+          });
         });
 
       });
@@ -339,7 +379,7 @@ describe('ConvexModel', function () {
         });
 
         it('sends a POST when the model is unsaved', function () {
-          model.$saved = false;
+          model.$$saved = false;
           $httpBackend
             .expectPOST('/items', {
               id: id
@@ -348,7 +388,7 @@ describe('ConvexModel', function () {
           model.$save();
           $httpBackend.flush();
           expect(model).to.have.property('name', 'Ben');
-          expect(model.$saved).to.be.true;
+          expect(model.$$saved).to.be.true;
         });
 
         it('excludes related data', function () {
@@ -377,7 +417,7 @@ describe('ConvexModel', function () {
         });
 
         it('does not send requests if the model is unsaved', function () {
-          model.$saved = false;
+          model.$$saved = false;
           $httpBackend.resetExpectations();
           model.$delete();
         });
@@ -385,7 +425,7 @@ describe('ConvexModel', function () {
         it('deletes saved models from the server', function () {
           model.$delete();
           $httpBackend.flush();
-          expect(model.$saved).to.be.false;
+          expect(model.$$saved).to.be.false;
         });
 
         it('deletes saved models from the cache', function () {
@@ -441,97 +481,23 @@ describe('ConvexModel', function () {
       var url = '/items?condition=true';
       var res = [{id: uuid.v4()}, {id: uuid.v4()}];
 
-      beforeEach(function () {
-        sinon.stub(Model.prototype, '$related');
-      });
-
       describe('#$where', function () {
 
-        it('sends a GET request with the query', function () {
-          $httpBackend
-            .expectGET(url)
-            .respond(200, res);
-          Model.$where({condition: true});
-          $httpBackend.flush();
-        });
-
-        it('casts the returned array of models', function () {
-          $httpBackend
-            .expectGET(url)
-            .respond(200, res);
-          Model.$where({condition: true})
-            .then(function (models) {
-              expect(models).to.have.length(2);
-              expect(models[0]).to.be.an.instanceOf(Model);
-            });
-          $httpBackend.flush();
-        });
-
-        it('can handle relations', function () {
-          $httpBackend
-            .expectGET(url + encodeBrackets('&expand[0]=related'))
-            .respond(200, res);
-          Model.$where({condition: true}, {expand: ['related']})
-            .then(function (models) {
-              expect(models[0].$related).to.have.been.calledWith('related');
-            });
-          $httpBackend.flush();
-        });
-
-      });
-
-      describe('#$find', function () {
-
-        it('returns the first model of the results set', function () {
-          $httpBackend
-            .expectGET(url)
-            .respond(200, res);
-          Model.$find({condition: true})
-            .then(function (model) {
-              expect(model)
-                .to.be.an.instanceOf(Model)
-                .and.have.property('id', res[0].id);
-            });
-          $httpBackend.flush();
-        });
-
-        it('rejects with an empty result', function () {
-          $httpBackend
-            .expectGET(url)
-            .respond(200, []);
-          var promise = Model.$find({condition: true});
-          $httpBackend.flush();
-          expect(promise).to.be.rejected;
-        });
-
-        it('can handle relations', function () {
-          $httpBackend
-            .expectGET(url + encodeBrackets('&expand[0]=related'))
-            .respond(200, res);
-          Model.$find({condition: true}, {expand: ['related']})
-            .then(function (model) {
-              expect(model.$related).to.have.been.calledWith('related');
-            });
-          $httpBackend.flush();
+        it('delegates to collection.$fetch', function () {
+          sinon.stub(ConvexCollection.prototype, '$fetch').returnsThis();
+          var query = {condition: true};
+          var collection = Model.$where(query);
+          expect(collection.$fetch).to.have.been.calledWith(query);
         });
 
       });
 
       describe('#$all', function () {
 
-        it('sends a GET request to the collection url', function () {
-          $httpBackend
-            .expectGET('/items')
-            .respond(200, res);
-          sinon.spy(Model, '$where');
-          var options = {};
-          Model.$all(options)
-            .then(function (models) {
-              expect(models).to.have.length(2);
-              expect(models[0]).to.be.an.instanceOf(Model);
-            });
-          $httpBackend.flush();
-          expect(Model.$where).to.have.been.calledWith(null, options);
+        it('delegates to Model.$where', function () {
+          sinon.stub(Model, '$where');
+          Model.$all();
+          expect(Model.$where).to.have.been.calledWith(undefined);
         });
 
       });
@@ -542,57 +508,27 @@ describe('ConvexModel', function () {
 
   describe('Relations', function () {
 
+    var fn = function () {};
+    fn.prototype.$name = 'foo';
+
     it('can create a belongsTo relation', function () {
-      ConvexRelation.returns({
-        key: 'target'
-      });
-      Model.belongsTo('Target');
+      Model.belongsTo(fn);
       expect(Model.prototype.$$relations)
-        .to.have.property('target')
-        .that.equals(ConvexRelation.firstCall.returnValue);
-      expect(ConvexRelation).to.have.been.calledWithNew;
+        .to.have.property('foo')
+        .and.contain({
+          target: fn,
+          type: 'belongsTo'
+        });
     });
 
     it('can create a hasMany relation', function () {
-      ConvexRelation.returns({
-        key: 'targets'
-      });
-      Model.hasMany('Target');
+      Model.hasMany(fn);
       expect(Model.prototype.$$relations)
-        .to.have.property('targets')
-        .that.equals(ConvexRelation.firstCall.returnValue);
-      expect(ConvexRelation).to.have.been.calledWithNew;
-    });
-
-    describe('#$related', function () {
-
-      it('returns a related model if already defined', function () {
-        var child = new Model();
-        model.child = child;
-        expect(model.$related('child')).to.equal(child);
-      });
-
-      it('returns a related collection if already defined', function () {
-        var child = {
-          isCollection: true
-        };
-        model.child = child;
-        expect(model.$related('child')).to.equal(child);
-      });
-
-      it('otherwise instantiates a new related model and returns it', function () {
-        model.$$relations = {
-          child: {
-            initialize: sinon.spy()
-          }
-        };
-        var related = model.$related('child');
-        expect(related)
-          .to.equal(model.$$relations.child.initialize.firstCall.returnValue);
-        expect(model.child).to.equal(related);
-        expect(model.$$relations.child.initialize).to.have.been.calledWith(model);
-      });
-
+        .to.have.property('foos')
+        .and.contain({
+          target: fn,
+          type: 'hasMany'
+        });
     });
 
   });
