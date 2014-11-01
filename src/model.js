@@ -21,52 +21,48 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
       return cached.$set(attributes);
     }
     else {
-      initializeRelations(this);
+      var relations = this.$$relations;
+      Object.keys(relations).forEach(function (relation) {
+        relations[relation].initialize(this);
+      }, this);
       this.$set(attributes);
       if (this.$initialize) this.$initialize();
       this.$$cache.put(this.id, this);
     }
   }
 
-  function initializeRelations (model) {
-    var relations = model.$$relations;
-    Object.keys(relations).forEach(function (relation) {
-      relations[relation].initialize(model);
-    });
+  function isForeignKey (key) {
+    return /_id$/.test(key);
+  }
+
+  function hasRelation (model, key) {
+    return model.$$relations[key];
   }
 
   ConvexModel.prototype.$set = function (attributes) {
-    var self = this;
-    var properties = Object.keys(attributes).reduce(function (acc, key) {
-      if (self.$$relations[key]) {
-        acc.related.push(key);
-      }
-      else if (/_id$/.test(key)) {
-        acc.foreignKeys.push(key);
-      }
-      else {
-        acc.data.push(key);
-      }
-      return acc;
-    },
-    {
-      data: [],
-      foreignKeys: [],
-      related: []
-    });
-    angular.extend(this, pick(attributes, properties.foreignKeys));
-    angular.extend(this, pick(attributes, properties.data));
-    properties.related.forEach(function (property) {
-      var relation = self.$$relations[property];
-      var key = relation.key;
-      var relatedData = attributes[property];
-      if (self[key]) {
-        self[key].$set(relatedData);
-      }
-      else {
-        self[key] = new relation.target(relatedData);
-      }
-    }, this);
+    var model = this;
+    Object.keys(attributes)
+      .filter(function (key) {
+        if (isForeignKey(key) || !hasRelation(model, key)) {
+          model[key] = attributes[key]
+        }
+        else {
+          return true;
+        }
+      })
+      .map(function (key) {
+        return model.$$relations[key];
+      })
+      .forEach(function (relation) {
+        var key = relation.key;
+        var data = attributes[key];
+        if (model[key]) {
+          model[key].$set(data);
+        }
+        else {
+          model[key] = new relation.target(data);
+        }
+      });
     return this;
   };
 
