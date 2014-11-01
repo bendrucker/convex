@@ -9,7 +9,7 @@ function key (Model, singular) {
   return singular ? k : k + 's';
 }
 
-module.exports = function ($injector) {
+module.exports = function ($injector, ConvexCollection) {
 
   function ConvexRelation (type, target) {
     this.type = type;
@@ -24,19 +24,24 @@ module.exports = function ($injector) {
 
   ConvexRelation.prototype.initialize = function (model) {
     var relation = this;
-    if (this.type === 'belongsTo') {
-      Object.defineProperty(model, this.foreignKey, {
-        get: function () {
-          var related = this[relation.key];
-          return related ? related.id : void 0;
-        },
-        set: function (id) {
-          if (!this[relation.key] || this[relation.key].id !== id) {
-            this[relation.key] = new relation.target({id: id});
-          }
-        },
-        enumerable: true
-      });
+    switch (this.type) {
+      case 'belongsTo':
+        Object.defineProperty(model, this.foreignKey, {
+          get: function () {
+            var related = this[relation.key];
+            return related ? related.id : void 0;
+          },
+          set: function (id) {
+            if (!this[relation.key] || this[relation.key].id !== id) {
+              this[relation.key] = new relation.target({id: id});
+            }
+          },
+          enumerable: true
+        });
+        break;
+      case 'hasMany':
+        model[relation.key] = new ConvexCollection(this.target);
+        break;
     }
   };
 
@@ -44,4 +49,4 @@ module.exports = function ($injector) {
 
 };
 
-module.exports.$inject = ['$injector'];
+module.exports.$inject = ['$injector', 'ConvexCollection'];

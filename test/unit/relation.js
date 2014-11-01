@@ -101,7 +101,19 @@ describe('ConvexRelation', function () {
         expect(model.mock).to.equal(mock);
       });
 
-    });    
+    });
+
+    describe('hasMany', function () {
+
+      it('instantiates a related collection', function () {
+        var model = {};
+        var relation = new Relation('hasMany', 'MockModel');
+        relation.initialize(model);
+        expect(model.mocks).to.be.an('array');
+        expect(model.mocks.$$model).to.equal(MockModel);
+      });
+
+    });
 
   });
 
