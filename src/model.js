@@ -191,16 +191,12 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     }, options);
   }
 
-  ConvexModel.$where = function (attributes, options) {
-    var Model = this;
-    return query(this, attributes, options)
-      .then(function (data) {
-        return new ConvexCollection(Model, data);
-      });
+  ConvexModel.$where = function (query, options) {
+    return new ConvexCollection(this).$fetch(query, options);
   };
 
   ConvexModel.$all = function (options) {
-    return this.$where(null, options);
+    return this.$where(void 0, options);
   };
 
   ConvexModel.belongsTo = function (Target) {

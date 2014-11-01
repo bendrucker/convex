@@ -5,7 +5,7 @@ var uuid    = require('node-uuid');
 
 describe('ConvexModel', function () {
 
-  var ConvexModel, Model, Related1, Related2, model, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
+  var ConvexModel, Model, Related1, Related2, model, ConvexCollection, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(angular.mock.module(function ($provide) {
     $provide.decorator('ConvexRequest', function ($delegate) {
@@ -14,6 +14,7 @@ describe('ConvexModel', function () {
   }));
   beforeEach(angular.mock.inject(function ($injector) {
     ConvexModel = $injector.get('ConvexModel');
+    ConvexCollection = $injector.get('ConvexCollection');
     ConvexRequest = $injector.get('ConvexRequest');
     ConvexRelation = $injector.get('ConvexRelation');
     ConvexBatch = $injector.get('ConvexBatch');
@@ -470,62 +471,21 @@ describe('ConvexModel', function () {
 
       describe('#$where', function () {
 
-        it('sends a GET request with the query', function () {
-          $httpBackend
-            .expectGET(url)
-            .respond(200, res);
-          Model.$where({condition: true});
-          $httpBackend.flush();
-        });
-
-        it('casts the returned array of models', function () {
-          $httpBackend
-            .expectGET(url)
-            .respond(200, res);
-          Model.$where({condition: true})
-            .then(function (models) {
-              expect(models).to.have.length(2);
-              expect(models[0]).to.be.an.instanceOf(Model);
-            });
-          $httpBackend.flush();
-        });
-
-        it('can handle relations', function () {
-          var response = [{
-            id: uuid.v4(),
-            rel1: {
-              id: uuid.v4(),
-              foo: 'bar'
-            }
-          }];
-          $httpBackend
-            .expectGET(url + encodeBrackets('&expand[0]=rel1'))
-            .respond(200, response);
-          Model.$where({condition: true}, {expand: ['rel1']})
-            .then(function (models) {
-              model = models[0];
-              expect(model.rel1_id).to.equal(response[0].rel1.id);
-            });
-          $httpBackend.flush();
+        it('delegates to collection.$fetch', function () {
+          sinon.stub(ConvexCollection.prototype, '$fetch').returnsThis();
+          var query = {condition: true};
+          var collection = Model.$where(query);
+          expect(collection.$fetch).to.have.been.calledWith(query);
         });
 
       });
 
       describe('#$all', function () {
 
-        it('sends a GET request to the collection url', function () {
-          $httpBackend
-            .expectGET('/items')
-            .respond(200, res);
-          sinon.spy(Model, '$where');
-          var options = {};
-          Model.$all(options)
-            .then(function (models) {
-              expect(models).to.have.length(2);
-              expect(models[0]).to.be.an.instanceOf(Model);
-            });
-          $httpBackend.flush();
-          expect(Model.$where).to.have.been.calledWith(null, options);
+        it('delegates to Model.$where', function () {
+          sinon.stub(Model, '$where');
+          Model.$all();
+          expect(Model.$where).to.have.been.calledWith(undefined);
         });
 
       });
