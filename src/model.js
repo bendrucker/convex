@@ -1,7 +1,7 @@
 'use strict';
 
 var angular = require('angular');
-var uuid    = require('node-uuid');
+var uuid    = require('uuid');
 
 module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRelation, ConvexCollection) {
 
