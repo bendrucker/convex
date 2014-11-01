@@ -1,16 +1,18 @@
 'use strict';
 
 var angular = require('angular');
+var uuid    = require('node-uuid');
 
 describe('ConvexCollection', function () {
 
   beforeEach(angular.mock.module(require('../../')));
 
-  var Model, ConvexCollection, collection;
-  beforeEach(angular.mock.inject(function (_ConvexCollection_) {
-    ConvexCollection = _ConvexCollection_;
-    Model = sinon.stub();
+  var Model, ConvexCollection, collection, $httpBackend;
+  beforeEach(angular.mock.inject(function ($injector) {
+    ConvexCollection = $injector.get('ConvexCollection');
+    Model = $injector.get('ConvexModel').extend({name: 'item'});
     collection = new ConvexCollection(Model);
+    $httpBackend = $injector.get('$httpBackend');
   }));
 
   describe('Constructor', function () {
@@ -39,16 +41,41 @@ describe('ConvexCollection', function () {
       var data = [{foo: 'bar'}, {baz: 'qux'}];
       collection.$push.apply(collection, data);
       expect(collection).to.have.length(2);
-      expect(Model).to.have.been.calledWith(data[0]);
-      expect(Model).to.have.been.calledWith(data[1]);
+      expect(collection[0])
+        .to.be.an.instanceOf(Model)
+        .and.contain({
+          foo: 'bar'
+        });
+      expect(collection[1])
+        .to.be.an.instanceOf(Model)
+        .and.contain({
+          baz: 'qux'
+        });
     });
 
-    it('receive models', function () {
+    it('can push models', function () {
       var data = [new Model(), new Model()];
-      Model.reset();
       collection.$push.apply(collection, data);
       expect(collection).to.have.length(2);
-      expect(Model).to.not.have.been.called;
+    });
+
+    it('returns the model array', function () {
+      expect(collection.$push()).to.equal(collection);
+    });
+
+  });
+
+  describe('#fetch', function () {
+
+    it('can fetch a collection of data using a query', function () {
+      $httpBackend
+        .expectGET('/items?condition=true')
+        .respond(200, [{id: uuid.v4()}, {id: uuid.v4()}]);
+      collection.$fetch({condition: true})
+        .then(function (collection) {
+          expect(collection).to.have.length(2);
+        });
+      $httpBackend.flush();
     });
 
   });

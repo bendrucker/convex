@@ -28,7 +28,21 @@ module.exports = function () {
         }, this);
     }
     this.$$models.push.apply(this.$$models, models);
-    return this;
+    return this.$$models;
+  };
+
+  ConvexCollection.prototype.$fetch = function (query, options) {
+    var collection = this;
+    var Model = this.$$model;
+    return Model.prototype.$request({
+      method: 'get',
+      path: Model.prototype.$path(),
+      params: query
+    }, options)
+    .then(function (data) {
+      collection.$push.apply(collection, data);
+      return collection.$$models;
+    });
   };
 
   return ConvexCollection;
