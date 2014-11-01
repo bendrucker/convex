@@ -1,8 +1,7 @@
 'use strict';
 
-var angular   = require('angular');
-var uuid      = require('node-uuid');
-var pick      = require('lodash.pick');
+var angular = require('angular');
+var uuid    = require('node-uuid');
 
 module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRelation, ConvexCollection) {
 
