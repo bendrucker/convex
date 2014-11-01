@@ -26,6 +26,11 @@ describe('ConvexCollection', function () {
       expect(angular.isArray(collection)).to.be.true;
     });
 
+    it('can receive models', function () {
+      var collection = new ConvexCollection(Model, [{}]);
+      expect(collection).to.have.length(1);
+    });
+
   });
 
   describe('#$push', function () {

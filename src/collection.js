@@ -4,7 +4,7 @@ var angular = require('angular');
 
 module.exports = function () {
 
-  function ConvexCollection (Model) {
+  function ConvexCollection (Model, models) {
     this.$$model = Model;
     this.$$models = [];
 
@@ -14,6 +14,8 @@ module.exports = function () {
     }
     this.$$models.$$model = this.$$model;
 
+    if (models) this.$push.apply(this, models);
+    
     return this.$$models;
   }
 
