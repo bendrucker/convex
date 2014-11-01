@@ -30,7 +30,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   }
 
   function isForeignKey (key) {
-    return /_id$/.test(key);
+    return (/_id$/).test(key);
   }
 
   function hasRelation (model, key) {
