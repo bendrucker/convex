@@ -197,17 +197,11 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     }, options);
   }
 
-  function cast (Model, data) {
-    var collection = new ConvexCollection(Model);
-    collection.$push.apply(collection, data);
-    return collection;
-  }
-
   ConvexModel.$where = function (attributes, options) {
     var Model = this;
     return query(this, attributes, options)
       .then(function (data) {
-        return cast(Model, data);
+        return new ConvexCollection(Model, data);
       });
   };
 
