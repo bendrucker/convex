@@ -1,27 +1,26 @@
 'use strict';
 
-var angular   = require('angular');
-var url       = require('url');
-var qs        = require('qs');
-var internals = {};
+var angular = require('angular');
+var url     = require('url');
+var qs      = require('qs');
 
 module.exports = function ($http, $q, ConvexCache, convexConfig) {
 
   function ConvexRequest (config) {
-    this.config = internals.config(config);
+    this.config = parseConfig(config);
     this.deferred = $q.defer();
   }
 
-  internals.qs = function (params) {
+  function querystring (params) {
     if (Object.keys(params).length) {
       return '?' + qs.stringify(params);
     }
     else {
       return '';
     }
-  };
+  }
 
-  internals.config = function (input) {
+  function parseConfig (input) {
     input = input || {};
     var output = angular.extend({}, input);
     output.method = (input.method || 'get').toUpperCase();
@@ -36,22 +35,22 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
       output.path = input.path || '';
       output.params = input.params || {};
       output.url = output.base + output.path; 
-      output.url += internals.qs(output.params);
+      output.url += querystring(output.params);
     }
     return output;
-  };
+  }
 
   ConvexRequest.prototype.$$cache = new ConvexCache('ConvexRequest');
 
   ConvexRequest.prototype.toJSON = function () {
     return {
       method: this.config.method,
-      path: this.config.path + internals.qs(this.config.params),
+      path: this.config.path + querystring(this.config.params),
       payload: this.config.data
     };
   };
 
-  internals.getCachedRequest = function (request) {
+  function getCachedRequest (request) {
     if (request.config.cache && request.config.method === 'GET') { 
       var cached = request.$$cache.get(
         request.config.url,
@@ -60,9 +59,9 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
       if (cached) request.cacheHit = true;
       return cached;
     }
-  };
+  }
 
-  internals.putCachedResponse = function (request, response) {
+  function putCachedResponse (request, response) {
     if (request.config.cache && !request.cacheHit) {
       request.$$cache.put(
         request.config.url,
@@ -70,17 +69,17 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
         request.config.cache === 'persist'
       );
     }
-  };
+  }
 
   ConvexRequest.prototype.send = function () {
     var request = this;
-    return $q.when(internals.getCachedRequest(this) || $http({
+    return $q.when(getCachedRequest(this) || $http({
         method: this.config.method,
         url: this.config.url,
         data: this.config.data
       }))
       .then(function (response) {
-        internals.putCachedResponse(request, response);
+        putCachedResponse(request, response);
         return response;
       })
       .then(angular.bind(this, this.fulfill))
