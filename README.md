@@ -66,3 +66,21 @@ Removes all data
 
 #### `$clone` -> `model`
 Copies the original model's data to a new model with a new `id`.
+
+#### `$fetch(options)` -> `promise(user)`
+Fetches the model data from the remote server. Sets received data on the `model`. This is a noop unless an id was passed when creating the `model` or it has already been saved.
+
+`GET /users/5d6b6...` responds with:
+
+```json
+{
+  "id": "5d6b6...",
+  "name": "Ben"
+}
+```
+
+```js
+user.$fetch().then(function (user) {
+  user.name === 'Ben' // true
+});
+```
