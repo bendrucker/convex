@@ -147,7 +147,11 @@ Similar to `Array.prototype.push` but can handle either `Model` instances or pla
 Requests an array of data and casts is to `Model` instances, filtering it by setting `query` as the querystring. [`Model.$where`](#Model-where) uses this method.
 
 
-## Batch Request API
+## Batch API
+
+Convex can construct batch requests that wrap multiple request configurations into a single payload. This is especially useful for applications designed for mobile use since high latency makes multiple requests particularly costly. Convex will automatically assemble this payload and handle fulfilling the requests as if they were each made individually.
+
+For more detail on how your server should handle batch requests, refer to the [batch-me-if-you-can protocol](https://github.com/bendrucker/batch-me-if-you-can/blob/master/PROTOCOL.md).
 
 #### `model.$batch(callback)` -> `promise(requests)`
 
@@ -182,6 +186,8 @@ user1.$batch(function (batch) {
 When called with no arguments, returns the setting (defaults to `true`). When an argument is provided, it sets the `parallel` setting for the batch.
 
 ## Relations API
+
+Convex can help managed related data and cast it into real models. Combined with the [Batch](#batch-request-api) and [Cache](#caching-api) APIs, relations provide a powerful means to minimize requests and keep data in sync within your application. 
 
 #### `Model.belongsTo(Target)` -> `Model`
 Creates a new *belongsTo* relation on `Model` where `model` instances are expected to have a `{{target}}_id` foreign key. `Target` can be a `ConvexModel` instance or a string that represents an injectable service.
@@ -247,7 +253,7 @@ user.$fetch({
 ```
 
 
-## Caching API
+## Cache API
 Any `GET` request can be cached either for the duration of the page session or permanently in local storage. `options.cache` controls caching behavior for requests. Passing `true` will cache in memory while `'persist'` will cache to local storage and memory.
 
 ```js
