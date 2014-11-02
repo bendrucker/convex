@@ -86,7 +86,7 @@ user.$fetch().then(function (user) {
 ```
 
 #### `$save(options)` -> `promise(model)`
-Saves the model to the server. Intelligently chooses between a `POST` and `PUT` request based on whether the model has been saved before or provided an `id` to the constructor.
+Saves the model to the server. Intelligently chooses between a `POST` and `PUT` request based on whether the model has been saved before or provided an `id` to the constructor. [Related data](#relations-api) will be automatically excluded from the request payload.
 
 ```js
 user.name = 'Ben Drucker';
@@ -187,7 +187,7 @@ When called with no arguments, returns the setting (defaults to `true`). When an
 
 ## Relations API
 
-Convex can help managed related data and cast it into real models. Combined with the [Batch](#batch-request-api) and [Cache](#caching-api) APIs, relations provide a powerful means to minimize requests and keep data in sync within your application. 
+Convex can help managed related data and cast it into real models. Combined with the [Batch](#batch-api) and [Cache](#cache-api) APIs, relations provide a powerful means to minimize requests and keep data in sync within your application. 
 
 #### `Model.belongsTo(Target)` -> `Model`
 Creates a new *belongsTo* relation on `Model` where `model` instances are expected to have a `{{target}}_id` foreign key. `Target` can be a `ConvexModel` instance or a string that represents an injectable service.
@@ -232,7 +232,7 @@ Creates a new `hasMany` relation on `Model` where many `Target` instances are ex
 
 All requests can accept an array in `options.expand` that will be added to the query object before it is formatted with [qs](https://github.com/hapijs/qs). Nested expansion can be requested using dot syntax. Your API is expected to handle the `expand` querystring array and return the requested related data.
 
-Expansion is only supported for `GET` requests. If you wish to save multiple objects without multiple requests to your remote API, you should use the [Batch API](#batch-request-api).
+Expansion is only supported for `GET` requests. If you wish to save multiple objects without multiple requests to your remote API, you should use the [Batch API](#batch-api).
 
 `GET /families/9f8mc...` responds with:
 
