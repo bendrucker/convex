@@ -22,3 +22,16 @@ angular.module('myApp', [
   require('convex')
 ]);
 ```
+
+## ConvexModel
+
+#### `ConvexModel.extend(prototype, constructor)` -> `ConvexModel`
+Creates a new model contructor, adding methods to the prototype from `prototype` and to the constructor from `constructor`. `$name` is a required property in `prototype` and should be the lowercase, singular name of the object.
+
+```js
+var User = ConvexModel.extend({
+  $name: 'user'
+});
+```
+
+Because data is set directly on the instances of `ConvexModel`, you need to avoid collisions by ensuring that `prototype` properties never share the same name with your data properties. The easiest way to accomplish this is by prefixing methods with `$` and never using that prefix in your API responses.
