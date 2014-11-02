@@ -222,6 +222,31 @@ app
 #### `Model.hasMany(Target)` -> `Model`
 Creates a new `hasMany` relation on `Model` where many `Target` instances are expected to have a `{{model}}_id` that references each `model`.
 
+### Requesting Related Data
+
+All requests can accept an array in `options.expand` that will be added to the query object before it is formatted with [qs](https://github.com/hapijs/qs). Nested expansion can be requested using dot syntax. Your API is expected to handle the `expand` querystring array and return the requested related data.
+
+Expansion is only supported for `GET` requests. If you wish to save multiple objects without multiple requests to your remote API, you should use the [Batch API](#batch-request-api).
+
+`GET /families/9f8mc...` responds with:
+
+```json
+{
+  "id": "9f8mc...",
+  "surname": "Drucker"
+}
+```
+
+```js
+user.$fetch({
+  expand: ['family']
+})
+.then(function (user) {
+  user.family.surname === 'Drucker'; // true
+});
+```
+
+
 ## Caching API
 Any `GET` request can be cached either for the duration of the page session or permanently in local storage. `options.cache` controls caching behavior for requests. Passing `true` will cache in memory while `'persist'` will cache to local storage and memory.
 
