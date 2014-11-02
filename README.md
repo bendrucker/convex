@@ -23,11 +23,9 @@ angular.module('myApp', [
 ]);
 ```
 
-## ConvexModel
-
 `ConvexModel` is the core service in convex. It provides access to all convex features and creates the objects that will store your data.
 
-### Creating Models
+## Creating Models
 
 #### `ConvexModel.extend(prototype, constructor)` -> `ConvexModel`
 Creates a new model contructor, adding methods to the prototype from `prototype` and to the constructor from `constructor`. `$name` is a required property in `prototype` and should be the lowercase, singular name of the object.
@@ -50,7 +48,7 @@ var user2 = new User({id: uuid});
 user1 === user2 // true
 ```
 
-### Model Methods
+## ConvexModel API
 
 #### `$set(attributes)` -> `model`
 Special setter method for handling related data. You can set data normally, but `$set` will automatically handle delegating nested objects to a related model where appropriate. It plays an important internal role but you may never actually need to use it.
@@ -134,7 +132,7 @@ User.$where({admin: true}).then(function (users) {
 
 Gets an array of models. Equivalent to calling `Model.$where(undefined)`. 
 
-### Batch Requests
+## Batch Request API
 
 #### `model.$batch(callback)` -> `promise(requests)`
 
@@ -168,7 +166,7 @@ user1.$batch(function (batch) {
 
 When called with no arguments, returns the setting (defaults to `true`). When an argument is provided, it sets the `parallel` setting for the batch.
 
-### Relations
+## Relations API
 
 #### `Model.belongsTo(Target)` -> `Model`
 Creates a new *belongsTo* relation on `Model` where `model` instances are expected to have a `{{target}}_id` foreign key. `Target` can be a `ConvexModel` instance or a string that represents an injectable service.
@@ -208,3 +206,14 @@ app
 
 #### `Model.hasMany(Target)` -> `Model`
 Creates a new `hasMany` relation on `Model` where many `Target` instances are expected to have a `{{model}}_id` that references each `model`.
+
+## Caching API
+Any `GET` request can be cached either for the duration of the page session or permanently in local storage. `options.cache` controls caching behavior for requests. Passing `true` will cache in memory while `'persist'` will cache to local storage and memory.
+
+```js
+model.$fetch({
+  cache: 'persist'
+});
+```
+
+After restarting the browser, rerunning the above example will retrieve the data from local storage instead of performing a new request. To request fresh data, just omit the `cache` option. To force a refresh of the cache, pass the `force` option and set the `cache` option to the desired cache level. A remote request will be performed the response will overwrite the old cache. 
