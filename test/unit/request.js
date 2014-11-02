@@ -157,6 +157,18 @@ describe('ConvexRequest', function () {
       $timeout.flush();
     });
 
+    it('can force a cache bypass', function () {
+      $httpBackend.expectGET(request.config.url)
+        .respond(200, {foo: 'bar'});
+      request.config.cache = true;
+      request.config.force = true;
+      request.$$cache.put(request.config.url, {foo: 'bar'});
+      request.send().then(function (response) {
+        expect(response).to.deep.equal({bar: 'baz'});
+      });
+      $timeout.flush();
+    });
+
     it('can send a POST', function () {
       $httpBackend.expectPOST(request.config.url, {})
         .respond(200, {bar: 'baz'});

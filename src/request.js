@@ -51,13 +51,15 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
   };
 
   function getCachedRequest (request) {
-    if (request.config.cache && request.config.method === 'GET') { 
-      var cached = request.$$cache.get(
-        request.config.url,
-        request.config.cache === 'persist'
-      );
-      if (cached) request.cacheHit = true;
-      return cached;
+    if (request.config.method === 'GET') {
+      if (request.config.cache && !request.config.force) { 
+        var cached = request.$$cache.get(
+          request.config.url,
+          request.config.cache === 'persist'
+        );
+        if (cached) request.cacheHit = true;
+        return cached;
+      }
     }
   }
 
