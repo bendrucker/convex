@@ -167,3 +167,44 @@ user1.$batch(function (batch) {
 #### `batch.parallel([setting])` -> `boolean`
 
 When called with no arguments, returns the setting (defaults to `true`). When an argument is provided, it sets the `parallel` setting for the batch.
+
+### Relations
+
+#### `Model.belongsTo(Target)` -> `Model`
+Creates a new *belongsTo* relation on `Model` where `model` instances are expected to have a `{{target}}_id` foreign key. `Target` can be a `ConvexModel` instance or a string that represents an injectable service.
+
+`GET /users/5d6b6...` responds with:
+
+```json
+{
+  "name": "Ben",
+  "family_id": "9f8mc..."
+}
+```
+
+```js
+app
+  .factory('User', function (ConvexModel) {
+    return ConvexModel.extend({
+      $name: 'family'
+    })
+    .belongsTo('Family');
+  })
+  .factory('Family', function (ConvexModel) {
+    return ConvexModel.extend({
+      $name: 'family',
+      $plural: 'families'
+    });
+  })
+  .run(function (User, Family) {
+    new User({id: '5d6b6...'})
+      .$fetch()
+      .then(function (user) {
+        user.family instanceof Family // true
+        user.family_id === user.family.id // true
+      });
+  });
+```
+
+#### `Model.hasMany(Target)` -> `Model`
+Creates a new `hasMany` relation on `Model` where many `Target` instances are expected to have a `{{model}}_id` that references each `model`.
