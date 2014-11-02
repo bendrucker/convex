@@ -48,7 +48,7 @@ var user2 = new User({id: uuid});
 user1 === user2 // true
 ```
 
-## ConvexModel API
+## Model API
 
 #### `$set(attributes)` -> `model`
 Special setter method for handling related data. You can set data normally, but `$set` will automatically handle delegating nested objects to a related model where appropriate. It plays an important internal role but you may never actually need to use it.
@@ -104,6 +104,7 @@ user.$delete().then(function (user) {
   user.$deleted === true; // true
 });
 ```
+<a name="Model-where"></a>
 #### `Model.$where(query, options)` -> `promise(collection)`
 
 Gets an array of models using the `query` to construct a querystring to filter the results.
@@ -131,6 +132,20 @@ User.$where({admin: true}).then(function (users) {
 #### `Model.$all(options)` -> `promise(collection)`
 
 Gets an array of models. Equivalent to calling `Model.$where(undefined)`. 
+
+## Collection API
+
+The Collection API implements a decorated array. It can be passed to directives like `ngRepeat` but also provides special methods for working with models.
+
+#### `new ConvexCollection(Model, [models])` -> `collection`
+Creates a new collection that uses the provided `Model` to cast data. The optional `models` argument is an array of models or model data that will be passed to `collection.$push`.
+
+#### `collection.$push(modelOrObject...)` -> `collection`
+Similar to `Array.prototype.push` but can handle either `Model` instances or plain objects that will be cast as models. This behavior is determined by the first argument so you should either provide all objects or all models.
+
+#### `collection.$fetch(query, options)` -> `promise(collection)`
+Requests an array of data and casts is to `Model` instances, filtering it by setting `query` as the querystring. [`Model.$where`](#Model-where) uses this method.
+
 
 ## Batch Request API
 
