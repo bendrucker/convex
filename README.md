@@ -25,6 +25,8 @@ angular.module('myApp', [
 
 ## ConvexModel
 
+`ConvexModel` is the core service in convex. It provides access to all convex features and creates the objects that will store your data.
+
 ### Creating Models
 
 #### `ConvexModel.extend(prototype, constructor)` -> `ConvexModel`
