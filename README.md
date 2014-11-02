@@ -106,3 +106,30 @@ user.$delete().then(function (user) {
   user.$deleted === true; // true
 });
 ```
+#### `Model.$where(query, options)` -> `promise(collection)`
+
+Gets an array of models using the `query` to construct a querystring to filter the results.
+
+`GET /users?admin=true` responds with:
+
+```json
+[
+  {
+    "id": "5d6b6...",
+    "name": "Ben",
+    "admin": true
+  }
+]
+```
+
+```js
+User.$where({admin: true}).then(function (users) {
+  users.length === 1 // true
+  users[0] instanceof User // true
+  users[0].name === 'Ben' // true
+});
+```
+
+#### `Model.$all(options)` -> `promise(collection)`
+
+Gets an array of models. Equivalent to calling `Model.$where(undefined)`. 
