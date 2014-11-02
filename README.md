@@ -43,7 +43,26 @@ Accepts an optional `attributes` objects with initial data to set on the model. 
 
 ```js
 var uuid = require('uuid').v4();
-var model1 = new Model({id: uuid});
-var model2 = new Model({id: uuid});
-model1 === model2 // true
+var user1 = new User({id: uuid});
+var user2 = new User({id: uuid});
+user1 === user2 // true
 ```
+
+### Model Methods
+
+#### `$set(attributes)` -> `model`
+Special setter method for handling related data. You can set data normally, but `$set` will automatically handle delegating nested objects to a related model where appropriate. It plays an important internal role but you may never actually need to use it.
+
+#### `$path(id)` -> `String`
+Pluralizes the `$name` to generate the path to the resource. If `id` is provided the path includes the resource `id`. 
+
+```js
+user.$path(); // '/users'
+user.$path(user.id); '/users/5d6b6...'
+```
+
+#### `$reset` -> `model`
+Removes all data
+
+#### `$clone` -> `model`
+Copies the original model's data to a new model with a new `id`.
