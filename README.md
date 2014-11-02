@@ -231,4 +231,4 @@ model.$fetch({
 });
 ```
 
-After restarting the browser, rerunning the above example will retrieve the data from local storage instead of performing a new request. To request fresh data, just omit the `cache` option. To force a refresh of the cache, pass the `force` option and set the `cache` option to the desired cache level. A remote request will be performed the response will overwrite the old cache. 
+Even after restarting the browser, rerunning the above example will retrieve the data from local storage instead of performing a new request. Convex's own in-memory cache will always be checked before falling back to local storage. To request fresh data, just omit the `cache` option. To force a refresh of the cache, pass the `force` option and set the `cache` option to the desired cache level. A remote request will be performed and the response will overwrite the old cache. 
