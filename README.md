@@ -69,7 +69,7 @@ Removes all data
 #### `$clone` -> `model`
 Copies the original model's data to a new model with a new `id`.
 
-#### `$fetch(options)` -> `promise(user)`
+#### `$fetch(options)` -> `promise(model)`
 Fetches the model data from the remote server. Sets received data on the `model`. This is a noop unless an id was passed when creating the `model` or it has already been saved.
 
 `GET /users/5d6b6...` responds with:
@@ -87,7 +87,7 @@ user.$fetch().then(function (user) {
 });
 ```
 
-#### `$save(options)` -> `promise(user)`
+#### `$save(options)` -> `promise(model)`
 Saves the model to the server. Intelligently chooses between a `POST` and `PUT` request based on whether the model has been saved before or provided an `id` to the constructor.
 
 ```js
@@ -98,7 +98,7 @@ user.$save().then(function (user) {
 });
 ```
 
-#### `$delete(options)` -> `promise(user)`
+#### `$delete(options)` -> `promise(model)`
 Deletes the model if it has been saved and removes all other references. Also sets `model.$deleted = true` in case you're referencing the model directly anywhere in your application.
 
 ```js
