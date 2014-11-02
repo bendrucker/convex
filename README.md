@@ -86,3 +86,23 @@ user.$fetch().then(function (user) {
   user.name === 'Ben' // true
 });
 ```
+
+#### `$save` -> `promise(user)`
+Saves the model to the server. Intelligently chooses between a `POST` and `PUT` request based on whether the model has been saved before or provided an `id` to the constructor.
+
+```js
+user.name = 'Ben Drucker';
+user.$save().then(function (user) {
+  // Successful request:
+  // PUT /users/5d6b6...
+});
+```
+
+#### `$delete` -> `promise(user)`
+Deletes the model if it has been saved and removes all other references. Also sets `model.$deleted = true` in case you're referencing the model directly anywhere in your application.
+
+```js
+user.$delete().then(function (user) {
+  user.$deleted === true; // true
+});
+```
