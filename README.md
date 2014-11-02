@@ -133,3 +133,37 @@ User.$where({admin: true}).then(function (users) {
 #### `Model.$all(options)` -> `promise(collection)`
 
 Gets an array of models. Equivalent to calling `Model.$where(undefined)`. 
+
+### Batch Requests
+
+#### `model.$batch(callback)` -> `promise(requests)`
+
+Calls the provided `callback` with `batch` (a [`ConvexBatch`](src/batch.js) instance). All REST methods can pass this as `batch` in `options`. `$batch` returns a promise that is resolved with the return value (or resolution if a promise is returned) of `callback`. All individual requests and promises are also resolved/rejected directly.
+
+```js
+var user1 = new User({name: 'Ben'});
+var user2 = new User({name: 'Ben2'});
+
+user1.$batch(function (batch) {
+  return $q.all([
+    user1.$save({batch: batch})
+      .then(function (user) {
+        console.log('User 1 saved', user);
+      }),
+    user2.$save({batch: batch})
+      .then(function (user) {
+        console.log('User 2 saved', users);
+      })
+  ]);
+})
+.then(function (users) {
+  console.log('All users saved successfully', users);
+})
+.catch(function (err) {
+  console.log('One or more users failed to save:', err);
+});
+```
+
+#### `batch.parallel([setting])` -> `boolean`
+
+When called with no arguments, returns the setting (defaults to `true`). When an argument is provided, it sets the `parallel` setting for the batch.
