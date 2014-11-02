@@ -10,7 +10,7 @@ describe('ConvexCollection', function () {
   var Model, ConvexCollection, collection, $httpBackend;
   beforeEach(angular.mock.inject(function ($injector) {
     ConvexCollection = $injector.get('ConvexCollection');
-    Model = $injector.get('ConvexModel').extend({name: 'item'});
+    Model = $injector.get('ConvexModel').extend({$name: 'item'});
     collection = new ConvexCollection(Model);
     $httpBackend = $injector.get('$httpBackend');
   }));

@@ -76,10 +76,8 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     angular.extend(Child, Parent);
     angular.extend(Child, ctor);
 
-    if (!proto.name) throw new Error('All models must have a name');
-    Child.prototype.$name = proto.name;
-    delete Child.prototype.name;
-    Child.prototype.$$cache = new ConvexCache(proto.name);
+    if (!proto.$name) throw new Error('All models must have a name ($name)');
+    Child.prototype.$$cache = new ConvexCache(proto.$name);
     Child.prototype.$$relations = {};
     Child.prototype.constructor = Child;
 
