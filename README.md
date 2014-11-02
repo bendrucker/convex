@@ -165,7 +165,7 @@ user1.$batch(function (batch) {
       }),
     user2.$save({batch: batch})
       .then(function (user) {
-        console.log('User 2 saved', users);
+        console.log('User 2 saved', user);
       })
   ]);
 })
