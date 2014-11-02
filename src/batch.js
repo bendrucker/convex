@@ -6,7 +6,16 @@ module.exports = function (ConvexRequest, $q, convexConfig) {
     this.requests = [];
   }
 
-  ConvexBatch.prototype.parallel = true;
+  ConvexBatch.prototype.$$parallel = true;
+
+  ConvexBatch.prototype.parallel = function (value) {
+    if (typeof value === 'undefined') {
+      return this.$$parallel;
+    }
+    else {
+      return (this.$$parallel = value);
+    }
+  };
 
   ConvexBatch.prototype.add = function (request) {
     this.requests.push(request);
@@ -15,7 +24,7 @@ module.exports = function (ConvexRequest, $q, convexConfig) {
   ConvexBatch.prototype.toJSON = function () {
     return {
       requests: this.requests,
-      parallel: this.parallel
+      parallel: this.parallel()
     };
   };
 
@@ -24,7 +33,7 @@ module.exports = function (ConvexRequest, $q, convexConfig) {
     return new ConvexRequest({
       method: 'post',
       path: convexConfig.batch,
-      data: this
+      data: this.toJSON()
     })
     .send()
     .catch(function (err) {

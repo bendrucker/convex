@@ -27,6 +27,18 @@ describe('ConvexBatch', function () {
 
   });
 
+  describe('#parallel', function () {
+
+    it('can get the parallel setting', function () {
+      expect(batch.parallel()).to.be.true;
+    });
+
+    it('can set the parallel setting', function () {
+      expect(batch.parallel(false)).to.be.false;
+    });
+
+  });
+
   describe('#add', function () {
 
     it('adds requests', function () {
