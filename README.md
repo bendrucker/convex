@@ -25,6 +25,8 @@ angular.module('myApp', [
 
 ## ConvexModel
 
+### Creating Models
+
 #### `ConvexModel.extend(prototype, constructor)` -> `ConvexModel`
 Creates a new model contructor, adding methods to the prototype from `prototype` and to the constructor from `constructor`. `$name` is a required property in `prototype` and should be the lowercase, singular name of the object.
 
@@ -35,3 +37,13 @@ var User = ConvexModel.extend({
 ```
 
 Because data is set directly on the instances of `ConvexModel`, you need to avoid collisions by ensuring that `prototype` properties never share the same name with your data properties. The easiest way to accomplish this is by prefixing methods with `$` and never using that prefix in your API responses.
+
+#### `new ConvexModel(attributes)` -> `model`
+Accepts an optional `attributes` objects with initial data to set on the model. If one of those attributes is an `id`, convex will look for an existing model with the same `id`. If one is found, convex will add any new `attributes` to that cached model and return it. If not, the new model will be cached. When `attributes.id` is omitted, it will be assigned as a new UUID.
+
+```js
+var uuid = require('uuid').v4();
+var model1 = new Model({id: uuid});
+var model2 = new Model({id: uuid});
+model1 === model2 // true
+```
