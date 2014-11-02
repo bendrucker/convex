@@ -452,7 +452,7 @@ describe('ConvexModel', function () {
 
       var callback, promise;
       beforeEach(function () {
-        callback = sinon.spy();
+        callback = sinon.stub();
         promise = {};
         sinon.stub(ConvexBatch.prototype, 'process').returns(promise);
         
@@ -463,7 +463,13 @@ describe('ConvexModel', function () {
         expect(callback)
           .to.have.been.calledWith(sinon.match.instanceOf(ConvexBatch));
         expect(callback).to.have.been.calledOn(model);
+      });
 
+      it('sets the return value for the batch', function () {
+        callback.returns('foo');
+        model.$batch(callback);
+        expect(callback.firstCall.args[0].return)
+          .to.equal('foo');
       });
 
       it('returns the batch promise', function () {

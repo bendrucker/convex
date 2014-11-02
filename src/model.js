@@ -185,7 +185,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
 
   ConvexModel.prototype.$batch = function (callback) {
     var batch = new ConvexBatch();
-    callback.call(this, batch);
+    batch.return = callback.call(this, batch);
     return batch.process();
   };
 

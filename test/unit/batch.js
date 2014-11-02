@@ -92,9 +92,15 @@ describe('ConvexBatch', function () {
       expect(request.reject).to.have.been.calledWith(err);
     });
 
-    it('resolves if all the requests resolve', function () {
-      responses.push('foo');
-      expect(batch.process()).to.eventually.deep.equal(['foo']);
+    it('can resolve a value', function () {
+      batch.return = 'foo';
+      expect(batch.process()).to.eventually.equal('foo');
+      $timeout.flush();
+    });
+
+    it('can resolve a promise', function () {
+      batch.return = $q.when('foo');
+      expect(batch.process()).to.eventually.equal('foo');
       $timeout.flush();
     });
 
