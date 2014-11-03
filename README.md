@@ -38,7 +38,7 @@ var User = ConvexModel.extend({
 
 Because data is set directly on the instances of `ConvexModel`, you need to avoid collisions by ensuring that `prototype` properties never share the same name with your data properties. The easiest way to accomplish this is by prefixing methods with `$` and never using that prefix in your API responses.
 
-#### `new ConvexModel(attributes)` -> `model`
+#### `new ConvexModel([attributes])` -> `model`
 Accepts an optional `attributes` objects with initial data to set on the model. If one of those attributes is an `id`, convex will look for an existing model with the same `id`. If one is found, convex will add any new `attributes` to that cached model and return it. If not, the new model will be cached. When `attributes.id` is omitted, it will be assigned as a new UUID.
 
 ```js
@@ -50,10 +50,10 @@ user1 === user2 // true
 
 ## Model API
 
-#### `$set(attributes)` -> `model`
+#### `$set([attributes])` -> `model`
 Special setter method for handling related data. You can set data normally, but `$set` will automatically handle delegating nested objects to a related model where appropriate. It plays an important internal role but you may never actually need to use it.
 
-#### `$path(id)` -> `string`
+#### `$path([id])` -> `string`
 Pluralizes the `$name` to generate the path to the resource. If `id` is provided the path includes the resource `id`. 
 
 ```js
@@ -67,7 +67,7 @@ Removes all data
 #### `$clone` -> `model`
 Copies the original model's data to a new model with a new `id`.
 
-#### `$fetch(options)` -> `promise(model)`
+#### `$fetch([options])` -> `promise(model)`
 Fetches the model data from the remote server. Sets received data on the `model`. This is a noop unless an id was passed when creating the `model` or it has already been saved.
 
 `GET /users/5d6b6...` responds with:
@@ -85,7 +85,7 @@ user.$fetch().then(function (user) {
 });
 ```
 
-#### `$save(options)` -> `promise(model)`
+#### `$save([options])` -> `promise(model)`
 Saves the model to the server. Intelligently chooses between a `POST` and `PUT` request based on whether the model has been saved before or provided an `id` to the constructor. [Related data](#relations-api) will be automatically excluded from the request payload.
 
 ```js
@@ -96,7 +96,7 @@ user.$save().then(function (user) {
 });
 ```
 
-#### `$delete(options)` -> `promise(model)`
+#### `$delete([options])` -> `promise(model)`
 Deletes the model if it has been saved and removes all other references. Also sets `model.$deleted = true` in case you're referencing the model directly anywhere in your application.
 
 ```js
@@ -105,7 +105,7 @@ user.$delete().then(function (user) {
 });
 ```
 <a name="Model-where"></a>
-#### `Model.$where(query, options)` -> `promise(collection)`
+#### `Model.$where([query], [options])` -> `promise(collection)`
 
 Gets an array of models using the `query` to construct a querystring to filter the results.
 
