@@ -1,18 +1,22 @@
 language: node_js
 node_js:
 - '0.10'
+addons:
+  sauce_connect: true
 before_install:
 - npm install -g bower
 - bower install
 script:
 - gulp lint
 - npm test
+- gulp sauce
 after_script:
 - npm i -g codeclimate-test-reporter
 - codeclimate < ./coverage/lcov.info
 env:
   global:
   - secure: ahvnOEHpQNYh/iheqFEBy2mBhlQou4HaRg4y2R8ikAeMYpubTQWuRmJr/2n5BbrcdB5uXtkx6EKZzSpGPJJbZaklSM/CAcNMWNSbC9Dyu4g8L4ONSo7hFgaqNTEsXW1h4DvXBFlyOc2PwH7E9kaILXe+UDAMU8hHFd4vs7XEMCc=
+  - secure: HTNVoBqEHg7OHaLpCAGttvKHG3BF+aMKyoAdc2E4z202k6nIHVN/q12bNyc0k7lZeHwE1BH1VlKOgEczRNFAXctm2JdTZDgXZz8rIVprG7NvyP7sWRMKJQR6RXW1neZhbbC2ns6RrR+cU23qLk909kkZkGcjnCQyEshZr5Zw5rc=
 deploy:
   provider: npm
   email: bvdrucker@gmail.com
