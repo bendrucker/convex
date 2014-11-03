@@ -67,7 +67,13 @@ gulp.task('sauce', function () {
     reporters: ['dots', 'saucelabs'],
     browsers: Object.keys(launchers),
     customLaunchers: launchers
-  }));
+  }))
+  .then(function () {
+    process.exit(0);
+  })
+  .catch(function () {
+    process.exit(1);
+  });
 });
 
 gulp.task('bump', function () {
