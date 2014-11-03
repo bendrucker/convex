@@ -13,3 +13,12 @@ after_script:
 env:
   global:
   - secure: ahvnOEHpQNYh/iheqFEBy2mBhlQou4HaRg4y2R8ikAeMYpubTQWuRmJr/2n5BbrcdB5uXtkx6EKZzSpGPJJbZaklSM/CAcNMWNSbC9Dyu4g8L4ONSo7hFgaqNTEsXW1h4DvXBFlyOc2PwH7E9kaILXe+UDAMU8hHFd4vs7XEMCc=
+deploy:
+  provider: npm
+  email: bvdrucker@gmail.com
+  api_key:
+    secure: hxzjjo81GtBY/WtmdIhxO3mC32MU3duxoNE7/cRhoijPgxGdEHZuOhN0aL4fIht/7a97p8FDSNuBjacjjfIlVGqMIkA2cznS2YSwPGuiLC2qf8rRRVJdxv1+fnBVNf0/xPl1X5WCYDXTVfF+KcVB06niqN/G1hIzy5aQA53fcz4=
+  on:
+    tags: true
+    all_branches: true
+    repo: bendrucker/convex
