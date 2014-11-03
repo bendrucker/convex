@@ -151,7 +151,7 @@ Requests an array of data and casts is to `Model` instances, filtering it by set
 
 Convex can construct batch requests that wrap multiple request configurations into a single payload. This is especially useful for applications designed for mobile use since high latency makes multiple requests particularly costly. Convex will automatically assemble this payload and handle fulfilling the requests as if they were each made individually.
 
-For more detail on how your server should handle batch requests, refer to the [batch-me-if-you-can protocol](https://github.com/bendrucker/batch-me-if-you-can/blob/master/PROTOCOL.md).
+For more detail on how your server should handle batch requests, refer to the [batch-me-if-you-can protocol](https://github.com/bendrucker/batch-me-if-you-can/blob/master/SCHEMA.md).
 
 #### `model.$batch(callback)` -> `promise(requests)`
 
