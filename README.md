@@ -129,7 +129,7 @@ User.$where({admin: true}).then(function (users) {
 });
 ```
 
-#### `Model.$all(options)` -> `promise(collection)`
+#### `Model.$all([options])` -> `promise(collection)`
 
 Gets an array of models. Equivalent to calling `Model.$where(undefined)`. 
 
@@ -143,7 +143,7 @@ Creates a new collection that uses the provided `Model` to cast data. The option
 #### `collection.$push(modelOrObject...)` -> `collection`
 Similar to `Array.prototype.push` but can handle either `Model` instances or plain objects that will be cast as models. This behavior is determined by the first argument so you should either provide all objects or all models.
 
-#### `collection.$fetch(query, options)` -> `promise(collection)`
+#### `collection.$fetch([query], [options])` -> `promise(collection)`
 Requests an array of data and casts is to `Model` instances, filtering it by setting `query` as the querystring. [`Model.$where`](#Model-where) uses this method.
 
 
