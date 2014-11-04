@@ -125,7 +125,7 @@ describe('ConvexRelation', function () {
       });
 
       it('adds the foreign key as an attribute', function () {
-        expect(model.mocks.$$attributes.item_id).to.equal(1);
+        expect(model.mocks.$attributes().item_id).to.equal(1);
       });
 
     });
