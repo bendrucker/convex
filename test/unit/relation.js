@@ -62,6 +62,10 @@ describe('ConvexRelation', function () {
       expect(Relation.prototype.isSingle.call({type: 'belongsTo'})).to.be.true;
     });
 
+    it('is true for hasOne relations', function () {
+      expect(Relation.prototype.isSingle.call({type: 'hasOne'})).to.be.true;
+    });
+
     it('is false for hasMany relations', function () {
       expect(Relation.prototype.isSingle.call({type: 'hasMany'})).to.be.false;
     });

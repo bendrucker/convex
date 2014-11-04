@@ -59,6 +59,9 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
         }
         else {
           model[key] = new relation.target(data);
+          if (relation.type === 'hasOne') {
+            model[key][model.$name] = model;
+          }
         }
       });
     return this;
@@ -199,6 +202,12 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
 
   ConvexModel.belongsTo = function (Target) {
     var relation = new ConvexRelation('belongsTo', Target);
+    this.prototype.$$relations[relation.key] = relation;
+    return this;
+  };
+
+  ConvexModel.hasOne = function (Target) {
+    var relation = new ConvexRelation('hasOne', Target);
     this.prototype.$$relations[relation.key] = relation;
     return this;
   };

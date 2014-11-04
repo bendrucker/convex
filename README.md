@@ -230,6 +230,9 @@ app
   });
 ```
 
+#### `Model.hasOne(Target)` -> `Model`
+Creates a new `hasOne` relation on `Model` where one `Target` instance is expected to have a `{{model}}_id` that references each `model`.
+
 #### `Model.hasMany(Target)` -> `Model`
 Creates a new `hasMany` relation on `Model` where many `Target` instances are expected to have a `{{model}}_id` that references each `model`.
 
