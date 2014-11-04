@@ -1,7 +1,7 @@
 {
   "name": "convex",
   "version": "2.1.1",
-  "description": "Our base model layer for building Angular applications",
+  "description": "Powerful, opinionated ORM for Angular with support for caching and batch operations",
   "main": "src/index.js",
   "scripts": {
     "test": "gulp test"
