@@ -40,7 +40,9 @@ module.exports = function ($injector, ConvexCollection) {
         });
         break;
       case 'hasMany':
-        model[relation.key] = new ConvexCollection(this.target);
+        var collection = model[relation.key] = new ConvexCollection(this.target);
+        collection.$$attributes = {};
+        collection.$$attributes[model.$name + '_id'] = model.id;
         break;
     }
   };

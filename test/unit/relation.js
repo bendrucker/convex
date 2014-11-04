@@ -109,12 +109,23 @@ describe('ConvexRelation', function () {
 
     describe('hasMany', function () {
 
-      it('instantiates a related collection', function () {
-        var model = {};
-        var relation = new Relation('hasMany', 'MockModel');
+      var model, relation;
+      beforeEach(function () {
+        model = {
+          $name: 'item',
+          id: 1
+        };
+        relation = new Relation('hasMany', 'MockModel');
         relation.initialize(model);
+      });
+
+      it('instantiates a related collection bound to the target', function () {
         expect(model.mocks).to.be.an('array');
         expect(model.mocks.$$model).to.equal(MockModel);
+      });
+
+      it('adds the foreign key as an attribute', function () {
+        expect(model.mocks.$$attributes.item_id).to.equal(1);
       });
 
     });
