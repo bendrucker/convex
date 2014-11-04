@@ -7,6 +7,7 @@ module.exports = function () {
   function ConvexCollection (Model, models) {
     this.$$model = Model;
     this.$$models = [];
+    this.$$attributes = {};
 
     var proto = ConvexCollection.prototype;
     for (var m in proto) {
@@ -19,14 +20,19 @@ module.exports = function () {
     return this.$$models;
   }
 
-  ConvexCollection.prototype.$push = function (model) {
-    var models = arguments;
-    if (!(model instanceof this.$$model)) {
-      models = Array.prototype.splice.call(arguments, 0)
-        .map(function (data) {
-          return new this.$$model(data);
-        }, this);
+  ConvexCollection.prototype.$attributes = function (attributes) {
+    if (typeof attributes !== 'undefined') {
+      this.$$attributes = attributes;
     }
+    return this.$$attributes;
+  };
+
+  ConvexCollection.prototype.$push = function (model) {
+    var models = Array.prototype.splice.call(arguments, 0)
+        .map(function (data) {
+          data = angular.extend({}, data, this.$$attributes);
+          return data instanceof this.$$model ? data : new this.$$model(data);
+        }, this);
     this.$$models.push.apply(this.$$models, models);
     return this.$$models;
   };

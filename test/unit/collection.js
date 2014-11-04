@@ -35,6 +35,20 @@ describe('ConvexCollection', function () {
 
   });
 
+  describe('#$attributes', function () {
+
+    it('can get attributes', function () {
+      expect(collection.$attributes()).to.be.empty;
+    });
+
+    it('can set attributes', function () {
+      expect(collection.$attributes({foo: 'bar'})).to.deep.equal({
+        foo: 'bar'
+      });
+    });
+
+  });
+
   describe('#$push', function () {
 
     it('can receive plain objects', function () {
@@ -57,6 +71,12 @@ describe('ConvexCollection', function () {
       var data = [new Model(), new Model()];
       collection.$push.apply(collection, data);
       expect(collection).to.have.length(2);
+    });
+
+    it('adds the attributes to models and data', function () {
+      collection.$attributes({foo: 'bar'});
+      collection.$push({});
+      expect(collection[0]).to.have.property('foo', 'bar');
     });
 
     it('returns the model array', function () {
