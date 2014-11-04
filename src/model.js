@@ -59,6 +59,9 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
         }
         else {
           model[key] = new relation.target(data);
+          if (relation.type === 'hasOne') {
+            model[key][model.$name] = model;
+          }
         }
       });
     return this;

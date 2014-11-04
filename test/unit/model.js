@@ -27,6 +27,7 @@ describe('ConvexModel', function () {
     BelongsTo = ConvexModel.extend({$name: 'belongsTo'});
     HasOne = ConvexModel.extend({$name: 'hasOne'});
     Model.belongsTo(BelongsTo).hasOne(HasOne);
+    HasOne.belongsTo(Model);
     model = new Model();
   });
 
