@@ -1,6 +1,6 @@
 {
   "name": "convex",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Our base model layer for building Angular applications",
   "main": "src/index.js",
   "scripts": {
