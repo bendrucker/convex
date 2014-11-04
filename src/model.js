@@ -203,6 +203,12 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return this;
   };
 
+  ConvexModel.hasOne = function (Target) {
+    var relation = new ConvexRelation('hasOne', Target);
+    this.prototype.$$relations[relation.key] = relation;
+    return this;
+  };
+
   ConvexModel.hasMany = function (Target) {
     var relation = new ConvexRelation('hasMany', Target);
     this.prototype.$$relations[relation.key] = relation;

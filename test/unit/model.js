@@ -523,6 +523,16 @@ describe('ConvexModel', function () {
         });
     });
 
+    it('can create a hasOne relation', function () {
+      Model.hasOne(fn);
+      expect(Model.prototype.$$relations)
+        .to.have.property('foo')
+        .and.contain({
+          target: fn,
+          type: 'hasOne'
+        });
+    });
+
     it('can create a hasMany relation', function () {
       Model.hasMany(fn);
       expect(Model.prototype.$$relations)
