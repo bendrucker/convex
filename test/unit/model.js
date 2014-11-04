@@ -5,7 +5,7 @@ var uuid    = require('uuid');
 
 describe('ConvexModel', function () {
 
-  var ConvexModel, Model, Related1, Related2, model, ConvexCollection, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
+  var ConvexModel, Model, BelongsTo, HasOne, model, ConvexCollection, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(angular.mock.module(function ($provide) {
     $provide.decorator('ConvexRequest', function ($delegate) {
@@ -24,9 +24,9 @@ describe('ConvexModel', function () {
   }));
   beforeEach(function () {
     Model = ConvexModel.extend({$name: 'item'});
-    Related1 = ConvexModel.extend({$name: 'rel1'});
-    Related2 = ConvexModel.extend({$name: 'rel2'});
-    Model.belongsTo(Related1).belongsTo(Related2);
+    BelongsTo = ConvexModel.extend({$name: 'belongsTo'});
+    HasOne = ConvexModel.extend({$name: 'hasOne'});
+    Model.belongsTo(BelongsTo).hasOne(HasOne);
     model = new Model();
   });
 
@@ -141,27 +141,27 @@ describe('ConvexModel', function () {
     });
 
     it('can handle data with foreign keys', function () {
-      model.$set({rel1_id: 1});
+      model.$set({belongsTo_id: 1});
       expect(model)
-        .to.have.property('rel1')
-        .that.is.an.instanceOf(Related1)
+        .to.have.property('belongsTo')
+        .that.is.an.instanceOf(BelongsTo)
         .with.property('id', 1);
     });
 
     it('can handle data with new nested objects', function () {
       model.$set({
-        rel1: {
+        belongsTo: {
           foo: 'bar'
         }
       });
-      expect(model.rel1).to.have.property('foo', 'bar');
-      expect(model.rel1).to.have.property('id');
+      expect(model.belongsTo).to.have.property('foo', 'bar');
+      expect(model.belongsTo).to.have.property('id');
     });
 
     it('can handle data with foreign keys and new nested objects', function () {
       model.$set({
-        rel1_id: 1,
-        rel1: {
+        belongsTo_id: 1,
+        belongsTo: {
           id: 1,
           foo: 'bar'
         }
@@ -169,17 +169,27 @@ describe('ConvexModel', function () {
     });
 
     it('can handle models with existing nested objects', function () {
-      model.rel1 = new Related1({
+      model.belongsTo = new BelongsTo({
         id: 1
       });
       model.$set({
-        rel1: {
+        belongsTo: {
           foo: 'bar'
         }
       });
-      expect(model.rel1).to.contain({
+      expect(model.belongsTo).to.contain({
         id: 1,
         foo: 'bar'
+      });
+    });
+
+    it('can handle empty hasOne relations', function () {
+      model.$set({
+        hasOne: {}
+      });
+      expect(model.hasOne).to.contain({
+        item_id: model.id,
+        item: model
       });
     });
 
