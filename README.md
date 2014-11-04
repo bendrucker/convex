@@ -66,10 +66,10 @@ user.$path(); // '/users'
 user.$path(user.id); '/users/5d6b6...'
 ```
 
-#### `$reset` -> `model`
+#### `$reset()` -> `model`
 Removes all data
 
-#### `$clone` -> `model`
+#### `$clone()` -> `model`
 Copies the original model's data to a new model with a new `id`.
 
 #### `$fetch([options])` -> `promise(model)`
