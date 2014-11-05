@@ -91,9 +91,9 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return model.$plural || model.$name + 's';
   }
 
-  ConvexModel.prototype.$path = function (id) {
+  ConvexModel.prototype.$path = function (withId) {
     var path = '/' + plural(this);
-    if (id) path += ('/' + id);
+    if (withId !== false) path += ('/' + this.id);
     return path;
   };
 
@@ -158,7 +158,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     var model = this;
     return this.$request({
       method: this.$$saved ? 'put' : 'post',
-      path: this.$$saved ? this.$path(this.id) : this.$path(),
+      path: this.$path(this.$$saved),
       data: this
     }, options)
     .then(function (response) {
@@ -174,7 +174,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
         if (model.$$saved) {
           return model.$request({
             method: 'delete',
-            path: model.$path(model.id)
+            path: model.$path()
           }, options);
         }
       })

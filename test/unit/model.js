@@ -198,12 +198,12 @@ describe('ConvexModel', function () {
 
   describe('#$path', function () {
 
-    it('generates the collection endpoint', function () {
-      expect(model.$path()).to.equal('/items');
+    it('generates the model endpoint', function () {
+      expect(model.$path()).to.equal('/items/' + model.id);
     });
 
-    it('generates a an instance endpoint with an id', function () {
-      expect(model.$path('id')).to.equal('/items/id');
+    it('generates a collection endpoint with false', function () {
+      expect(model.$path(false)).to.equal('/items');
     });
 
   });

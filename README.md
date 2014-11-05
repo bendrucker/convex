@@ -58,8 +58,8 @@ user1 === user2 // true
 #### `$set([attributes])` -> `model`
 Special setter method for handling related data. You can set data normally, but `$set` will automatically handle delegating nested objects to a related model where appropriate. It plays an important internal role but you may never actually need to use it.
 
-#### `$path([id])` -> `string`
-Pluralizes the `$name` to generate the path to the resource. If `id` is provided the path includes the resource `id`. 
+#### `$path([instance])` -> `string`
+Pluralizes the `$name` and adds the `id` to generate the path to the resource. If `instance` is `false` the path omits the `id`. 
 
 ```js
 user.$path(); // '/users'

@@ -42,7 +42,7 @@ module.exports = function () {
     var Model = this.$$model;
     return Model.prototype.$request({
       method: 'get',
-      path: Model.prototype.$path(),
+      path: Model.prototype.$path(false),
       params: query
     }, options)
     .then(function (data) {
