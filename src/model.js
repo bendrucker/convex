@@ -209,7 +209,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
         key: key
       }, options));
       return this;
-    }
+    };
   });
 
   return ConvexModel;
