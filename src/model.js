@@ -19,6 +19,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
       return cached.$set(attributes);
     }
     else {
+      this.id = attributes.id;
       var relations = this.$$relations;
       Object.keys(relations).forEach(function (relation) {
         relations[relation].initialize(this);
