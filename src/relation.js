@@ -5,7 +5,7 @@ module.exports = function ($injector, ConvexCollection) {
   function ConvexRelation (config) {
     this.type = config.type;
     this.key = config.key;
-    this.foreignKey = config.foreignKey || config.type === 'belongsTo' ? config.key + '_id' : void 0;
+    this.foreignKey = config.foreignKey || (config.type === 'belongsTo' ? config.key + '_id' : void 0);
     this.rawTarget = config.target;
   }
 

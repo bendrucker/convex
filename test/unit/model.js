@@ -26,8 +26,8 @@ describe('ConvexModel', function () {
     Model = ConvexModel.extend({$name: 'item'});
     BelongsTo = ConvexModel.extend({$name: 'belongsTo'});
     HasOne = ConvexModel.extend({$name: 'hasOne'});
-    Model.belongsTo(BelongsTo).hasOne(HasOne);
-    HasOne.belongsTo(Model);
+    Model.belongsTo(BelongsTo, 'belongsTo').hasOne(HasOne, 'hasOne');
+    HasOne.belongsTo(Model, 'item');
     model = new Model();
   });
 
@@ -525,33 +525,43 @@ describe('ConvexModel', function () {
     fn.prototype.$name = 'foo';
 
     it('can create a belongsTo relation', function () {
-      Model.belongsTo(fn);
+      Model.belongsTo(fn, 'key');
       expect(Model.prototype.$$relations)
-        .to.have.property('foo')
+        .to.have.property('key')
         .and.contain({
-          target: fn,
-          type: 'belongsTo'
+          type: 'belongsTo',
+          key: 'key',
+          target: fn
         });
     });
 
     it('can create a hasOne relation', function () {
-      Model.hasOne(fn);
+      Model.hasOne(fn, 'key');
       expect(Model.prototype.$$relations)
-        .to.have.property('foo')
+        .to.have.property('key')
         .and.contain({
-          target: fn,
-          type: 'hasOne'
+          type: 'hasOne',
+          key: 'key',
+          target: fn
         });
     });
 
     it('can create a hasMany relation', function () {
-      Model.hasMany(fn);
+      Model.hasMany(fn, 'keys');
       expect(Model.prototype.$$relations)
-        .to.have.property('foos')
+        .to.have.property('keys')
         .and.contain({
-          target: fn,
-          type: 'hasMany'
+          type: 'hasMany',
+          target: fn
         });
+    });
+
+    it('can create a relation with custom options', function () {
+      Model.belongsTo(fn, 'key', {
+        foreignKey: 'fkey'
+      });
+      expect(Model.prototype.$$relations)
+        .to.have.deep.property('key.foreignKey', 'fkey');
     });
 
   });

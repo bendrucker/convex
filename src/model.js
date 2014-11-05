@@ -200,23 +200,16 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return this.$where(void 0, options);
   };
 
-  ConvexModel.belongsTo = function (Target) {
-    var relation = new ConvexRelation('belongsTo', Target);
-    this.prototype.$$relations[relation.key] = relation;
-    return this;
-  };
-
-  ConvexModel.hasOne = function (Target) {
-    var relation = new ConvexRelation('hasOne', Target);
-    this.prototype.$$relations[relation.key] = relation;
-    return this;
-  };
-
-  ConvexModel.hasMany = function (Target) {
-    var relation = new ConvexRelation('hasMany', Target);
-    this.prototype.$$relations[relation.key] = relation;
-    return this;
-  };
+  ['belongsTo', 'hasOne', 'hasMany'].forEach(function (relationType) {
+    ConvexModel[relationType] = function (Target, key, options) {
+      this.prototype.$$relations[key] = new ConvexRelation(angular.extend({
+        type: relationType,
+        target: Target,
+        key: key
+      }, options));
+      return this;
+    }
+  });
 
   return ConvexModel;
 
