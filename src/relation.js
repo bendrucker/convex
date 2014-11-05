@@ -41,9 +41,7 @@ module.exports = function ($injector, ConvexCollection) {
         break;
       case 'hasMany':
         var collection = model[relation.key] = new ConvexCollection(this.target);
-        var attributes = {};
-        attributes[model.$name + '_id'] = model.id;
-        collection.$attributes(attributes);
+        collection.$relate(model.$name, model);
         break;
     }
   };

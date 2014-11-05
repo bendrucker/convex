@@ -35,16 +35,15 @@ describe('ConvexCollection', function () {
 
   });
 
-  describe('#$attributes', function () {
+  describe('#$relate', function () {
 
-    it('can get attributes', function () {
-      expect(collection.$attributes()).to.be.empty;
-    });
-
-    it('can set attributes', function () {
-      expect(collection.$attributes({foo: 'bar'})).to.deep.equal({
-        foo: 'bar'
-      });
+    it('can set a parent key and model', function () {
+      var model = new Model();
+      expect(collection.$relate('parent', model))
+        .to.contain({
+          $$parentKey: 'parent',
+          $$parent: model
+        });
     });
 
   });
@@ -73,10 +72,11 @@ describe('ConvexCollection', function () {
       expect(collection).to.have.length(2);
     });
 
-    it('adds the attributes to models and data', function () {
-      collection.$attributes({foo: 'bar'});
+    it('adds the parent to models', function () {
+      var model = new Model();
+      collection.$relate('model', model);
       collection.$push({});
-      expect(collection[0]).to.have.property('foo', 'bar');
+      expect(collection[0]).to.have.property('model', model);
     });
 
     it('returns the model array', function () {

@@ -4,7 +4,7 @@ var angular = require('angular');
 
 describe('ConvexRelation', function () {
 
-  var Relation, MockModel;
+  var Relation, MockModel, Collection;
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(function () {
     MockModel = sinon.spy();
@@ -15,6 +15,7 @@ describe('ConvexRelation', function () {
   }));
   beforeEach(angular.mock.inject(function ($injector) {
     Relation = $injector.get('ConvexRelation');
+    Collection = $injector.get('ConvexCollection');
   }));
 
   describe('Constructor', function () {
@@ -143,6 +144,7 @@ describe('ConvexRelation', function () {
           target: 'MockModel',
           key: 'mocks'
         });
+        sinon.spy(Collection.prototype, '$relate');
         relation.initialize(model);
       });
 
@@ -151,8 +153,8 @@ describe('ConvexRelation', function () {
         expect(model.mocks.$$model).to.equal(MockModel);
       });
 
-      it('adds the foreign key as an attribute', function () {
-        expect(model.mocks.$attributes().item_id).to.equal(1);
+      it('attaches the parent', function () {
+        expect(Collection.prototype.$relate).to.have.been.calledWith('item', model);
       });
 
     });
