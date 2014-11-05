@@ -24,10 +24,9 @@ describe('ConvexRelation', function () {
         .to.have.property('type', 'belongsTo');
     });
 
-    it('can receive a target fn directly', function () {
-      var fn = function () {};
-      expect(new Relation(null, fn))
-        .to.have.property('target', fn);
+    it('can receive a target Model directly', function () {
+      expect(new Relation(null, MockModel))
+        .to.have.property('target', MockModel);
     });
 
     it('gets the target from the injector', function () {

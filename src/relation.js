@@ -13,10 +13,27 @@ module.exports = function ($injector, ConvexCollection) {
 
   function ConvexRelation (type, target) {
     this.type = type;
-    this.target = typeof target === 'function' ? target : $injector.get(target);
-    this.foreignKey = this.isSingle() ? name(this.target) + '_id' : null;
-    this.key = key(this.target, this.isSingle());
+    this.rawTarget = target;
   }
+
+  Object.defineProperties(ConvexRelation.prototype, {
+    target: {
+      get: function () {
+        var target = this.rawTarget;
+        return typeof target === 'function' ? target : $injector.get(target);
+      }
+    },
+    foreignKey: {
+      get: function () {
+        return this.isSingle() ? name(this.target) + '_id' : null;
+      }
+    },
+    key: {
+      get: function () {
+        return key(this.target, this.isSingle());
+      }
+    }
+  });
 
   ConvexRelation.prototype.isSingle = function () {
     return this.type === 'belongsTo' || this.type === 'hasOne';
