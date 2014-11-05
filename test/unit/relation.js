@@ -20,37 +20,57 @@ describe('ConvexRelation', function () {
   describe('Constructor', function () {
 
     it('sets the relation type', function () {
-      expect(new Relation('belongsTo', 'MockModel'))
-        .to.have.property('type', 'belongsTo');
+      expect(new Relation({
+        type: 'belongsTo'
+      }))
+      .to.have.property('type', 'belongsTo');
     });
 
     it('can receive a target Model directly', function () {
-      expect(new Relation(null, MockModel))
-        .to.have.property('target', MockModel);
+      expect(new Relation({
+        target: MockModel
+      }))
+      .to.have.property('target', MockModel);
     });
 
-    it('gets the target from the injector', function () {
-      expect(new Relation(null, 'MockModel'))
-        .to.have.property('target', MockModel);
+    it('can receive an injectable', function () {
+      expect(new Relation({
+        target: 'MockModel'
+      }))
+      .to.have.property('target', MockModel);
     });
 
-    it('sets a foreign key for single relations', function () {
-      expect(new Relation('belongsTo', 'MockModel'))
-        .to.have.property('foreignKey', 'mock_id');
+    it('sets the key', function () {
+      expect(new Relation({
+        key: 'k'
+      }))
+      .to.have.property('key', 'k');
     });
 
-    describe('key', function () {
+    it('sets the foreign key to key_id by default', function () {
+      expect(new Relation({
+        type: 'belongsTo',
+        key: 'key'
+      }))
+      .to.have.property('foreignKey', 'key_id');
+    });
 
-      it('is the name for singular relations', function () {
-        expect(new Relation('belongsTo', 'MockModel'))
-          .to.have.property('key', 'mock');
-      });
+    it('can set a custom foreign key', function () {
+      expect({
+        type: 'belongsTo',
+        key: 'key',
+        foreignKey: 'fkey'
+      })
+      .to.have.property('foreignKey', 'fkey');
+    });
 
-      it('is pluralized automatically for 1-to-many relations', function () {
-        expect(new Relation('hasMany', 'MockModel'))
-          .to.have.property('key', 'mocks');
-      });
-
+    it('has no foreign key hasN relations', function () {
+      expect({
+        type: 'belongsTo',
+        key: 'k',
+        foreignKey: 'fkey'
+      })
+      .to.have.property('foreignKey', undefined);
     });
 
   });
@@ -78,7 +98,11 @@ describe('ConvexRelation', function () {
       var model, relation;
       beforeEach(function () {
         model = {};
-        relation = new Relation('belongsTo', 'MockModel');
+        relation = new Relation({
+          type: 'belongsTo',
+          target: 'MockModel',
+          key: 'mock'
+        });
       });
 
       it('references the related object for the foreign key', function () {
@@ -114,7 +138,11 @@ describe('ConvexRelation', function () {
           $name: 'item',
           id: 1
         };
-        relation = new Relation('hasMany', 'MockModel');
+        relation = new Relation({
+          type: 'hasMany',
+          target: 'MockModel',
+          key: 'mocks'
+        });
         relation.initialize(model);
       });
 

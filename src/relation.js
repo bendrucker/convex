@@ -1,19 +1,12 @@
 'use strict';
 
-function name (Model) {
-  return Model.prototype.$name;
-}
-
-function key (Model, singular) {
-  var k = name(Model);
-  return singular ? k : k + 's';
-}
-
 module.exports = function ($injector, ConvexCollection) {
 
-  function ConvexRelation (type, target) {
-    this.type = type;
-    this.rawTarget = target;
+  function ConvexRelation (config) {
+    this.type = config.type;
+    this.key = config.key;
+    this.foreignKey = config.foreignKey || config.type === 'belongsTo' ? config.key + '_id' : void 0;
+    this.rawTarget = config.target;
   }
 
   Object.defineProperties(ConvexRelation.prototype, {
@@ -21,16 +14,6 @@ module.exports = function ($injector, ConvexCollection) {
       get: function () {
         var target = this.rawTarget;
         return typeof target === 'function' ? target : $injector.get(target);
-      }
-    },
-    foreignKey: {
-      get: function () {
-        return this.isSingle() ? name(this.target) + '_id' : null;
-      }
-    },
-    key: {
-      get: function () {
-        return key(this.target, this.isSingle());
       }
     }
   });
