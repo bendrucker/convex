@@ -1,22 +1,22 @@
 'use strict';
 
-function name (Model) {
-  return Model.prototype.$name;
-}
-
-function key (Model, singular) {
-  var k = name(Model);
-  return singular ? k : k + 's';
-}
-
 module.exports = function ($injector, ConvexCollection) {
 
-  function ConvexRelation (type, target) {
-    this.type = type;
-    this.target = typeof target === 'function' ? target : $injector.get(target);
-    this.foreignKey = this.isSingle() ? name(this.target) + '_id' : null;
-    this.key = key(this.target, this.isSingle());
+  function ConvexRelation (config) {
+    this.type = config.type;
+    this.key = config.key;
+    this.foreignKey = config.foreignKey || (config.type === 'belongsTo' ? config.key + '_id' : void 0);
+    this.rawTarget = config.target;
   }
+
+  Object.defineProperties(ConvexRelation.prototype, {
+    target: {
+      get: function () {
+        var target = this.rawTarget;
+        return typeof target === 'function' ? target : $injector.get(target);
+      }
+    }
+  });
 
   ConvexRelation.prototype.isSingle = function () {
     return this.type === 'belongsTo' || this.type === 'hasOne';

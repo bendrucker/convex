@@ -216,8 +216,8 @@ When called with no arguments, returns the setting (defaults to `true`). When an
 
 Convex can help managed related data and cast it into real models. Combined with the [Batch](#batch-api) and [Cache](#cache-api) APIs, relations provide a powerful means to minimize requests and keep data in sync within your application. 
 
-#### `Model.belongsTo(Target)` -> `Model`
-Creates a new *belongsTo* relation on `Model` where `model` instances are expected to have a `{{target}}_id` foreign key. `Target` can be a `ConvexModel` instance or a string that represents an injectable service.
+#### `Model.belongsTo(Target, key, [options])` -> `Model`
+Creates a new *belongsTo* relation on `Model` where `model` instances are expected to have a `{{key}}_id` (or `options.foreignKey`) foreign key. `Target` can be a `ConvexModel` instance or a string that represents an injectable service.
 
 `GET /users/5d6b6...` responds with:
 
@@ -252,11 +252,11 @@ app
   });
 ```
 
-#### `Model.hasOne(Target)` -> `Model`
-Creates a new `hasOne` relation on `Model` where one `Target` instance is expected to have a `{{model}}_id` that references each `model`.
+#### `Model.hasOne(Target, key, [options])` -> `Model`
+Creates a new `hasOne` relation on `Model` where one `Target` instance is expected to have a `{{key}}_id` that references each `model`.
 
-#### `Model.hasMany(Target)` -> `Model`
-Creates a new `hasMany` relation on `Model` where many `Target` instances are expected to have a `{{model}}_id` that references each `model`.
+#### `Model.hasMany(Target, key, [options])` -> `Model`
+Creates a new `hasMany` relation on `Model` where many `Target` instances are expected to have a `{{key}}_id` that references each `model`.
 
 ### Requesting Related Data
 
