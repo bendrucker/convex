@@ -145,28 +145,6 @@ The Collection API implements a decorated array. It can be passed to directives 
 #### `new ConvexCollection(Model, [models])` -> `collection`
 Creates a new collection that uses the provided `Model` to cast data. The optional `models` argument is an array of models or model data that will be passed to `collection.$push`.
 
-#### `collection.$attributes([attributes]) -> `attributes`
-Sets attributes (an object) with data that will appear on all models when added with `$push`. When called with no arguments it will return the existing attributes. This is used by relations to allow empty models to automatically be associated with the parent:
-
-```js
-var User = ConvexModel.extend({
-  $name: 'user'
-});
-var Project = ConvexModel.extend({
-  $name: 'project'
-});
-User.hasMany(Project);
-var user = new User({
-  id: '5d6b6...'
-});
-user.projects.$attributes().user_id === '5d6b6...' // true
-user.projects.push({
-  title: 'convex'
-  awesome: true
-});
-user.projects[0].user === user // true
-```
-
 #### `collection.$push(modelOrObject...)` -> `collection`
 Similar to `Array.prototype.push` but can handle either `Model` instances or plain objects that will be cast as models.
 
