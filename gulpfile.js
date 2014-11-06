@@ -29,7 +29,7 @@ var testConfig = {
     transform: ['browserify-shim']
   },
   coverageReporter: {
-    type: 'html',
+    type: 'lcov',
     dir: './coverage',
     subdir: './'
   },
@@ -45,7 +45,7 @@ gulp.task('test', function () {
       transform: ['browserify-istanbul', 'browserify-shim']
     },
     coverageReporter: {
-      type: 'html',
+      type: 'lcov',
       dir: './coverage',
       subdir: './'
     }
