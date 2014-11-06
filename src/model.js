@@ -55,7 +55,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
       .forEach(function (relation) {
         var key = relation.key;
         var data = attributes[key];
-        if (model[key]) {
+        if (model[key] && model[key].$set) {
           model[key].$set(data);
         }
         else {

@@ -5,7 +5,7 @@ var uuid    = require('uuid');
 
 describe('ConvexModel', function () {
 
-  var ConvexModel, Model, BelongsTo, HasOne, model, ConvexCollection, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
+  var ConvexModel, Model, BelongsTo, HasOne, HasMany, model, ConvexCollection, ConvexRequest, ConvexRelation, ConvexBatch, ConvexCache, $httpBackend, $timeout;
   beforeEach(angular.mock.module(require('../../')));
   beforeEach(angular.mock.module(function ($provide) {
     $provide.decorator('ConvexRequest', function ($delegate) {
@@ -26,8 +26,10 @@ describe('ConvexModel', function () {
     Model = ConvexModel.extend({$name: 'item'});
     BelongsTo = ConvexModel.extend({$name: 'belongsTo'});
     HasOne = ConvexModel.extend({$name: 'hasOne'});
-    Model.belongsTo(BelongsTo, 'belongsTo').hasOne(HasOne, 'hasOne');
+    HasMany = ConvexModel.extend({$name: 'hasMany'});
+    Model.belongsTo(BelongsTo, 'belongsTo').hasOne(HasOne, 'hasOne').hasMany(HasMany, 'hasMany');
     HasOne.belongsTo(Model, 'item');
+    HasMany.belongsTo(Model, 'item');
     model = new Model();
   });
 
@@ -191,6 +193,12 @@ describe('ConvexModel', function () {
       expect(model.hasOne).to.contain({
         item_id: model.id,
         item: model
+      });
+    });
+
+    it('ignores related collections', function () {
+      model.$set({
+        hasMany: []
       });
     });
 
@@ -399,13 +407,6 @@ describe('ConvexModel', function () {
         });
 
         it('excludes related data', function () {
-          Model.prototype.$$relations = {
-            rel1: null
-          };
-          model.rel1 = {
-            foo: 'bar'
-          };
-          // sinon.stub(model, '$related');
           $httpBackend
             .expectPUT(url, {
               id: model.id
