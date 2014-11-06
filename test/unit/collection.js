@@ -40,9 +40,35 @@ describe('ConvexCollection', function () {
     it('can set a parent key and model', function () {
       var model = new Model();
       expect(collection.$relate('parent', model))
+        .to.have.property('$$related')
+        .and.contain({
+          parent: model
+        });
+    });
+
+  });
+
+  describe('#$new', function () {
+
+    var related = {};
+    beforeEach(function () {
+      collection.$relate('related', related);
+    });
+
+    it('can receive a objects', function () {
+      expect(collection.$new({foo: 'bar'}))
+        .to.be.an.instanceOf(Model)
+        .and.contain({
+          foo: 'bar',
+          related: related
+        });
+    });
+
+    it('can receive models', function () {
+      expect(collection.$new(new Model()))
         .to.contain({
-          $$parentKey: 'parent',
-          $$parent: model
+          $$saved: false,
+          related: related
         });
     });
 
@@ -50,7 +76,7 @@ describe('ConvexCollection', function () {
 
   describe('#$push', function () {
 
-    it('can receive plain objects', function () {
+    it('can push data with $new', function () {
       var data = [{foo: 'bar'}, {baz: 'qux'}];
       collection.$push.apply(collection, data);
       expect(collection).to.have.length(2);
@@ -64,19 +90,6 @@ describe('ConvexCollection', function () {
         .and.contain({
           baz: 'qux'
         });
-    });
-
-    it('can push models', function () {
-      var data = [new Model(), new Model()];
-      collection.$push.apply(collection, data);
-      expect(collection).to.have.length(2);
-    });
-
-    it('adds the parent to models', function () {
-      var model = new Model();
-      collection.$relate('model', model);
-      collection.$push({});
-      expect(collection[0]).to.have.property('model', model);
     });
 
     it('returns the model array', function () {

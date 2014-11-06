@@ -145,6 +145,9 @@ The Collection API implements a decorated array. It can be passed to directives 
 #### `new ConvexCollection(Model, [models])` -> `collection`
 Creates a new collection that uses the provided `Model` to cast data. The optional `models` argument is an array of models or model data that will be passed to `collection.$push`.
 
+#### `collection.$new(modelOrObject...)` -> `model`
+Returns a new `model` bound to the `belongsTo` relation shared by the members of the collection.
+
 #### `collection.$push(modelOrObject...)` -> `collection`
 Similar to `Array.prototype.push` but can handle either `Model` instances or plain objects that will be cast as models.
 
