@@ -112,12 +112,11 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   };
 
   ConvexModel.prototype.toJSON = function () {
-    var data = angular.copy(this, {});
-    for (var relation in this.$$relations) {
-      data[relation] = void 0;
-    }
-    for (var key in data) {
-      if (!this.hasOwnProperty(key)) data[key] = void 0;
+    var data = {}
+    for (var key in this) {
+      if (key.charAt(0) !== '$' && !this.$$relations[key]) {
+        data[key] = this[key];
+      }
     }
     return data;
   };

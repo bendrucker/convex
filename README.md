@@ -74,6 +74,9 @@ Removes all data
 #### `$clone()` -> `model`
 Copies the original model's data to a new model with a new `id`.
 
+#### `toJSON()` -> `object`
+Creates a copy of the model data without properties beginning in `$` or embedded relations. It does include foreign keys as well as properties inherited from the prototype.
+
 #### `$fetch([options])` -> `promise(model)`
 Fetches the model data from the remote server. Sets received data on the `model`. This is a noop unless an id was passed when creating the `model` or it has already been saved.
 

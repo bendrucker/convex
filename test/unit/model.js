@@ -251,14 +251,18 @@ describe('ConvexModel', function () {
 
   describe('#toJSON', function () {
 
-    it('only includes own properties', function () {
-      model.foo = 'bar';
-      expect(model.toJSON()).to.not.respondTo('toJSON');
-      expect(model.toJSON()).to.have.property('foo', 'bar');
+    it('excludes $ prefixed properties', function () {
+      model.$foo = 'bar';
+      expect(model.toJSON()).to.not.have.property('$foo');
+    });
+
+    it('includes prototype properties', function () {
+      Model.prototype.notOwn = 'foo';
+      expect(model.toJSON()).to.have.property('notOwn', 'foo');
     });
 
     it('excludes relations', function () {
-      model.$$relations = {foo: null};
+      model.$$relations = {foo: {}};
       model.foo = 'bar';
       expect(model.toJSON()).to.not.have.property('foo');
     });
