@@ -81,6 +81,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     angular.extend(Child, ctor);
 
     if (!proto.$name) throw new Error('All models must have a name ($name)');
+    Child.prototype.$plural = proto.$plural || proto.$name + 's';
     Child.prototype.$$cache = new ConvexCache(proto.$name);
     Child.prototype.$$relations = {};
     Child.prototype.constructor = Child;
@@ -88,12 +89,8 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
     return Child;
   };
 
-  function plural (model) {
-    return model.$plural || model.$name + 's';
-  }
-
   ConvexModel.prototype.$path = function (withId) {
-    var path = '/' + plural(this);
+    var path = '/' + this.$plural;
     if (withId !== false) path += ('/' + this.id);
     return path;
   };

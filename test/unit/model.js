@@ -78,6 +78,16 @@ describe('ConvexModel', function () {
       }).to.throw(/must have a name \(\$name\)/);
     });
 
+    it('adds the default plural', function () {
+      expect(MockBase.extend({$name: 'foo'}).prototype)
+        .to.have.property('$plural', 'foos');
+    });
+
+    it('takes a custom plural', function () {
+      expect(MockBase.extend({$name: 'sheep', $plural: 'sheep'}).prototype)
+        .to.have.property('$plural', 'sheep');
+    });
+
     it('creates a new cache for the child model', function () {
       var Child = ConvexModel.extend({$name: 'model'});
       expect(Child.prototype.$$cache).to.exist;
