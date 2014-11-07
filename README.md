@@ -193,6 +193,10 @@ user1.$batch(function (batch) {
 
 When called with no arguments, returns the setting (defaults to `true`). When an argument is provided, it sets the `parallel` setting for the batch.
 
+#### `batch.all(array)` -> `promise(array)`
+
+Sugar method for calling `$q.all` without needing to inject it separately.
+
 ## Relations API
 
 Convex can help managed related data and cast it into real models. Combined with the [Batch](#batch-api) and [Cache](#cache-api) APIs, relations provide a powerful means to minimize requests and keep data in sync within your application. 

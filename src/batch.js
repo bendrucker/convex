@@ -50,6 +50,10 @@ module.exports = function (ConvexRequest, $q, convexConfig) {
     });    
   };
 
+  ConvexBatch.prototype.all = function (promises) {
+    return $q.all(promises);
+  };
+
   return ConvexBatch;
 
 };

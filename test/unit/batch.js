@@ -118,4 +118,14 @@ describe('ConvexBatch', function () {
 
   });
 
+  describe('#all', function () {
+
+    it('calls $q.all', function () {
+      expect(batch.all([$q.when('foo'), $q.when('bar')]))
+        .to.eventually.deep.equal(['foo', 'bar']);
+      $timeout.flush();
+    });
+
+  });
+
 });
