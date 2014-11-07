@@ -41,6 +41,8 @@ var User = ConvexModel.extend({
 });
 ```
 
+You can optionally pass a `$plural` property for generating plural keys. Otherwise, an `'s'` will be appended to `model.$name`.
+
 Because data is set directly on the instances of `ConvexModel`, you need to avoid collisions by ensuring that `prototype` properties never share the same name with your data properties. The easiest way to accomplish this is by prefixing methods with `$` and never using that prefix in your API responses.
 
 #### `new ConvexModel([attributes])` -> `model`
