@@ -35,7 +35,7 @@ module.exports = function () {
       return attributes.$set(this.$$related);
     }
     else {
-      return new this.$$model(angular.extend({}, attributes, this.$$related)); 
+      return angular.extend(new this.$$model(attributes), this.$$related); 
     }
   };
 
