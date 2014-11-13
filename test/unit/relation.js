@@ -144,7 +144,7 @@ describe('ConvexRelation', function () {
           target: 'MockModel',
           key: 'mocks'
         });
-        sinon.spy(Collection.prototype, '$relate');
+        sinon.spy(Collection.prototype, '$related');
         relation.initialize(model);
       });
 
@@ -154,7 +154,7 @@ describe('ConvexRelation', function () {
       });
 
       it('attaches the parent', function () {
-        expect(Collection.prototype.$relate).to.have.been.calledWith('item', model);
+        expect(Collection.prototype.$related).to.have.been.calledWith('item', model);
       });
 
     });

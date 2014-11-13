@@ -35,15 +35,21 @@ describe('ConvexCollection', function () {
 
   });
 
-  describe('#$relate', function () {
+  describe('#$related', function () {
 
     it('can set a parent key and model', function () {
       var model = new Model();
-      expect(collection.$relate('parent', model))
+      expect(collection.$related('parent', model))
         .to.have.property('$$related')
         .and.contain({
           parent: model
         });
+    });
+
+    it('can get a parent', function () {
+      var model = new Model();
+      collection.$related('parent', model)
+      expect(collection.$related('parent')).to.equal(model);
     });
 
   });

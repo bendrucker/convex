@@ -20,11 +20,16 @@ module.exports = function () {
     return this.$$models;
   }
 
-  ConvexCollection.prototype.$relate = function (name, model) {
-    var relation = {};
-    relation[name] = model;
-    angular.extend(this.$$related, relation);
-    return this;
+  ConvexCollection.prototype.$relate = ConvexCollection.prototype.$related = function (name, model) {
+    if (!model) {
+      return this.$$related[name];
+    }
+    else {
+      var relation = {};
+      relation[name] = model;
+      angular.extend(this.$$related, relation);
+      return this;
+    }
   };
 
   ConvexCollection.prototype.$new = function (attributes) {
