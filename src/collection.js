@@ -25,9 +25,7 @@ module.exports = function () {
       return this.$$related[name];
     }
     else {
-      var relation = {};
-      relation[name] = model;
-      angular.extend(this.$$related, relation);
+      this.$$related[name] = model;
       return this;
     }
   };
