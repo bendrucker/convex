@@ -112,7 +112,7 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
   };
 
   ConvexModel.prototype.toJSON = function () {
-    var data = {}
+    var data = {};
     for (var key in this) {
       if (key.charAt(0) !== '$' && !this.$$relations[key]) {
         data[key] = this[key];
