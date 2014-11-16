@@ -48,7 +48,7 @@ describe('ConvexCollection', function () {
 
     it('can get a parent', function () {
       var model = new Model();
-      collection.$related('parent', model)
+      collection.$related('parent', model);
       expect(collection.$related('parent')).to.equal(model);
     });
 
