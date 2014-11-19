@@ -2,6 +2,7 @@
 
 var angular = require('angular');
 var uuid    = require('uuid');
+var expect  = require('../expect');
 
 describe('ConvexCollection', function () {
 

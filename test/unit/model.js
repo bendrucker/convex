@@ -2,6 +2,8 @@
 
 var angular = require('angular');
 var uuid    = require('uuid');
+var sinon   = require('sinon');
+var expect  = require('../expect');
 
 describe('ConvexModel', function () {
 

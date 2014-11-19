@@ -1,6 +1,7 @@
 'use strict';
 
 var angular = require('angular');
+var expect  = require('../expect');
 
 describe('ConvexCache', function () {
 

@@ -1,6 +1,9 @@
 'use strict';
 
-var angular = require('angular');
+var angular         = require('angular');
+var expect          = require('../expect');
+var sinon           = require('sinon');
+var sinonAsPromised = require('sinon-as-promised');
 
 describe('ConvexBatch', function () {
 
@@ -17,6 +20,10 @@ describe('ConvexBatch', function () {
     $q = $injector.get('$q');
     $timeout = $injector.get('$timeout');
     batch = new ConvexBatch();
+    sinonAsPromised($q);
+    sinonAsPromised.setScheduler(function (fn) {
+      $injector.get('$rootScope').$evalAsync(fn);
+    });
   }));
 
   describe('Constructor', function () {
@@ -67,7 +74,7 @@ describe('ConvexBatch', function () {
       batch.add(request);
       responses = [];
       sinon.stub(ConvexRequest.prototype, 'send')
-        .returns($q.when(responses));
+        .resolves(responses);
     });
 
     it('sends a request', function () {

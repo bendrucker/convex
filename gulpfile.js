@@ -13,16 +13,15 @@ gulp.task('lint', function () {
 });
 
 var testConfig = {
-  frameworks: ['browserify', 'mocha', 'chai-sinon'],
+  frameworks: ['browserify', 'mocha'],
   files: [
     'node_modules/es5-shim/es5-shim.js',
-    'node_modules/chai-as-promised/lib/chai-as-promised.js',
     'components/angular/angular.js',
     'components/angular-mocks/angular-mocks.js',
-    'test/**/*.js'
+    'test/unit/*.js'
   ],
   preprocessors: {
-    'test/**/*.js': 'browserify'
+    'test/unit/*.js': 'browserify'
   },
   browserify: {
     debug: true,

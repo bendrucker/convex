@@ -1,6 +1,8 @@
 'use strict';
 
 var angular = require('angular');
+var sinon   = require('sinon');
+var expect  = require('../expect');
 
 describe('ConvexRequest', function () {
 
