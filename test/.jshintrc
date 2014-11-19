@@ -3,11 +3,9 @@
   "browser": true,
   "expr": true,
   "globals": {
-    "expect": false,
     "describe": false,
     "it": false,
     "beforeEach": false,
-    "afterEach": false,
-    "sinon": false
+    "afterEach": false
   }
 }
