@@ -1,6 +1,6 @@
 'use strict';
 
-require('angular')
+module.exports = require('angular')
   .module('convex', [])
   .constant('convexConfig', {
     batch: '/batch'
@@ -10,6 +10,5 @@ require('angular')
   .factory('ConvexRequest', require('./request'))
   .factory('ConvexBatch', require('./batch'))
   .factory('ConvexCache', require('./cache'))
-  .factory('ConvexRelation', require('./relation'));
-
-module.exports = 'convex';
+  .factory('ConvexRelation', require('./relation'))
+  .name;
