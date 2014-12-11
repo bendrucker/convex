@@ -4,7 +4,7 @@ var angular = require('angular');
 var url     = require('url');
 var qs      = require('qs');
 
-module.exports = function ($http, $q, ConvexCache, convexConfig) {
+module.exports = function ($http, $q, $timeout, ConvexCache, convexConfig) {
 
   function ConvexRequest (config) {
     this.config = parseConfig(config);
@@ -75,11 +75,23 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
 
   ConvexRequest.prototype.send = function () {
     var request = this;
-    return $q.when(getCachedRequest(this) || $http({
-        method: this.config.method,
-        url: this.config.url,
-        data: this.config.data
-      }))
+    var attempts = -1;
+    function send (request) {
+      attempts++;
+      return $http({
+        method: request.config.method,
+        url: request.config.url,
+        data: request.config.data,
+        timeout: 20000
+      })
+      .catch(function (response) {
+        if (response.status !== 503 || attempts > 2) return $q.reject(response);
+        return $timeout(function () {
+          return send(request);
+        }, Math.exp(2, attempts + 1));
+      });
+    }
+    return $q.when(getCachedRequest(this) || send(this))
       .then(function (response) {
         putCachedResponse(request, response);
         return response;
@@ -137,6 +149,7 @@ module.exports = function ($http, $q, ConvexCache, convexConfig) {
 module.exports.$inject = [
   '$http',
   '$q',
+  '$timeout',
   'ConvexCache',
   'convexConfig'
 ];

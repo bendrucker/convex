@@ -171,6 +171,50 @@ describe('ConvexRequest', function () {
       $timeout.flush();
     });
 
+    it('performs exponential backoff', function () {
+      $httpBackend.expectGET(request.config.url)
+        .respond(503);
+      var response;
+      request.send().then(function (_response_) {
+        response = _response_;
+      });
+      $httpBackend.flush();
+      $httpBackend.expectGET(request.config.url)
+        .respond(503);
+      $timeout.flush(2000);
+      $httpBackend.flush();
+      $httpBackend.expectGET(request.config.url)
+        .respond(200, {foo: 'bar'});
+      $timeout.flush(4000);
+      $httpBackend.flush();
+      expect(response).to.deep.equal({
+        foo: 'bar'
+      });
+    });
+
+    it('fails after 3 attempts', function () {
+      $httpBackend.expectGET(request.config.url)
+        .respond(503);
+      var err;
+      request.send().catch(function (_err_) {
+        err = _err_;
+      });
+      $httpBackend.flush();
+      $httpBackend.expectGET(request.config.url)
+        .respond(503);
+      $timeout.flush(2000); 
+      $httpBackend.flush();
+      $httpBackend.expectGET(request.config.url)
+        .respond(503);
+      $timeout.flush(4000);
+      $httpBackend.flush();
+      $httpBackend.expectGET(request.config.url)
+        .respond(503);
+      $timeout.flush(8000);
+      $httpBackend.flush();
+      expect(err).to.be.ok;      
+    });
+
     it('can send a POST', function () {
       $httpBackend.expectPOST(request.config.url, {})
         .respond(200, {bar: 'baz'});
