@@ -21,9 +21,6 @@ describe('ConvexBatch', function () {
     $timeout = $injector.get('$timeout');
     batch = new ConvexBatch();
     sinonAsPromised($q);
-    sinonAsPromised.setScheduler(function (fn) {
-      $injector.get('$rootScope').$evalAsync(fn);
-    });
   }));
 
   describe('Constructor', function () {

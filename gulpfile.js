@@ -16,8 +16,8 @@ var testConfig = {
   frameworks: ['browserify', 'mocha'],
   files: [
     'node_modules/es5-shim/es5-shim.js',
-    'components/angular/angular.js',
-    'components/angular-mocks/angular-mocks.js',
+    'node_modules/angular/angular.js',
+    'node_modules/angular-mocks/angular-mocks.js',
     'test/unit/*.js'
   ],
   preprocessors: {
