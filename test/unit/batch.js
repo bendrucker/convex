@@ -41,6 +41,13 @@ describe('ConvexBatch', function () {
       expect(batch.parallel(false)).to.be.false;
     });
 
+    it('throws with a non boolean', function () {
+      expect(function () {
+        batch.parallel('false');
+      })
+      .to.throw('boolean');
+    });
+
   });
 
   describe('#add', function () {

@@ -9,8 +9,11 @@ module.exports = function (ConvexRequest, $q, convexConfig) {
   ConvexBatch.prototype.$$parallel = true;
 
   ConvexBatch.prototype.parallel = function (value) {
-    if (typeof value === 'undefined') {
+    if (!arguments.length) {
       return this.$$parallel;
+    }
+    else if (typeof value !== 'boolean') {
+      throw new Error('"parallel" must be a boolean');
     }
     else {
       return (this.$$parallel = value);
