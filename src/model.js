@@ -58,6 +58,10 @@ module.exports = function ($q, ConvexRequest, ConvexCache, ConvexBatch, ConvexRe
         if (model[key] && model[key].$set) {
           model[key].$set(data);
         }
+        else if (model[key] && model[key].$push) {
+          var target = model[key];
+          target.$push.apply(target, data);
+        }
         else {
           model[key] = new relation.target(data);
           if (relation.type === 'hasOne') {

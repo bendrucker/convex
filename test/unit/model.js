@@ -208,10 +208,12 @@ describe('ConvexModel', function () {
       });
     });
 
-    it('ignores related collections', function () {
+    it('casts related collections', function () {
       model.$set({
-        hasMany: []
+        hasMany: [{}]
       });
+      expect(Array.isArray(model.hasMany)).to.equal(true);
+      expect(model.hasMany[0]).to.be.an.instanceOf(HasMany);
     });
 
   });
