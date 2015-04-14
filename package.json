@@ -37,7 +37,7 @@
     "karma": "~0.12.19",
     "karma-as-promised": "~0.2.0",
     "karma-browserify": "^1.0.0",
-    "karma-coverage": "^0.2.6",
+    "karma-coverage": "0.2.6",
     "karma-mocha": "~0.1.7",
     "karma-phantomjs-launcher": "~0.1.4",
     "karma-sauce-launcher": "~0.2.10",
