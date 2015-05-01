@@ -99,6 +99,13 @@ describe('ConvexCollection', function () {
         });
     });
 
+    it('prevents duplicates from a previous $push', function () {
+      var data = {id: 'theId'};
+      collection.$push(data);
+      collection.$push(data);
+      expect(collection.length).to.equal(1);
+    });
+
     it('returns the model array', function () {
       expect(collection.$push()).to.equal(collection);
     });

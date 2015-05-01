@@ -8,6 +8,7 @@ module.exports = function () {
     this.$$model = Model;
     this.$$models = [];
     this.$$related = {};
+    this.$$keys = {};
 
     var proto = ConvexCollection.prototype;
     for (var m in proto) {
@@ -43,6 +44,13 @@ module.exports = function () {
     var models = Array.prototype.splice.call(arguments, 0)
         .map(function (attributes) {
           return this.$new(attributes);
+        }, this)
+        .filter(function (model) {
+          return !this.$$keys.hasOwnProperty(model.id);
+        }, this)
+        .map(function (model) {
+          this.$$keys[model.id] = null;
+          return model;
         }, this);
     this.$$models.push.apply(this.$$models, models);
     return this.$$models;
