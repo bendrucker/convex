@@ -1,6 +1,6 @@
 {
   "name": "convex",
-  "version": "3.3.2",
+  "version": "3.3.3",
   "description": "Powerful, opinionated ORM for Angular with support for caching and batch operations",
   "main": "src/index.js",
   "scripts": {
