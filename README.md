@@ -14,7 +14,7 @@ If convex is missing something you need or you can't abide by these assumptions,
 ## Requirements
 Because convex uses `Object.defineProperty` for relations, it is not compatible with IE 8. Angular `<1.3` and earlier are not supported but Angular `1.2` should work.
 
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/convex.svg)](https://saucelabs.com/u/convex)
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/convex.svg)](https://saucelabs.com/u/convex) [![Greenkeeper badge](https://badges.greenkeeper.io/bendrucker/convex.svg)](https://greenkeeper.io/)
 
 ## Setup
 
