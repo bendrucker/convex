@@ -57,7 +57,7 @@
     "angular": "global:angular"
   },
   "dependencies": {
-    "qs": "~2.3.2",
+    "qs": "~6.9.4",
     "uuid": "~2.0.1"
   },
   "peerDependencies": {
