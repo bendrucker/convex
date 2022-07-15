@@ -1,5 +1,9 @@
-convex [![Build Status](https://travis-ci.org/bendrucker/convex.svg?branch=master)](https://travis-ci.org/bendrucker/convex) [![Code Climate](https://codeclimate.com/github/bendrucker/convex/badges/gpa.svg)](https://codeclimate.com/github/bendrucker/convex) [![Test Coverage](https://codeclimate.com/github/bendrucker/convex/badges/coverage.svg)](https://codeclimate.com/github/bendrucker/convex) [![NPM version](https://badge.fury.io/js/convex.svg)](http://badge.fury.io/js/convex)
+convex [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 ======
+
+The [`convex`](https://www.npmjs.com/package/convex) package name has been acquired [Convex, Inc.](https://www.convex.dev) through a donation to [🇺🇦 Razom](https://www.razomforukraine.org). Existing versions remain available.
+
+====== 
 
 A powerful, opionated ORM for Angular with support for caching and batch operations. I built convex to scratch my own itch and use it actively in production at [Valet.io](http://www.valet.io). It makes a number of assumptions about how you build your APIs:
 
@@ -17,10 +21,6 @@ Because convex uses `Object.defineProperty` for relations, it is not compatible 
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/convex.svg)](https://saucelabs.com/u/convex)
 
 ## Setup
-
-```bash
-$ npm install convex
-```
 
 ```js
 angular.module('myApp', [
