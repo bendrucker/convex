@@ -3,7 +3,7 @@ convex [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/Stan
 
 The [`convex`](https://www.npmjs.com/package/convex) package name has been acquired [Convex, Inc.](https://www.convex.dev) through a donation to [🇺🇦 Razom](https://www.razomforukraine.org). Existing versions remain available.
 
-====== 
+<hr>
 
 A powerful, opionated ORM for Angular with support for caching and batch operations. I built convex to scratch my own itch and use it actively in production at [Valet.io](http://www.valet.io). It makes a number of assumptions about how you build your APIs:
 
